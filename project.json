@@ -1,0 +1,12 @@
+{
+    "name": "資格試験学習資料",
+    "slug": "study-materials",
+    "status": "development",
+    "description": "宅建士・不動産鑑定士・行政書士の学習資料とe-Gov法令テキスト。NotebookLM連携用。",
+    "stack": ["python"],
+    "deploy_target": "none",
+    "category": "automation",
+    "created": "2026-03-20",
+    "updated": "2026-03-20",
+    "tags": ["study", "takken", "kanteishi", "gyoseishoshi", "egov", "notebooklm"]
+}
