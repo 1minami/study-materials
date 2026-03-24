@@ -6,14 +6,37 @@
 
 ```
 materials/
-  ├── takken/          # 宅建士（22ファイル）
+  ├── takken/          # 宅建士（23ファイル: 教材00-18 + 過去問19-22）
   ├── kanteishi/       # 不動産鑑定士（試験概要 + 短答式/ + 論文式/）
   └── gyoseishoshi/    # 行政書士（14ファイル）
 data/
   ├── laws/            # e-Gov API から取得した法令原文（37法令・重複排除済み）
   └── standards/       # 不動産鑑定評価基準等（非法令資料）
+docs/
+  └── index.html       # 宅建テキスト（GitHub Pages で公開）
 scripts/
-  └── fetch_egov.py    # e-Gov 法令取得スクリプト（3試験統合版）
+  ├── fetch_egov.py           # e-Gov 法令取得スクリプト（3試験統合版）
+  └── build_takken_textbook.py  # 宅建教材 → HTML テキストブック変換
+```
+
+## Web テキストブック
+
+宅建教材を要点整理型の HTML テキストブックとして公開中。
+
+**URL**: https://1minami.github.io/study-materials/
+
+- 全科目 + 過去問演習（23ファイル統合）
+- 左サイドバー目次、スクロール追従ハイライト
+- スマホ対応（レスポンシブ）、ダークモード対応、印刷対応
+
+### テキストブックの再生成
+
+教材ファイル（`materials/takken/`）を更新した場合:
+
+```bash
+python scripts/build_takken_textbook.py   # takken-textbook.html を生成
+cp takken-textbook.html docs/index.html   # GitHub Pages 用にコピー
+git add docs/index.html && git commit -m "update textbook" && git push
 ```
 
 ## 使い方
