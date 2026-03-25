@@ -54,8 +54,8 @@ body {
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0,0,0,.15);
 }
-.header h1 { font-size: 18px; font-weight: 700; }
-.header .subtitle { font-size: 12px; opacity: .85; margin-left: 12px; }
+.header h1 { font-size: 18px; font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.header .subtitle { font-size: 12px; opacity: .85; margin-left: 12px; white-space: nowrap; }
 .menu-toggle {
   display: none;
   background: none;
@@ -165,10 +165,15 @@ ul, ol { margin: 8px 0 8px 24px; }
 li { margin: 4px 0; }
 li > ul, li > ol { margin: 4px 0 4px 20px; }
 /* Tables */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 12px 0;
+}
 table {
   width: 100%;
   border-collapse: collapse;
-  margin: 12px 0;
+  margin: 0;
   font-size: 14px;
 }
 thead { background: var(--accent); color: #fff; }
@@ -232,6 +237,18 @@ hr {
   transition: opacity .2s;
 }
 .back-top:hover { opacity: .85; }
+/* Sidebar overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 899;
+}
+.sidebar-overlay.active { display: block; }
 /* Mobile */
 @media (max-width: 768px) {
   .menu-toggle { display: block; }
@@ -242,9 +259,32 @@ hr {
   }
   .sidebar.open { transform: translateX(0); }
   .main { margin-left: 0; padding: 20px 16px 60px; }
-  .chapter { padding: 20px 18px; }
+  .chapter { padding: 20px 16px; }
+  .part-title { font-size: 22px; }
+  .chapter > h2:first-of-type { font-size: 19px; padding-left: 10px; }
+  h3 { font-size: 16px; }
+  h4 { font-size: 15px; }
   table { font-size: 12px; }
   th, td { padding: 6px 8px; }
+  th { white-space: normal; }
+  ul, ol { margin-left: 16px; }
+  li > ul, li > ol { margin-left: 14px; }
+  blockquote { padding: 10px 12px; }
+  .header .subtitle { display: none; }
+}
+/* Small phone */
+@media (max-width: 480px) {
+  body { font-size: 14px; }
+  .header { padding: 0 12px; }
+  .header h1 { font-size: 15px; }
+  .main { padding: 16px 12px 60px; }
+  .chapter { padding: 16px 12px; border-radius: 8px; }
+  .part-title { font-size: 20px; margin-bottom: 20px; }
+  .chapter > h2:first-of-type { font-size: 17px; }
+  h3 { font-size: 15px; }
+  table { font-size: 11px; }
+  th, td { padding: 5px 6px; }
+  .back-top { bottom: 16px; right: 16px; width: 40px; height: 40px; font-size: 18px; }
 }
 /* Print */
 @media print {
@@ -264,6 +304,7 @@ hr {
   <span class="subtitle">全科目 + 過去問演習</span>
 </header>
 
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 <aside class="sidebar">
 <nav id="toc" class="toc">
 <h2>目次</h2>
@@ -7006,12 +7047,25 @@ hr {
 <button class="back-top" onclick="scrollTo({top:0,behavior:'smooth'})" title="トップへ戻る">↑</button>
 
 <script>
-// Sidebar toggle (mobile)
+// Sidebar toggle (mobile) with overlay
 function toggleSidebar() {
-  document.querySelector('.sidebar').classList.toggle('open');
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.querySelector('.sidebar-overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('active', sidebar.classList.contains('open'));
 }
 document.querySelector('.main').addEventListener('click', () => {
   document.querySelector('.sidebar').classList.remove('open');
+  document.querySelector('.sidebar-overlay').classList.remove('active');
+});
+// Wrap tables for horizontal scroll on mobile
+document.querySelectorAll('.main table').forEach(table => {
+  if (!table.parentElement.classList.contains('table-wrap')) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'table-wrap';
+    table.parentNode.insertBefore(wrapper, table);
+    wrapper.appendChild(table);
+  }
 });
 // Back to top button
 window.addEventListener('scroll', () => {
