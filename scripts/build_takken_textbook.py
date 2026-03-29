@@ -327,11 +327,13 @@ body {{
   margin-left: var(--sidebar-w);
   margin-top: var(--header-h);
   padding: 32px 40px 100px;
-  max-width: calc(var(--content-max-w) + 80px);
 }}
 
 /* ========== Parts & Chapters ========== */
-.part {{ margin-bottom: 48px; }}
+.part {{
+  max-width: var(--content-max-w);
+  margin: 0 auto 48px;
+}}
 .part-title {{
   font-size: clamp(20px, 2.5vw + 8px, 26px);
   font-weight: 800;
