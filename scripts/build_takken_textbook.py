@@ -161,11 +161,13 @@ HTML_TEMPLATE = """\
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2563eb">
 <title>宅建士試験 要点整理テキスト</title>
 <style>
 :root {{
   --bg: #fafaf8;
   --fg: #1a1a1a;
+  --fg-muted: #64748b;
   --accent: #2563eb;
   --accent-light: #dbeafe;
   --border: #e5e5e5;
@@ -173,14 +175,17 @@ HTML_TEMPLATE = """\
   --star: #f59e0b;
   --success: #16a34a;
   --danger: #dc2626;
-  --toc-bg: #f1f5f9;
+  --toc-bg: #f8fafc;
   --sidebar-w: 280px;
   --header-h: 56px;
+  --content-max-w: 860px;
+  --radius: 12px;
 }}
 @media (prefers-color-scheme: dark) {{
   :root {{
     --bg: #0f172a;
     --fg: #e2e8f0;
+    --fg-muted: #94a3b8;
     --accent: #60a5fa;
     --accent-light: #1e3a5f;
     --border: #334155;
@@ -189,15 +194,21 @@ HTML_TEMPLATE = """\
   }}
 }}
 * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-html {{ scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + 16px); }}
+html {{
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-h) + 20px);
+  -webkit-text-size-adjust: 100%;
+}}
 body {{
   font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
   background: var(--bg);
   color: var(--fg);
-  line-height: 1.8;
-  font-size: 15px;
+  line-height: 1.85;
+  font-size: clamp(14px, 0.9vw + 11px, 16px);
+  overflow-x: hidden;
 }}
-/* Header */
+
+/* ========== Header ========== */
 .header {{
   position: fixed;
   top: 0;
@@ -209,21 +220,57 @@ body {{
   display: flex;
   align-items: center;
   padding: 0 24px;
+  gap: 8px;
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0,0,0,.15);
 }}
-.header h1 {{ font-size: 18px; font-weight: 700; }}
-.header .subtitle {{ font-size: 12px; opacity: .85; margin-left: 12px; }}
+.header h1 {{
+  font-size: clamp(14px, 1.8vw + 6px, 18px);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}}
+.header .subtitle {{
+  font-size: 12px;
+  opacity: .8;
+  white-space: nowrap;
+}}
 .menu-toggle {{
   display: none;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   color: #fff;
-  font-size: 24px;
+  font-size: 22px;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
-  margin-right: 12px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: background .15s;
+  -webkit-tap-highlight-color: transparent;
 }}
-/* Sidebar */
+.menu-toggle:hover {{ background: rgba(255,255,255,.15); }}
+
+/* ========== Sidebar Overlay ========== */
+.sidebar-overlay {{
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  z-index: 899;
+  opacity: 0;
+  transition: opacity .3s ease;
+  -webkit-tap-highlight-color: transparent;
+}}
+.sidebar-overlay.visible {{
+  display: block;
+  opacity: 1;
+}}
+
+/* ========== Sidebar ========== */
 .sidebar {{
   position: fixed;
   top: var(--header-h);
@@ -231,14 +278,15 @@ body {{
   width: var(--sidebar-w);
   height: calc(100vh - var(--header-h));
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--toc-bg);
   border-right: 1px solid var(--border);
-  padding: 16px 0;
+  padding: 12px 0 24px;
   z-index: 900;
-  transition: transform .3s ease;
+  transition: transform .3s cubic-bezier(.4,0,.2,1), visibility .3s;
 }}
 .sidebar .toc h2 {{ display: none; }}
-.toc-section {{ margin-bottom: 8px; }}
+.toc-section {{ margin-bottom: 4px; }}
 .toc-section-title {{
   display: block;
   padding: 8px 20px;
@@ -247,6 +295,7 @@ body {{
   color: var(--accent);
   text-decoration: none;
   letter-spacing: .04em;
+  transition: background .15s;
 }}
 .toc-section-title:hover {{ background: var(--accent-light); }}
 .toc-section ul {{
@@ -256,12 +305,15 @@ body {{
 }}
 .toc-section li a {{
   display: block;
-  padding: 4px 20px 4px 36px;
+  padding: 6px 16px 6px 32px;
   font-size: 13px;
   color: var(--fg);
   text-decoration: none;
   border-left: 3px solid transparent;
   transition: all .15s;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
 }}
 .toc-section li a:hover,
 .toc-section li a.active {{
@@ -269,45 +321,60 @@ body {{
   border-left-color: var(--accent);
   color: var(--accent);
 }}
-/* Main */
+
+/* ========== Main ========== */
 .main {{
   margin-left: var(--sidebar-w);
   margin-top: var(--header-h);
-  padding: 32px 40px 80px;
-  max-width: 900px;
+  padding: 32px 40px 100px;
+  max-width: calc(var(--content-max-w) + 80px);
 }}
-/* Parts & Chapters */
+
+/* ========== Parts & Chapters ========== */
 .part {{ margin-bottom: 48px; }}
 .part-title {{
-  font-size: 26px;
+  font-size: clamp(20px, 2.5vw + 8px, 26px);
   font-weight: 800;
   color: var(--accent);
   border-bottom: 3px solid var(--accent);
   padding-bottom: 8px;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }}
 .chapter {{
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius);
   padding: 28px 32px;
   margin-bottom: 24px;
   box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }}
 .chapter > h2:first-of-type {{
-  font-size: 22px;
+  font-size: clamp(17px, 1.8vw + 8px, 22px);
   font-weight: 800;
   color: var(--accent);
   border-left: 5px solid var(--accent);
   padding-left: 14px;
   margin-bottom: 20px;
 }}
-/* Headings */
-h3 {{ font-size: 18px; font-weight: 700; margin: 24px 0 12px; padding-bottom: 4px; border-bottom: 2px solid var(--border); }}
-h4 {{ font-size: 16px; font-weight: 700; margin: 20px 0 8px; color: var(--accent); }}
+
+/* ========== Headings ========== */
+h3 {{
+  font-size: clamp(15px, 1.2vw + 8px, 18px);
+  font-weight: 700;
+  margin: 24px 0 12px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid var(--border);
+}}
+h4 {{
+  font-size: clamp(14px, 1vw + 8px, 16px);
+  font-weight: 700;
+  margin: 20px 0 8px;
+  color: var(--accent);
+}}
 h5 {{ font-size: 15px; font-weight: 700; margin: 16px 0 8px; }}
 h6 {{ font-size: 14px; font-weight: 700; margin: 12px 0 6px; }}
-/* Text */
+
+/* ========== Text ========== */
 p {{ margin: 8px 0; }}
 blockquote {{
   background: var(--accent-light);
@@ -315,19 +382,44 @@ blockquote {{
   padding: 12px 16px;
   margin: 12px 0;
   border-radius: 0 8px 8px 0;
-  font-size: 14px;
+  font-size: 0.9em;
 }}
 strong {{ color: var(--accent); font-weight: 700; }}
-/* Lists */
+
+/* ========== Lists ========== */
 ul, ol {{ margin: 8px 0 8px 24px; }}
 li {{ margin: 4px 0; }}
 li > ul, li > ol {{ margin: 4px 0 4px 20px; }}
-/* Tables */
+
+/* ========== Tables ========== */
+.table-wrap {{
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 12px 0;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  position: relative;
+}}
+.table-wrap.scrollable::after {{
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 24px;
+  background: linear-gradient(to right, transparent, rgba(0,0,0,.06));
+  pointer-events: none;
+  border-radius: 0 8px 8px 0;
+}}
+.table-wrap table {{
+  margin: 0;
+  border-radius: 0;
+}}
 table {{
   width: 100%;
   border-collapse: collapse;
   margin: 12px 0;
-  font-size: 14px;
+  font-size: clamp(12px, 0.8vw + 8px, 14px);
 }}
 thead {{ background: var(--accent); color: #fff; }}
 th {{
@@ -342,12 +434,13 @@ td {{
 }}
 tbody tr:nth-child(even) {{ background: rgba(0,0,0,.02); }}
 tbody tr:hover {{ background: var(--accent-light); }}
-/* Code */
+
+/* ========== Code ========== */
 code {{
   background: rgba(0,0,0,.06);
   padding: 2px 6px;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: 0.88em;
   font-family: "Consolas", "Monaco", monospace;
 }}
 pre {{
@@ -356,61 +449,123 @@ pre {{
   padding: 16px;
   border-radius: 8px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin: 12px 0;
   font-size: 13px;
   line-height: 1.6;
 }}
 pre code {{ background: none; padding: 0; color: inherit; }}
-/* Horizontal rule */
+
+/* ========== Horizontal rule ========== */
 hr {{
   border: none;
   border-top: 2px dashed var(--border);
   margin: 28px 0;
 }}
-/* Star importance markers */
-.chapter h3, .chapter h4 {{
-  position: relative;
-}}
-/* Back to top */
+
+/* ========== Back to top ========== */
 .back-top {{
   position: fixed;
   bottom: 24px;
   right: 24px;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: var(--accent);
   color: #fff;
   border: none;
   font-size: 20px;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,.2);
-  display: none;
+  box-shadow: 0 2px 12px rgba(0,0,0,.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition: opacity .25s, visibility .25s, transform .25s;
   z-index: 999;
-  transition: opacity .2s;
+  -webkit-tap-highlight-color: transparent;
+}}
+.back-top.visible {{
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }}
 .back-top:hover {{ opacity: .85; }}
-/* Mobile */
+
+/* ========== Tablet (<=1024px) ========== */
+@media (max-width: 1024px) {{
+  :root {{ --sidebar-w: 240px; }}
+  .main {{ padding: 28px 28px 80px; }}
+  .chapter {{ padding: 24px; }}
+  .toc-section-title {{ font-size: 12px; }}
+  .toc-section li a {{ padding: 5px 14px 5px 26px; font-size: 12px; }}
+}}
+
+/* ========== Mobile (<=768px) ========== */
 @media (max-width: 768px) {{
-  .menu-toggle {{ display: block; }}
+  .menu-toggle {{ display: flex; }}
   .sidebar {{
     transform: translateX(-100%);
-    width: 260px;
-    box-shadow: 4px 0 20px rgba(0,0,0,.15);
+    visibility: hidden;
+    width: 280px;
+    box-shadow: 4px 0 24px rgba(0,0,0,.2);
   }}
-  .sidebar.open {{ transform: translateX(0); }}
-  .main {{ margin-left: 0; padding: 20px 16px 60px; }}
-  .chapter {{ padding: 20px 18px; }}
-  table {{ font-size: 12px; }}
-  th, td {{ padding: 6px 8px; }}
+  .sidebar.open {{
+    transform: translateX(0);
+    visibility: visible;
+  }}
+  .main {{
+    margin-left: 0;
+    padding: 20px 16px 80px;
+  }}
+  .chapter {{ padding: 20px 16px; border-radius: 10px; }}
+  .header .subtitle {{ display: none; }}
+  th, td {{ padding: 8px 10px; }}
+  ul, ol {{ margin-left: 18px; }}
+  .toc-section li a {{
+    padding: 8px 16px 8px 28px;
+    font-size: 14px;
+    min-height: 44px;
+  }}
+  .toc-section-title {{
+    padding: 10px 16px;
+    font-size: 14px;
+  }}
 }}
-/* Print */
+
+/* ========== Small phone (<=480px) ========== */
+@media (max-width: 480px) {{
+  .header h1 {{ font-size: 14px; }}
+  .main {{ padding: 16px 10px 80px; }}
+  .chapter {{ padding: 16px 12px; border-radius: 8px; }}
+  th, td {{ padding: 6px 8px; }}
+  .sidebar {{ width: 260px; }}
+  .back-top {{ bottom: 16px; right: 16px; }}
+}}
+
+/* ========== Very small phone (<=360px) ========== */
+@media (max-width: 360px) {{
+  .main {{ padding: 12px 8px 80px; }}
+  .chapter {{ padding: 14px 10px; border-radius: 6px; }}
+  .header {{ padding: 0 8px; gap: 4px; }}
+  .header h1 {{ font-size: 13px; }}
+  th, td {{ padding: 4px 6px; }}
+  .sidebar {{ width: 240px; }}
+}}
+
+/* ========== Landscape phone ========== */
+@media (max-width: 768px) and (orientation: landscape) {{
+  :root {{ --header-h: 44px; }}
+  .back-top {{ bottom: 12px; right: 12px; width: 40px; height: 40px; font-size: 16px; }}
+}}
+
+/* ========== Print ========== */
 @media print {{
-  .header, .sidebar, .back-top, .menu-toggle {{ display: none !important; }}
+  .header, .sidebar, .back-top, .menu-toggle, .sidebar-overlay {{ display: none !important; }}
   .main {{ margin: 0; padding: 0; max-width: 100%; }}
   .chapter {{ break-inside: avoid; border: none; box-shadow: none; padding: 0; margin-bottom: 16px; }}
   .part {{ break-before: page; }}
   body {{ font-size: 11pt; line-height: 1.6; }}
+  table {{ font-size: 10pt; }}
 }}
 </style>
 </head>
@@ -421,6 +576,8 @@ hr {{
   <h1>宅建士試験 要点整理テキスト</h1>
   <span class="subtitle">全科目 + 過去問演習</span>
 </header>
+
+<div class="sidebar-overlay" onclick="closeSidebar()"></div>
 
 <aside class="sidebar">
 {toc}
@@ -433,34 +590,92 @@ hr {{
 <button class="back-top" onclick="scrollTo({{top:0,behavior:'smooth'}})" title="トップへ戻る">↑</button>
 
 <script>
-// Sidebar toggle (mobile)
-function toggleSidebar() {{
-  document.querySelector('.sidebar').classList.toggle('open');
-}}
-document.querySelector('.main').addEventListener('click', () => {{
-  document.querySelector('.sidebar').classList.remove('open');
-}});
-// Back to top button
-window.addEventListener('scroll', () => {{
-  document.querySelector('.back-top').style.display = window.scrollY > 400 ? 'block' : 'none';
-}});
-// Active TOC highlight
-const tocLinks = document.querySelectorAll('.toc-section li a');
-const chapters = document.querySelectorAll('.chapter');
-const observer = new IntersectionObserver((entries) => {{
-  entries.forEach(e => {{
-    if (e.isIntersecting) {{
-      tocLinks.forEach(l => l.classList.remove('active'));
-      const id = e.target.id;
-      const link = document.querySelector(`.toc-section li a[href="#${{id}}"]`);
-      if (link) {{
-        link.classList.add('active');
-        link.scrollIntoView({{ block: 'nearest', behavior: 'smooth' }});
-      }}
-    }}
+(function() {{
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.querySelector('.sidebar-overlay');
+  const main = document.querySelector('.main');
+  const backTop = document.querySelector('.back-top');
+  const isMobile = () => window.innerWidth <= 768;
+
+  // --- Sidebar toggle ---
+  window.toggleSidebar = function() {{
+    const open = sidebar.classList.toggle('open');
+    overlay.classList.toggle('visible', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  }};
+  window.closeSidebar = function() {{
+    sidebar.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  }};
+
+  main.addEventListener('click', () => {{ if (isMobile()) closeSidebar(); }});
+  document.addEventListener('keydown', (e) => {{ if (e.key === 'Escape') closeSidebar(); }});
+
+  // Close sidebar on TOC link click (mobile)
+  sidebar.querySelectorAll('.toc-section a').forEach(a => {{
+    a.addEventListener('click', () => {{ if (isMobile()) closeSidebar(); }});
   }});
-}}, {{ rootMargin: '-80px 0px -60% 0px', threshold: 0 }});
-chapters.forEach(ch => observer.observe(ch));
+
+  // --- Touch swipe gestures ---
+  let touchStartX = 0, touchStartY = 0;
+  document.addEventListener('touchstart', (e) => {{
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }}, {{ passive: true }});
+  document.addEventListener('touchend', (e) => {{
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+    if (dy > 60) return; // vertical swipe, ignore
+    if (dx > 60 && touchStartX < 40 && !sidebar.classList.contains('open')) {{
+      toggleSidebar();
+    }} else if (dx < -60 && sidebar.classList.contains('open')) {{
+      closeSidebar();
+    }}
+  }}, {{ passive: true }});
+
+  // --- Back to top button ---
+  window.addEventListener('scroll', () => {{
+    backTop.classList.toggle('visible', window.scrollY > 400);
+  }}, {{ passive: true }});
+
+  // --- Table horizontal scroll wrapper ---
+  function wrapTables() {{
+    document.querySelectorAll('.chapter table:not(.wrapped)').forEach(table => {{
+      table.classList.add('wrapped');
+      const wrap = document.createElement('div');
+      wrap.className = 'table-wrap';
+      table.parentNode.insertBefore(wrap, table);
+      wrap.appendChild(table);
+      checkTableOverflow(wrap);
+    }});
+  }}
+  function checkTableOverflow(wrap) {{
+    wrap.classList.toggle('scrollable', wrap.scrollWidth > wrap.clientWidth + 2);
+  }}
+  function recheckAllTables() {{
+    document.querySelectorAll('.table-wrap').forEach(checkTableOverflow);
+  }}
+  wrapTables();
+  window.addEventListener('resize', recheckAllTables);
+
+  // --- Active TOC highlight ---
+  const tocLinks = document.querySelectorAll('.toc-section li a');
+  const chapters = document.querySelectorAll('.chapter');
+  const tocObserver = new IntersectionObserver((entries) => {{
+    entries.forEach(e => {{
+      if (e.isIntersecting) {{
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const link = document.querySelector('.toc-section li a[href="#' + e.target.id + '"]');
+        if (link) {{
+          link.classList.add('active');
+          link.scrollIntoView({{ block: 'nearest', behavior: 'smooth' }});
+        }}
+      }}
+    }});
+  }}, {{ rootMargin: '-80px 0px -60% 0px', threshold: 0 }});
+  chapters.forEach(ch => tocObserver.observe(ch));
+}})();
 </script>
 
 </body>
