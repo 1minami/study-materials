@@ -177,6 +177,7 @@ HTML_TEMPLATE = """\
   --danger: #dc2626;
   --toc-bg: #f8fafc;
   --sidebar-w: 280px;
+  --right-sidebar-w: 260px;
   --header-h: 56px;
   --content-max-w: 860px;
   --radius: 12px;
@@ -322,9 +323,76 @@ body {{
   color: var(--accent);
 }}
 
+/* ========== Right Sidebar (Notes) ========== */
+.right-sidebar {{
+  position: fixed;
+  top: var(--header-h);
+  right: 0;
+  width: var(--right-sidebar-w);
+  height: calc(100vh - var(--header-h));
+  background: var(--toc-bg);
+  border-left: 1px solid var(--border);
+  z-index: 800;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}}
+.right-sidebar-title {{
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--fg-muted);
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}}
+.right-sidebar-chapter {{
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 12px;
+  flex-shrink: 0;
+  line-height: 1.4;
+  min-height: 1.4em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}}
+.right-sidebar-textarea {{
+  flex: 1;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--fg);
+  background: var(--card-bg);
+  resize: none;
+  outline: none;
+  transition: border-color .15s;
+}}
+.right-sidebar-textarea:focus {{
+  border-color: var(--accent);
+}}
+.right-sidebar-textarea::placeholder {{
+  color: var(--fg-muted);
+}}
+.right-sidebar-status {{
+  font-size: 11px;
+  color: var(--fg-muted);
+  margin-top: 8px;
+  flex-shrink: 0;
+  min-height: 16px;
+}}
+
 /* ========== Main ========== */
 .main {{
   margin-left: var(--sidebar-w);
+  margin-right: var(--right-sidebar-w);
   margin-top: var(--header-h);
   padding: 32px 40px 100px;
 }}
@@ -496,7 +564,8 @@ hr {{
 /* ========== Tablet (<=1024px) ========== */
 @media (max-width: 1024px) {{
   :root {{ --sidebar-w: 240px; }}
-  .main {{ padding: 28px 28px 80px; }}
+  .right-sidebar {{ display: none; }}
+  .main {{ margin-right: 0; padding: 28px 28px 80px; }}
   .chapter {{ padding: 24px; }}
   .toc-section-title {{ font-size: 12px; }}
   .toc-section li a {{ padding: 5px 14px 5px 26px; font-size: 12px; }}
@@ -562,7 +631,7 @@ hr {{
 
 /* ========== Print ========== */
 @media print {{
-  .header, .sidebar, .back-top, .menu-toggle, .sidebar-overlay {{ display: none !important; }}
+  .header, .sidebar, .right-sidebar, .back-top, .menu-toggle, .sidebar-overlay {{ display: none !important; }}
   .main {{ margin: 0; padding: 0; max-width: 100%; }}
   .chapter {{ break-inside: avoid; border: none; box-shadow: none; padding: 0; margin-bottom: 16px; }}
   .part {{ break-before: page; }}
@@ -588,6 +657,13 @@ hr {{
 <main class="main">
 {body}
 </main>
+
+<aside class="right-sidebar">
+  <div class="right-sidebar-title">学習メモ</div>
+  <div class="right-sidebar-chapter" id="note-chapter-name">—</div>
+  <textarea class="right-sidebar-textarea" id="note-textarea" placeholder="この章のメモを入力..."></textarea>
+  <div class="right-sidebar-status" id="note-status"></div>
+</aside>
 
 <button class="back-top" onclick="scrollTo({{top:0,behavior:'smooth'}})" title="トップへ戻る">↑</button>
 
@@ -661,7 +737,52 @@ hr {{
   wrapTables();
   window.addEventListener('resize', recheckAllTables);
 
-  // --- Active TOC highlight ---
+  // --- Notes panel ---
+  const noteChapterName = document.getElementById('note-chapter-name');
+  const noteTextarea = document.getElementById('note-textarea');
+  const noteStatus = document.getElementById('note-status');
+  let currentNoteId = null;
+  let saveTimer = null;
+
+  function loadNote(chapterId, chapterTitle) {{
+    // Save current note before switching
+    if (currentNoteId && noteTextarea) {{
+      saveNote(currentNoteId);
+    }}
+    currentNoteId = chapterId;
+    if (noteChapterName) noteChapterName.textContent = chapterTitle || '—';
+    if (noteTextarea) {{
+      noteTextarea.value = localStorage.getItem('takken-note-' + chapterId) || '';
+      noteTextarea.disabled = false;
+    }}
+    if (noteStatus) noteStatus.textContent = '';
+  }}
+
+  function saveNote(chapterId) {{
+    if (!chapterId || !noteTextarea) return;
+    const val = noteTextarea.value;
+    if (val) {{
+      localStorage.setItem('takken-note-' + chapterId, val);
+    }} else {{
+      localStorage.removeItem('takken-note-' + chapterId);
+    }}
+  }}
+
+  if (noteTextarea) {{
+    noteTextarea.addEventListener('input', () => {{
+      if (noteStatus) noteStatus.textContent = '';
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {{
+        saveNote(currentNoteId);
+        if (noteStatus) {{
+          noteStatus.textContent = '保存しました';
+          setTimeout(() => {{ noteStatus.textContent = ''; }}, 2000);
+        }}
+      }}, 500);
+    }});
+  }}
+
+  // --- Active TOC highlight + Notes sync ---
   const tocLinks = document.querySelectorAll('.toc-section li a');
   const chapters = document.querySelectorAll('.chapter');
   const tocObserver = new IntersectionObserver((entries) => {{
@@ -673,6 +794,10 @@ hr {{
           link.classList.add('active');
           link.scrollIntoView({{ block: 'nearest', behavior: 'smooth' }});
         }}
+        // Update notes panel
+        const h2 = e.target.querySelector('h2');
+        const title = h2 ? h2.textContent : e.target.id;
+        loadNote(e.target.id, title);
       }}
     }});
   }}, {{ rootMargin: '-80px 0px -60% 0px', threshold: 0 }});
