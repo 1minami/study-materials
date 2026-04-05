@@ -12,8 +12,13 @@ materials/
 data/
   ├── laws/            # e-Gov API から取得した法令原文（37法令・重複排除済み）
   └── standards/       # 不動産鑑定評価基準等（非法令資料）
+templates/
+  ├── style.css        # テキストブック用 CSS テンプレート
+  └── script.js        # テキストブック用 JS テンプレート
 docs/
-  └── index.html       # 宅建テキスト（GitHub Pages で公開）
+  ├── index.html       # 宅建テキスト（GitHub Pages で公開）
+  ├── style.css        # CSS（ビルド時に自動コピー）
+  └── script.js        # JS（ビルド時に自動コピー）
 scripts/
   ├── fetch_egov.py           # e-Gov 法令取得スクリプト（3試験統合版）
   └── build_takken_textbook.py  # 宅建教材 → HTML テキストブック変換
@@ -31,12 +36,11 @@ scripts/
 
 ### テキストブックの再生成
 
-教材ファイル（`materials/takken/`）を更新した場合:
+教材ファイル（`materials/takken/`）またはテンプレート（`templates/`）を更新した場合:
 
 ```bash
-python scripts/build_takken_textbook.py   # takken-textbook.html を生成
-cp takken-textbook.html docs/index.html   # GitHub Pages 用にコピー
-git add docs/index.html && git commit -m "update textbook" && git push
+python scripts/build_takken_textbook.py   # HTML + CSS + JS を生成（docs/ にも自動コピー）
+git add docs/ && git commit -m "update textbook" && git push
 ```
 
 ## 使い方
