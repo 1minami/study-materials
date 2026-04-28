@@ -112,6 +112,140 @@
     });
   }
 
+  // --- Random Quiz ---
+  const QUIZ_SIZE = 10;
+  const quizOverlay = document.getElementById('quiz-overlay');
+  const quizBody = document.getElementById('quiz-body');
+  const quizProgress = document.getElementById('quiz-progress');
+  const quizNextBtn = document.getElementById('quiz-next-btn');
+  const quizRetryBtn = document.getElementById('quiz-retry-btn');
+  let quizPool = null;
+  let quizSet = [];
+  let quizIdx = 0;
+  let quizScore = 0;
+  let quizAnswered = false;
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  async function loadQuizPool() {
+    if (quizPool) return quizPool;
+    try {
+      const res = await fetch('quiz.json');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      quizPool = await res.json();
+    } catch (e) {
+      quizPool = [];
+      console.error('quiz.json load failed:', e);
+    }
+    return quizPool;
+  }
+
+  function renderQuestion() {
+    const q = quizSet[quizIdx];
+    quizAnswered = false;
+    quizNextBtn.disabled = true;
+    quizNextBtn.textContent = (quizIdx === quizSet.length - 1) ? '結果を見る ▶' : '次の問題 ▶';
+    quizProgress.textContent = `${quizIdx + 1} / ${quizSet.length}（正解 ${quizScore}）`;
+
+    const meta = `<div class="quiz-meta"><span class="quiz-q-num">Q${quizIdx + 1}</span><span class="quiz-chapter">${escapeHtml(q.category)} ／ ${escapeHtml(q.section || '')} ／ ${escapeHtml(q.source)}</span></div>`;
+    const qtext = `<div class="quiz-question">${escapeHtml(q.question).replace(/\n/g, '<br>')}</div>`;
+    const choices = q.choices.map((c, i) => {
+      const n = i + 1;
+      return `<button type="button" class="quiz-choice" data-n="${n}"><span class="quiz-choice-num">${n}</span><span class="quiz-choice-text">${escapeHtml(c)}</span></button>`;
+    }).join('');
+    quizBody.innerHTML = meta + qtext + `<div class="quiz-choices">${choices}</div><div class="quiz-explanation" id="quiz-explanation" hidden></div>`;
+
+    quizBody.querySelectorAll('.quiz-choice').forEach(btn => {
+      btn.addEventListener('click', () => answerQuestion(parseInt(btn.dataset.n, 10)));
+    });
+    quizBody.scrollTop = 0;
+  }
+
+  function answerQuestion(n) {
+    if (quizAnswered) return;
+    quizAnswered = true;
+    const q = quizSet[quizIdx];
+    const correct = q.answer;
+    const isCorrect = (n === correct);
+    if (isCorrect) quizScore++;
+
+    quizBody.querySelectorAll('.quiz-choice').forEach(btn => {
+      const v = parseInt(btn.dataset.n, 10);
+      btn.disabled = true;
+      if (v === correct) btn.classList.add('correct');
+      else if (v === n) btn.classList.add('wrong');
+    });
+
+    const expl = document.getElementById('quiz-explanation');
+    const verdict = isCorrect
+      ? '<span class="quiz-verdict ok">○ 正解</span>'
+      : `<span class="quiz-verdict ng">× 不正解（正解: ${correct}）</span>`;
+    expl.innerHTML = verdict + `<div class="quiz-explanation-body">${escapeHtml(q.explanation || '').replace(/\n/g, '<br>')}</div>`;
+    expl.hidden = false;
+
+    quizProgress.textContent = `${quizIdx + 1} / ${quizSet.length}（正解 ${quizScore}）`;
+    quizNextBtn.disabled = false;
+  }
+
+  function showResult() {
+    const total = quizSet.length;
+    const pct = total ? Math.round((quizScore / total) * 100) : 0;
+    quizProgress.textContent = `終了`;
+    quizBody.innerHTML = `
+      <div class="quiz-score">スコア ${quizScore} / ${total}（正答率 ${pct}%）</div>
+      <div class="quiz-result-msg">「もう10問」で再挑戦できる。</div>
+    `;
+    quizNextBtn.disabled = true;
+    quizNextBtn.textContent = '次の問題 ▶';
+  }
+
+  window.nextQuiz = function() {
+    if (!quizAnswered) return;
+    if (quizIdx >= quizSet.length - 1) {
+      showResult();
+      return;
+    }
+    quizIdx++;
+    renderQuestion();
+  };
+
+  window.openQuiz = async function() {
+    quizOverlay.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+    quizBody.innerHTML = '<div class="quiz-empty">読み込み中…</div>';
+    quizProgress.textContent = '';
+    quizNextBtn.disabled = true;
+
+    const pool = await loadQuizPool();
+    if (!pool || pool.length === 0) {
+      quizBody.innerHTML = '<div class="quiz-empty">問題データが見つからない。<br>quiz.json を確認。</div>';
+      return;
+    }
+    quizSet = shuffle(pool).slice(0, Math.min(QUIZ_SIZE, pool.length));
+    quizIdx = 0;
+    quizScore = 0;
+    renderQuestion();
+  };
+
+  window.closeQuiz = function(e) {
+    if (e && e.target && !e.target.classList.contains('quiz-overlay')) return;
+    quizOverlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  };
+
   // --- Active TOC highlight + Notes sync ---
   const tocLinks = document.querySelectorAll('.toc-section li a');
   const chapters = document.querySelectorAll('.chapter');
