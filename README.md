@@ -18,10 +18,11 @@ templates/
 docs/
   ├── index.html       # 宅建テキスト（GitHub Pages で公開）
   ├── style.css        # CSS（ビルド時に自動コピー）
-  └── script.js        # JS（ビルド時に自動コピー）
+  ├── script.js        # JS（ビルド時に自動コピー）
+  └── quiz.json        # 過去問データ（ビルド時に自動生成）
 scripts/
   ├── fetch_egov.py           # e-Gov 法令取得スクリプト（3試験統合版）
-  └── build_takken_textbook.py  # 宅建教材 → HTML テキストブック変換
+  └── build_takken_textbook.py  # 宅建教材 → HTML テキストブック + quiz.json 変換
 ```
 
 ## Web テキストブック
@@ -33,13 +34,24 @@ scripts/
 - 全科目 + 過去問演習（23ファイル統合）
 - 左サイドバー目次、スクロール追従ハイライト
 - スマホ対応（レスポンシブ）、ダークモード対応、印刷対応
+- 章ごとの学習メモ（右サイドバー、`localStorage` 保存）
+- **ランダム問題演習**: 過去問128問プールから10問ランダム出題、1問ずつ即時採点+解説表示
+
+### ランダム問題演習
+
+サイドバー上部「📝 ランダム問題演習」リンクからモーダルを起動。
+
+- ソース: `materials/takken/19-22*.md`（権利関係/宅建業法/法令上の制限/税・その他）
+- 出題形式: 4択、全範囲ランダム10問
+- 採点: 選択肢クリックで即時正誤判定 → 解説展開 → 「次の問題」で進行 → 最終スコア表示
+- データ: ビルド時に `quiz.json` を自動生成（`fetch` でロード）
 
 ### テキストブックの再生成
 
 教材ファイル（`materials/takken/`）またはテンプレート（`templates/`）を更新した場合:
 
 ```bash
-python scripts/build_takken_textbook.py   # HTML + CSS + JS を生成（docs/ にも自動コピー）
+python scripts/build_takken_textbook.py   # HTML + CSS + JS + quiz.json を生成（docs/ にも自動コピー）
 git add docs/ && git commit -m "update textbook" && git push
 ```
 
