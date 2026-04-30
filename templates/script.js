@@ -246,6 +246,189 @@
     document.body.style.overflow = '';
   };
 
+  // --- Fill-in-blank Quiz ---
+  const FILLIN_SIZE = 10;
+  const fillinOverlay = document.getElementById('fillin-overlay');
+  const fillinBody = document.getElementById('fillin-body');
+  const fillinProgress = document.getElementById('fillin-progress');
+  const fillinSubmitBtn = document.getElementById('fillin-submit-btn');
+  const fillinNextBtn = document.getElementById('fillin-next-btn');
+  let fillinPool = null;
+  let fillinSet = [];
+  let fillinIdx = 0;
+  let fillinScore = 0;
+  let fillinAnswered = false;
+
+  function normAns(s) {
+    return String(s == null ? '' : s)
+      .normalize('NFKC')
+      .replace(/\s+/g, '')
+      .toLowerCase();
+  }
+
+  // Markdown軽量変換: **bold** / `code` / リスト・改行を許容（段落単位）
+  function paragraphToHtml(p, answer, masked) {
+    // エスケープ後に**...**置換。answerと一致する太字は <input> へ。
+    const lines = p.split('\n');
+    const escAns = escapeHtml(answer);
+    return lines.map(line => {
+      let html = escapeHtml(line);
+      // `code` 簡易
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+      // **X** を強調 or 入力欄
+      html = html.replace(/\*\*([^*]+?)\*\*/g, function(_, inner) {
+        if (masked && inner === answer) {
+          return '<input type="text" class="fillin-input" autocomplete="off" autocapitalize="off" spellcheck="false">';
+        }
+        if (!masked && inner === answer) {
+          return '<strong class="fillin-answer-hl">' + escapeHtml(inner) + '</strong>';
+        }
+        return '<strong>' + escapeHtml(inner) + '</strong>';
+      });
+      // リスト先頭 "- " or "* " or "1. " はマーカーへ
+      const listM = html.match(/^(\s*)(?:[-*]|\d+\.)\s+(.*)$/);
+      if (listM) {
+        return '<div class="fillin-li">・' + listM[2] + '</div>';
+      }
+      return '<div class="fillin-line">' + html + '</div>';
+    }).join('');
+  }
+
+  async function loadFillinPool() {
+    if (fillinPool) return fillinPool;
+    try {
+      const res = await fetch('fillin.json');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      fillinPool = await res.json();
+    } catch (e) {
+      fillinPool = [];
+      console.error('fillin.json load failed:', e);
+    }
+    return fillinPool;
+  }
+
+  function renderFillin() {
+    const q = fillinSet[fillinIdx];
+    fillinAnswered = false;
+    fillinSubmitBtn.disabled = false;
+    fillinSubmitBtn.hidden = false;
+    fillinNextBtn.hidden = true;
+    fillinNextBtn.disabled = true;
+    fillinNextBtn.textContent = (fillinIdx === fillinSet.length - 1) ? '結果を見る ▶' : '次の問題 ▶';
+    fillinProgress.textContent = `${fillinIdx + 1} / ${fillinSet.length}（正解 ${fillinScore}）`;
+
+    const meta = `<div class="quiz-meta"><span class="quiz-q-num">Q${fillinIdx + 1}</span><span class="quiz-chapter">${escapeHtml(q.category || '')} ／ ${escapeHtml(q.chapter || '')} ／ ${escapeHtml(q.section || '')}</span></div>`;
+    const hint = q.blank_count > 1
+      ? `<div class="fillin-hint">同じ語が ${q.blank_count} 箇所あり。空欄1つに入力すれば全箇所判定。</div>`
+      : '';
+    const para = `<div class="fillin-paragraph">${paragraphToHtml(q.paragraph, q.answer, true)}</div>`;
+    fillinBody.innerHTML = meta + hint + para + `<div class="quiz-explanation" id="fillin-explanation" hidden></div>`;
+
+    const inputs = fillinBody.querySelectorAll('.fillin-input');
+    if (inputs.length > 0) {
+      inputs[0].focus();
+      // 1番目に入力した値を他のinputへ同期
+      inputs[0].addEventListener('input', () => {
+        const v = inputs[0].value;
+        inputs.forEach((el, i) => { if (i > 0) el.value = v; });
+      });
+      inputs.forEach(el => {
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            if (!fillinAnswered) submitFillin();
+            else nextFillin();
+          }
+        });
+      });
+    }
+    fillinBody.scrollTop = 0;
+  }
+
+  window.submitFillin = function() {
+    if (fillinAnswered) return;
+    const q = fillinSet[fillinIdx];
+    const inputs = fillinBody.querySelectorAll('.fillin-input');
+    if (inputs.length === 0) return;
+    const userAns = inputs[0].value;
+    const isCorrect = normAns(userAns) === normAns(q.answer);
+    fillinAnswered = true;
+    if (isCorrect) fillinScore++;
+
+    inputs.forEach(el => {
+      el.disabled = true;
+      el.classList.add(isCorrect ? 'correct' : 'wrong');
+      if (!isCorrect) {
+        // 不正解時は正解を併記
+        const tag = document.createElement('span');
+        tag.className = 'fillin-answer-correct';
+        tag.textContent = ' → ' + q.answer;
+        el.parentNode.insertBefore(tag, el.nextSibling);
+      }
+    });
+
+    const expl = document.getElementById('fillin-explanation');
+    const verdict = isCorrect
+      ? '<span class="quiz-verdict ok">○ 正解</span>'
+      : `<span class="quiz-verdict ng">× 不正解（正解: ${escapeHtml(q.answer)}）</span>`;
+    expl.innerHTML = verdict;
+    expl.hidden = false;
+
+    fillinProgress.textContent = `${fillinIdx + 1} / ${fillinSet.length}（正解 ${fillinScore}）`;
+    fillinSubmitBtn.hidden = true;
+    fillinNextBtn.hidden = false;
+    fillinNextBtn.disabled = false;
+    fillinNextBtn.focus();
+  };
+
+  function showFillinResult() {
+    const total = fillinSet.length;
+    const pct = total ? Math.round((fillinScore / total) * 100) : 0;
+    fillinProgress.textContent = `終了`;
+    fillinBody.innerHTML = `
+      <div class="quiz-score">スコア ${fillinScore} / ${total}（正答率 ${pct}%）</div>
+      <div class="quiz-result-msg">「もう10問」で再挑戦できる。</div>
+    `;
+    fillinSubmitBtn.hidden = true;
+    fillinNextBtn.hidden = true;
+  }
+
+  window.nextFillin = function() {
+    if (!fillinAnswered) return;
+    if (fillinIdx >= fillinSet.length - 1) {
+      showFillinResult();
+      return;
+    }
+    fillinIdx++;
+    renderFillin();
+  };
+
+  window.openFillin = async function() {
+    fillinOverlay.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+    fillinBody.innerHTML = '<div class="quiz-empty">読み込み中…</div>';
+    fillinProgress.textContent = '';
+    fillinSubmitBtn.disabled = true;
+    fillinSubmitBtn.hidden = false;
+    fillinNextBtn.hidden = true;
+
+    const pool = await loadFillinPool();
+    if (!pool || pool.length === 0) {
+      fillinBody.innerHTML = '<div class="quiz-empty">穴埋め問題が見つからない。<br>fillin.json を確認。</div>';
+      return;
+    }
+    fillinSet = shuffle(pool).slice(0, Math.min(FILLIN_SIZE, pool.length));
+    fillinIdx = 0;
+    fillinScore = 0;
+    renderFillin();
+  };
+
+  window.closeFillin = function(e) {
+    if (e && e.target && !e.target.classList.contains('quiz-overlay')) return;
+    fillinOverlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  };
+
   // --- Active TOC highlight + Notes sync ---
   const tocLinks = document.querySelectorAll('.toc-section li a');
   const chapters = document.querySelectorAll('.chapter');
