@@ -331,9 +331,7 @@
     const hint = q.blank_count > 1
       ? `<div class="fillin-hint">同じ語が ${q.blank_count} 箇所あり。空欄1つに入力すれば全箇所判定。</div>`
       : '';
-    // 出題: sentenceがあれば文単位、なければparagraph全体
-    const sentenceText = q.sentence || q.paragraph;
-    const para = `<div class="fillin-paragraph">${paragraphToHtml(sentenceText, q.answer, true)}</div>`;
+    const para = `<div class="fillin-paragraph">${paragraphToHtml(q.paragraph, q.answer, true)}</div>`;
     fillinBody.innerHTML = meta + hint + para + `<div class="quiz-explanation" id="fillin-explanation" hidden></div>`;
 
     const inputs = fillinBody.querySelectorAll('.fillin-input');
@@ -381,12 +379,7 @@
     const verdict = isCorrect
       ? '<span class="quiz-verdict ok">○ 正解</span>'
       : `<span class="quiz-verdict ng">× 不正解（正解: ${escapeHtml(q.answer)}）</span>`;
-    // 解説段落表示: paragraphが文より長い場合のみ表示
-    const showContext = q.paragraph && q.paragraph !== q.sentence;
-    const contextHtml = showContext
-      ? `<div class="fillin-context-label">▼ 元の段落</div><div class="fillin-paragraph fillin-paragraph-context">${paragraphToHtml(q.paragraph, q.answer, false)}</div>`
-      : '';
-    expl.innerHTML = verdict + contextHtml;
+    expl.innerHTML = verdict;
     expl.hidden = false;
 
     fillinProgress.textContent = `${fillinIdx + 1} / ${fillinSet.length}（正解 ${fillinScore}）`;

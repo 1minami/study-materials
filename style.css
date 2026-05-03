@@ -803,22 +803,6 @@ hr {
   .fillin-input { min-width: 80px; font-size: 14px; }
 }
 
-/* 解説段落 (採点後コンテキスト表示) */
-.fillin-context-label {
-  margin-top: 14px;
-  margin-bottom: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--fg-muted);
-  letter-spacing: .04em;
-}
-.fillin-paragraph-context {
-  background: var(--card-bg);
-  border-left: 3px solid var(--fg-muted);
-  font-size: 14px;
-  line-height: 1.85;
-}
-
 /* 設定画面 */
 .fillin-setup {
   display: flex;

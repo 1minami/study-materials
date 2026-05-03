@@ -442,33 +442,7 @@ def _is_valid_bold(s: str) -> bool:
     return True
 
 
-def _extract_sentence_with(line: str, bold_marker: str) -> str:
-    """行から **X** を含む最小文単位を切り出す。
-    行内に「。」「！」「？」があれば該当文のみ。なければ行全体。
-    リスト記号 (- / * / 1.) は保持。
-    """
-    if bold_marker not in line:
-        return line.strip()
-    parts = re.split(r"(?<=[。！？\?])", line)
-    parts = [p for p in parts if p.strip()]
-    for p in parts:
-        if bold_marker in p:
-            return p.strip()
-    return line.strip()
-
-
 SUBHEADING_RE = re.compile(r"^(#{3,6})\s+(.+?)\s*$", re.MULTILINE)
-
-
-def _has_enough_context(sentence: str, answer: str) -> bool:
-    """sentence が単独で答えを推定できる程度の文脈を持つか判定。
-    答え/マークダウン記号/句読点を除いた残文字が8字以上あれば文脈ありとみなす。
-    """
-    s = sentence.replace(f"**{answer}**", "")
-    s = re.sub(r"`[^`]*`", "", s)
-    s = re.sub(r"\*\*([^*]+?)\*\*", r"\1", s)  # 他の太字は中身を残す
-    s = re.sub(r"[\*\-\+\:：、。「」『』（）\(\)\s\[\]→⇒|]", "", s)
-    return len(s) >= 8
 
 
 def _normalize_paragraph(p: str) -> str:
@@ -557,26 +531,12 @@ def parse_fillin_from_md(md_text: str, file_label: str, category: str) -> list:
                 continue
             seen_in_para.add(b)
             unique_answers.append(b)
-        # 答え→出現する行(リスト要素含む)の特定
-        para_lines = para.split("\n")
         for ans in unique_answers:
             blank_count = sum(1 for b in valid if b == ans)
             key = (file_label, section_for(block_start), para, ans)
             if key in seen_keys:
                 continue
             seen_keys.add(key)
-            # ans を含む行を探し、その文を sentence とする
-            marker = f"**{ans}**"
-            sentence = ""
-            for ln in para_lines:
-                if marker in ln:
-                    sentence = _extract_sentence_with(ln, marker)
-                    break
-            if not sentence:
-                sentence = para
-            # 文脈不足の場合は paragraph 全体を出題に使う (R3)
-            if not _has_enough_context(sentence, ans) and para != sentence:
-                sentence = para
             questions.append({
                 "id": f"{file_label}-{len(questions) + 1}",
                 "chapter": file_label,
@@ -585,7 +545,6 @@ def parse_fillin_from_md(md_text: str, file_label: str, category: str) -> list:
                 "heading": heading_for(block_start),
                 "answer": ans,
                 "blank_count": blank_count,
-                "sentence": sentence,
                 "paragraph": para,
             })
     return questions
