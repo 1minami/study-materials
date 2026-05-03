@@ -457,6 +457,20 @@ def _extract_sentence_with(line: str, bold_marker: str) -> str:
     return line.strip()
 
 
+SUBHEADING_RE = re.compile(r"^(#{3,6})\s+(.+?)\s*$", re.MULTILINE)
+
+
+def _has_enough_context(sentence: str, answer: str) -> bool:
+    """sentence が単独で答えを推定できる程度の文脈を持つか判定。
+    答え/マークダウン記号/句読点を除いた残文字が8字以上あれば文脈ありとみなす。
+    """
+    s = sentence.replace(f"**{answer}**", "")
+    s = re.sub(r"`[^`]*`", "", s)
+    s = re.sub(r"\*\*([^*]+?)\*\*", r"\1", s)  # 他の太字は中身を残す
+    s = re.sub(r"[\*\-\+\:：、。「」『』（）\(\)\s\[\]→⇒|]", "", s)
+    return len(s) >= 8
+
+
 def _normalize_paragraph(p: str) -> str:
     # 余分な空行除去、左右余白除去
     lines = [ln.rstrip() for ln in p.split("\n")]
@@ -487,6 +501,20 @@ def parse_fillin_from_md(md_text: str, file_label: str, category: str) -> list:
     def section_for(pos: int) -> str:
         current = ""
         for s_pos, name in section_starts:
+            if s_pos <= pos:
+                current = name
+            else:
+                break
+        return current
+
+    # サブ見出し (h3-h6)
+    sub_starts = []
+    for m in SUBHEADING_RE.finditer(md_text):
+        sub_starts.append((m.start(), m.group(2).strip().rstrip("★ ").strip()))
+
+    def heading_for(pos: int) -> str:
+        current = ""
+        for s_pos, name in sub_starts:
             if s_pos <= pos:
                 current = name
             else:
@@ -546,11 +574,15 @@ def parse_fillin_from_md(md_text: str, file_label: str, category: str) -> list:
                     break
             if not sentence:
                 sentence = para
+            # 文脈不足の場合は paragraph 全体を出題に使う (R3)
+            if not _has_enough_context(sentence, ans) and para != sentence:
+                sentence = para
             questions.append({
                 "id": f"{file_label}-{len(questions) + 1}",
                 "chapter": file_label,
                 "category": category,
                 "section": section_for(block_start),
+                "heading": heading_for(block_start),
                 "answer": ans,
                 "blank_count": blank_count,
                 "sentence": sentence,

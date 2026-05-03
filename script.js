@@ -248,8 +248,6 @@
 
   // --- Fill-in-blank Quiz ---
   const FILLIN_SIZE_DEFAULT = 10;
-  const FILLIN_WRONG_KEY = 'takken-fillin-wrong-v1';
-  const FILLIN_WRONG_LIMIT = 200;
   const fillinOverlay = document.getElementById('fillin-overlay');
   const fillinBody = document.getElementById('fillin-body');
   const fillinProgress = document.getElementById('fillin-progress');
@@ -263,31 +261,6 @@
   let fillinAnswered = false;
   let fillinSize = FILLIN_SIZE_DEFAULT;
   let fillinSelectedCats = null;
-  let fillinReviewMode = false;
-
-  function loadWrongIds() {
-    try {
-      const raw = localStorage.getItem(FILLIN_WRONG_KEY);
-      if (!raw) return [];
-      const arr = JSON.parse(raw);
-      return Array.isArray(arr) ? arr : [];
-    } catch (e) { return []; }
-  }
-  function saveWrongIds(ids) {
-    try {
-      const trimmed = ids.slice(-FILLIN_WRONG_LIMIT);
-      localStorage.setItem(FILLIN_WRONG_KEY, JSON.stringify(trimmed));
-    } catch (e) {}
-  }
-  function recordWrong(id) {
-    const ids = loadWrongIds().filter(x => x !== id);
-    ids.push(id);
-    saveWrongIds(ids);
-  }
-  function clearWrongOnCorrect(id) {
-    const ids = loadWrongIds().filter(x => x !== id);
-    saveWrongIds(ids);
-  }
 
   // 答え揺らぎ吸収: NFKC正規化 + 空白/記号除去 + カナ→ひらがな統一 + 小文字化
   function normAns(s) {
@@ -339,10 +312,6 @@
     if (fillinSelectedCats && fillinSelectedCats.size > 0) {
       filtered = pool.filter(q => fillinSelectedCats.has(q.category || ''));
     }
-    if (fillinReviewMode) {
-      const wrongIds = new Set(loadWrongIds());
-      filtered = filtered.filter(q => wrongIds.has(q.id));
-    }
     if (filtered.length === 0) return [];
     return shuffle(filtered).slice(0, Math.min(fillinSize, filtered.length));
   }
@@ -357,8 +326,8 @@
     fillinNextBtn.textContent = (fillinIdx === fillinSet.length - 1) ? '結果を見る ▶' : '次の問題 ▶';
     fillinProgress.textContent = `${fillinIdx + 1} / ${fillinSet.length}（正解 ${fillinScore}）`;
 
-    const reviewBadge = fillinReviewMode ? '<span class="fillin-mode-badge">苦手モード</span>' : '';
-    const meta = `<div class="quiz-meta"><span class="quiz-q-num">Q${fillinIdx + 1}</span><span class="quiz-chapter">${escapeHtml(q.category || '')} ／ ${escapeHtml(q.chapter || '')} ／ ${escapeHtml(q.section || '')}</span>${reviewBadge}</div>`;
+    const path = [q.category, q.chapter, q.section, q.heading].filter(Boolean).map(escapeHtml).join(' ／ ');
+    const meta = `<div class="quiz-meta"><span class="quiz-q-num">Q${fillinIdx + 1}</span><span class="quiz-chapter">${path}</span></div>`;
     const hint = q.blank_count > 1
       ? `<div class="fillin-hint">同じ語が ${q.blank_count} 箇所あり。空欄1つに入力すれば全箇所判定。</div>`
       : '';
@@ -395,12 +364,7 @@
     const userAns = inputs[0].value;
     const isCorrect = normAns(userAns) === normAns(q.answer);
     fillinAnswered = true;
-    if (isCorrect) {
-      fillinScore++;
-      clearWrongOnCorrect(q.id);
-    } else {
-      recordWrong(q.id);
-    }
+    if (isCorrect) fillinScore++;
 
     inputs.forEach(el => {
       el.disabled = true;
@@ -465,7 +429,6 @@
     if (!fillinSelectedCats) {
       fillinSelectedCats = new Set(cats);
     }
-    const wrongCount = loadWrongIds().length;
 
     const catItems = cats.map(c => {
       const checked = fillinSelectedCats.has(c) ? 'checked' : '';
@@ -490,13 +453,6 @@
           <div class="fillin-setup-label">問題数</div>
           <select id="fillin-size-select" class="fillin-size-select">${sizeOpts}</select>
         </div>
-        <div class="fillin-setup-section">
-          <label class="fillin-cat fillin-review-toggle">
-            <input type="checkbox" id="fillin-review-toggle" ${fillinReviewMode ? 'checked' : ''} ${wrongCount === 0 ? 'disabled' : ''}>
-            <span>苦手モード <em>(誤答履歴: ${wrongCount}件${wrongCount === 0 ? ' — 履歴なし' : ''})</em></span>
-          </label>
-          ${wrongCount > 0 ? '<button type="button" class="quiz-btn fillin-btn-mini" id="fillin-wrong-clear">履歴クリア</button>' : ''}
-        </div>
         <div class="fillin-setup-section fillin-setup-start">
           <button type="button" class="quiz-btn quiz-btn-primary" id="fillin-start-btn">開始 ▶</button>
         </div>
@@ -518,20 +474,6 @@
       fillinSelectedCats = new Set();
       renderFillinSetup(pool);
     });
-    const reviewToggle = fillinBody.querySelector('#fillin-review-toggle');
-    if (reviewToggle) {
-      reviewToggle.addEventListener('change', () => { fillinReviewMode = reviewToggle.checked; });
-    }
-    const clearBtn = fillinBody.querySelector('#fillin-wrong-clear');
-    if (clearBtn) {
-      clearBtn.addEventListener('click', () => {
-        if (confirm('誤答履歴をすべて削除する。よいか？')) {
-          saveWrongIds([]);
-          fillinReviewMode = false;
-          renderFillinSetup(pool);
-        }
-      });
-    }
     fillinBody.querySelector('#fillin-size-select').addEventListener('change', (e) => {
       fillinSize = parseInt(e.target.value, 10) || FILLIN_SIZE_DEFAULT;
     });
@@ -541,7 +483,7 @@
   function startFillin(pool) {
     fillinSet = buildFillinSet(pool);
     if (fillinSet.length === 0) {
-      fillinBody.innerHTML = '<div class="quiz-empty">該当問題なし。<br>カテゴリ選択や苦手モードを見直してくれ。</div>';
+      fillinBody.innerHTML = '<div class="quiz-empty">該当問題なし。<br>カテゴリ選択を見直してくれ。</div>';
       fillinSubmitBtn.hidden = true;
       fillinNextBtn.hidden = true;
       return;

@@ -819,19 +819,6 @@ hr {
   line-height: 1.85;
 }
 
-/* モード表示バッジ */
-.fillin-mode-badge {
-  display: inline-block;
-  background: linear-gradient(90deg, #f59e0b, #ef4444);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: 10px;
-  letter-spacing: .04em;
-  margin-left: 6px;
-}
-
 /* 設定画面 */
 .fillin-setup {
   display: flex;
@@ -888,11 +875,6 @@ hr {
   font-style: normal;
   font-size: 11px;
   margin-left: 2px;
-}
-.fillin-review-toggle {
-  width: fit-content;
-  background: linear-gradient(90deg, rgba(245,158,11,.08), rgba(239,68,68,.08));
-  border-color: rgba(239,68,68,.3);
 }
 .fillin-size-select {
   padding: 6px 10px;
