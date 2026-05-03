@@ -803,6 +803,121 @@ hr {
   .fillin-input { min-width: 80px; font-size: 14px; }
 }
 
+/* 解説段落 (採点後コンテキスト表示) */
+.fillin-context-label {
+  margin-top: 14px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fg-muted);
+  letter-spacing: .04em;
+}
+.fillin-paragraph-context {
+  background: var(--card-bg);
+  border-left: 3px solid var(--fg-muted);
+  font-size: 14px;
+  line-height: 1.85;
+}
+
+/* モード表示バッジ */
+.fillin-mode-badge {
+  display: inline-block;
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: .04em;
+  margin-left: 6px;
+}
+
+/* 設定画面 */
+.fillin-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 4px;
+}
+.fillin-setup-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fillin-setup-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: .03em;
+}
+.fillin-setup-actions {
+  display: flex;
+  gap: 6px;
+}
+.fillin-btn-mini {
+  padding: 4px 10px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+.fillin-cats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 6px 10px;
+}
+.fillin-cat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card-bg);
+  cursor: pointer;
+  font-size: 13px;
+  transition: background .12s, border-color .12s;
+}
+.fillin-cat:hover { background: var(--accent-light); }
+.fillin-cat input[type=checkbox] {
+  width: 16px;
+  height: 16px;
+  accent-color: #7c3aed;
+  cursor: pointer;
+}
+.fillin-cat em {
+  color: var(--fg-muted);
+  font-style: normal;
+  font-size: 11px;
+  margin-left: 2px;
+}
+.fillin-review-toggle {
+  width: fit-content;
+  background: linear-gradient(90deg, rgba(245,158,11,.08), rgba(239,68,68,.08));
+  border-color: rgba(239,68,68,.3);
+}
+.fillin-size-select {
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--fg);
+  width: fit-content;
+  min-width: 120px;
+  cursor: pointer;
+}
+.fillin-setup-start {
+  align-items: stretch;
+  margin-top: 8px;
+}
+.fillin-setup-start .quiz-btn {
+  padding: 12px 24px;
+  font-size: 14px;
+}
+@media (max-width: 480px) {
+  .fillin-cats { grid-template-columns: 1fr; }
+}
+
 /* ========== Print ========== */
 @media print {
   .header, .sidebar, .right-sidebar, .back-top, .menu-toggle, .sidebar-overlay { display: none !important; }

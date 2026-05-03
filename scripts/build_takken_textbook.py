@@ -404,7 +404,7 @@ def build_quiz_json() -> list:
     return all_q
 
 
-# 穴埋め抽出: `**X**` 太字 + 段落単位
+# 穴埋め抽出: `**X**` 太字 + 文単位 (段落をparagraphとして保持)
 BOLD_RE = re.compile(r"\*\*([^\*\n]+?)\*\*")
 H_LINE_RE = re.compile(r"^#{1,6}\s+(.+?)\s*$")
 SECTION_HEADER_RE = re.compile(r"^##\s+(?:[0-9０-９]+\.\s*)?(.+?)\s*★*\s*$")
@@ -412,7 +412,16 @@ SECTION_HEADER_RE = re.compile(r"^##\s+(?:[0-9０-９]+\.\s*)?(.+?)\s*★*\s*$")
 HAS_MEANINGFUL_CHAR_RE = re.compile(
     r"[A-Za-z0-9０-９ぁ-んァ-ヶー一-龯々〆〤]"
 )
-EXCLUDE_BOLD_PURE = {"×", "○", "◯", "△", "◎", "—", "ー", "-"}
+EXCLUDE_BOLD_PURE = {"×", "○", "◯", "△", "◎", "—", "ー", "-", "→", "⇒", "≪", "≫"}
+# 除外パターン (条文番号・項番号・章番号・数字のみ)
+EXCLUDE_BOLD_PATTERNS = [
+    re.compile(r"^第?[0-9０-９一二三四五六七八九十百千]+条(?:の[0-9０-９一二三四五六七八九十]+)?$"),
+    re.compile(r"^第?[0-9０-９一二三四五六七八九十]+項$"),
+    re.compile(r"^第?[0-9０-９一二三四五六七八九十]+号$"),
+    re.compile(r"^[0-9０-９]+\.?$"),
+    re.compile(r"^第[0-9０-９一二三四五六七八九十]+章$"),
+    re.compile(r"^[（(][0-9０-９a-zA-Zア-ン]{1,3}[）)]$"),
+]
 
 
 def _is_valid_bold(s: str) -> bool:
@@ -421,13 +430,31 @@ def _is_valid_bold(s: str) -> bool:
         return False
     if "\n" in s:
         return False
-    if len(s) < 2 or len(s) > 30:
+    if len(s) < 2 or len(s) > 40:
         return False
     if s in EXCLUDE_BOLD_PURE:
         return False
     if not HAS_MEANINGFUL_CHAR_RE.search(s):
         return False
+    for pat in EXCLUDE_BOLD_PATTERNS:
+        if pat.match(s):
+            return False
     return True
+
+
+def _extract_sentence_with(line: str, bold_marker: str) -> str:
+    """行から **X** を含む最小文単位を切り出す。
+    行内に「。」「！」「？」があれば該当文のみ。なければ行全体。
+    リスト記号 (- / * / 1.) は保持。
+    """
+    if bold_marker not in line:
+        return line.strip()
+    parts = re.split(r"(?<=[。！？\?])", line)
+    parts = [p for p in parts if p.strip()]
+    for p in parts:
+        if bold_marker in p:
+            return p.strip()
+    return line.strip()
 
 
 def _normalize_paragraph(p: str) -> str:
@@ -502,12 +529,23 @@ def parse_fillin_from_md(md_text: str, file_label: str, category: str) -> list:
                 continue
             seen_in_para.add(b)
             unique_answers.append(b)
+        # 答え→出現する行(リスト要素含む)の特定
+        para_lines = para.split("\n")
         for ans in unique_answers:
             blank_count = sum(1 for b in valid if b == ans)
             key = (file_label, section_for(block_start), para, ans)
             if key in seen_keys:
                 continue
             seen_keys.add(key)
+            # ans を含む行を探し、その文を sentence とする
+            marker = f"**{ans}**"
+            sentence = ""
+            for ln in para_lines:
+                if marker in ln:
+                    sentence = _extract_sentence_with(ln, marker)
+                    break
+            if not sentence:
+                sentence = para
             questions.append({
                 "id": f"{file_label}-{len(questions) + 1}",
                 "chapter": file_label,
@@ -515,6 +553,7 @@ def parse_fillin_from_md(md_text: str, file_label: str, category: str) -> list:
                 "section": section_for(block_start),
                 "answer": ans,
                 "blank_count": blank_count,
+                "sentence": sentence,
                 "paragraph": para,
             })
     return questions
