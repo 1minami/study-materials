@@ -258,7 +258,6 @@ HTML_TEMPLATE = """\
     <div class="quiz-body" id="quiz-body"></div>
     <div class="quiz-footer">
       <button class="quiz-btn quiz-btn-primary" id="quiz-next-btn" onclick="nextQuiz()" disabled>次の問題 ▶</button>
-      <button class="quiz-btn" id="quiz-retry-btn" onclick="openQuiz()">もう10問</button>
     </div>
   </div>
 </div>
@@ -274,7 +273,6 @@ HTML_TEMPLATE = """\
     <div class="quiz-footer">
       <button class="quiz-btn quiz-btn-primary" id="fillin-submit-btn" onclick="submitFillin()" disabled>採点する</button>
       <button class="quiz-btn quiz-btn-primary" id="fillin-next-btn" onclick="nextFillin()" hidden>次の問題 ▶</button>
-      <button class="quiz-btn" id="fillin-retry-btn" onclick="openFillin()">もう10問</button>
     </div>
   </div>
 </div>

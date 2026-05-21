@@ -118,7 +118,6 @@
   const quizBody = document.getElementById('quiz-body');
   const quizProgress = document.getElementById('quiz-progress');
   const quizNextBtn = document.getElementById('quiz-next-btn');
-  const quizRetryBtn = document.getElementById('quiz-retry-btn');
   let quizPool = null;
   let quizSet = [];
   let quizIdx = 0;
@@ -206,7 +205,6 @@
     quizProgress.textContent = `終了`;
     quizBody.innerHTML = `
       <div class="quiz-score">スコア ${quizScore} / ${total}（正答率 ${pct}%）</div>
-      <div class="quiz-result-msg">「もう10問」で再挑戦できる。</div>
     `;
     quizNextBtn.disabled = true;
     quizNextBtn.textContent = '次の問題 ▶';
@@ -253,7 +251,6 @@
   const fillinProgress = document.getElementById('fillin-progress');
   const fillinSubmitBtn = document.getElementById('fillin-submit-btn');
   const fillinNextBtn = document.getElementById('fillin-next-btn');
-  const fillinRetryBtn = document.getElementById('fillin-retry-btn');
   let fillinPool = null;
   let fillinSet = [];
   let fillinIdx = 0;
@@ -395,7 +392,6 @@
     fillinProgress.textContent = `終了`;
     fillinBody.innerHTML = `
       <div class="quiz-score">スコア ${fillinScore} / ${total}（正答率 ${pct}%）</div>
-      <div class="quiz-result-msg">「もう10問」で再挑戦／「設定変更」で範囲変更。</div>
     `;
     fillinSubmitBtn.hidden = true;
     fillinNextBtn.hidden = true;
@@ -485,7 +481,6 @@
     fillinScore = 0;
     fillinSubmitBtn.hidden = false;
     fillinSubmitBtn.disabled = false;
-    if (fillinRetryBtn) fillinRetryBtn.textContent = '設定変更';
     renderFillin();
   }
 
@@ -496,7 +491,6 @@
     fillinProgress.textContent = '設定';
     fillinSubmitBtn.hidden = true;
     fillinNextBtn.hidden = true;
-    if (fillinRetryBtn) fillinRetryBtn.textContent = '設定変更';
 
     const pool = await loadFillinPool();
     if (!pool || pool.length === 0) {
