@@ -514,6 +514,12 @@ hr {
     min-width: 0;
   }
 }
+.quiz-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
 .quiz-textbook-pane { display: none; }
 @media (min-width: 960px) {
   .quiz-modal--split .quiz-textbook-pane { display: flex; }
