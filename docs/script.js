@@ -245,6 +245,7 @@
     }
     quizIdx++;
     renderQuestion();
+    if (quizTextbookIframe) quizTextbookIframe.contentDocument?.documentElement?.replaceChildren();
   };
 
   window.openQuiz = async function() {
