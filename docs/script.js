@@ -197,7 +197,6 @@
       btn.addEventListener('click', () => answerQuestion(parseInt(btn.dataset.n, 10)));
     });
     quizBody.scrollTop = 0;
-    updateTextbookPane(q.section);
   }
 
   function answerQuestion(n) {
@@ -224,6 +223,7 @@
 
     quizProgress.textContent = `${quizIdx + 1} / ${quizSet.length}（正解 ${quizScore}）`;
     quizNextBtn.disabled = false;
+    updateTextbookPane(q.section);
   }
 
   function showResult() {
