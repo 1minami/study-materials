@@ -7846,15 +7846,21 @@
 <button class="back-top" onclick="scrollTo({top:0,behavior:'smooth'})" title="トップへ戻る">↑</button>
 
 <div class="quiz-overlay" id="quiz-overlay" onclick="closeQuiz(event)">
-  <div class="quiz-modal" onclick="event.stopPropagation()">
-    <div class="quiz-header">
-      <div class="quiz-title">📝 ランダム問題演習</div>
-      <div class="quiz-progress" id="quiz-progress"></div>
-      <button class="quiz-close" onclick="closeQuiz()" aria-label="閉じる">✕</button>
+  <div class="quiz-modal quiz-modal--split" onclick="event.stopPropagation()">
+    <div class="quiz-main">
+      <div class="quiz-header">
+        <div class="quiz-title">📝 ランダム問題演習</div>
+        <div class="quiz-progress" id="quiz-progress"></div>
+        <button class="quiz-close" onclick="closeQuiz()" aria-label="閉じる">✕</button>
+      </div>
+      <div class="quiz-body" id="quiz-body"></div>
+      <div class="quiz-footer">
+        <button class="quiz-btn quiz-btn-primary" id="quiz-next-btn" onclick="nextQuiz()" disabled>次の問題 ▶</button>
+      </div>
     </div>
-    <div class="quiz-body" id="quiz-body"></div>
-    <div class="quiz-footer">
-      <button class="quiz-btn quiz-btn-primary" id="quiz-next-btn" onclick="nextQuiz()" disabled>次の問題 ▶</button>
+    <div class="quiz-textbook-pane" id="quiz-textbook-pane">
+      <div class="quiz-textbook-header">📖 テキスト</div>
+      <iframe id="quiz-textbook-iframe" class="quiz-textbook-iframe"></iframe>
     </div>
   </div>
 </div>
