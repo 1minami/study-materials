@@ -24,6 +24,9 @@
   <a href="#" class="toc-section-title quiz-launcher" onclick="openQuiz();return false;">📝 ランダム問題演習</a>
 </div>
 <div class="toc-section">
+  <a href="#" class="toc-section-title marubatsu-launcher" onclick="openMarubatsu();return false;">⭕ 一問一答</a>
+</div>
+<div class="toc-section">
   <a href="#" class="toc-section-title fillin-launcher" onclick="openFillin();return false;">✍️ 穴埋め演習</a>
 </div>
 <div class="toc-section">
@@ -7861,6 +7864,20 @@
     <div class="quiz-textbook-pane" id="quiz-textbook-pane">
       <div class="quiz-textbook-header">📖 テキスト</div>
       <iframe id="quiz-textbook-iframe" class="quiz-textbook-iframe"></iframe>
+    </div>
+  </div>
+</div>
+
+<div class="quiz-overlay" id="marubatsu-overlay" onclick="closeMarubatsu(event)">
+  <div class="quiz-modal" onclick="event.stopPropagation()">
+    <div class="quiz-header">
+      <div class="quiz-title">⭕ 一問一答</div>
+      <div class="quiz-progress" id="marubatsu-progress"></div>
+      <button class="quiz-close" onclick="closeMarubatsu()" aria-label="閉じる">✕</button>
+    </div>
+    <div class="quiz-body" id="marubatsu-body"></div>
+    <div class="quiz-footer">
+      <button class="quiz-btn quiz-btn-primary" id="marubatsu-next-btn" onclick="nextMarubatsu()" hidden>次の問題 ▶</button>
     </div>
   </div>
 </div>
