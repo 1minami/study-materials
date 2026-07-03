@@ -478,9 +478,103 @@
 
   window.closeMarubatsu = function(e) {
     if (e && e.target && !e.target.classList.contains('quiz-overlay')) return;
+    stopMbMic();
     mbOverlay.classList.remove('visible');
     document.body.style.overflow = '';
   };
+
+  // --- Marubatsu キーボード回答（← = ⭕ / → = ❌ / Enter・Space = 次へ）---
+  document.addEventListener('keydown', (e) => {
+    if (!mbOverlay.classList.contains('visible')) return;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      if (mbAnswered || mbBody.querySelectorAll('.marubatsu-btn').length === 0) return;
+      e.preventDefault();
+      answerMb(e.key === 'ArrowLeft');
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      if (!mbAnswered || mbNextBtn.hidden) return;
+      e.preventDefault();
+      nextMarubatsu();
+    }
+  });
+
+  // --- Marubatsu 音声回答 (Web Speech API) ---
+  const mbMicBtn = document.getElementById('mb-mic-btn');
+  const mbMicStatus = document.getElementById('mb-mic-status');
+  const MbSR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let mbRec = null;
+  let mbMicOn = false;
+
+  // normAns 済み（NFKC + カナ→ひらがな + 小文字化）の語で判定
+  const MB_VOICE_MARU = ['まる', '丸', '○', '◯', '正しい', '正解', 'せいかい'];
+  const MB_VOICE_BATSU = ['ばつ', '罰', '×', 'ぺけ', '誤り', 'あやまり', '間違い', 'まちがい', '不正解'];
+  const MB_VOICE_NEXT = ['つぎ', '次', 'ねくすと', '進む', 'すすむ'];
+
+  function handleMbVoice(text) {
+    const t = normAns(text);
+    if (!t) return;
+    const hasQuestion = mbBody.querySelectorAll('.marubatsu-btn').length > 0;
+    if (!mbAnswered && hasQuestion) {
+      if (MB_VOICE_BATSU.some(w => t.includes(w))) { answerMb(false); return; }
+      if (MB_VOICE_MARU.some(w => t.includes(w))) { answerMb(true); return; }
+    } else if (mbAnswered && !mbNextBtn.hidden) {
+      if (MB_VOICE_NEXT.some(w => t.includes(w))) nextMarubatsu();
+    }
+  }
+
+  function initMbRecognition() {
+    const rec = new MbSR();
+    rec.lang = 'ja-JP';
+    rec.continuous = true;
+    rec.interimResults = false;
+    rec.onresult = (ev) => {
+      const res = ev.results[ev.results.length - 1];
+      if (!res.isFinal) return;
+      const heard = res[0].transcript.trim();
+      if (mbMicStatus) mbMicStatus.textContent = '「' + heard + '」';
+      handleMbVoice(heard);
+    };
+    rec.onerror = (ev) => {
+      if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
+        stopMbMic();
+        if (mbMicStatus) mbMicStatus.textContent = 'マイク利用不可';
+      }
+    };
+    // continuous でも無音等で自動停止するため、ON の間は再開し続ける
+    rec.onend = () => {
+      if (mbMicOn) { try { rec.start(); } catch (err) {} }
+    };
+    return rec;
+  }
+
+  function startMbMic() {
+    if (!MbSR || !mbMicBtn) return;
+    if (!mbRec) mbRec = initMbRecognition();
+    mbMicOn = true;
+    try { mbRec.start(); } catch (err) {}
+    mbMicBtn.classList.add('mic-listening');
+    mbMicBtn.setAttribute('aria-pressed', 'true');
+    if (mbMicStatus) mbMicStatus.textContent = '音声待機中…';
+  }
+
+  function stopMbMic() {
+    mbMicOn = false;
+    if (mbRec) { try { mbRec.stop(); } catch (err) {} }
+    if (mbMicBtn) {
+      mbMicBtn.classList.remove('mic-listening');
+      mbMicBtn.setAttribute('aria-pressed', 'false');
+    }
+    if (mbMicStatus) mbMicStatus.textContent = '';
+  }
+
+  window.toggleMbMic = function() {
+    if (mbMicOn) stopMbMic();
+    else startMbMic();
+  };
+
+  if (mbMicBtn && !MbSR) {
+    mbMicBtn.disabled = true;
+    mbMicBtn.title = 'このブラウザは音声認識に対応していません（Chrome / Edge / Safari で利用可）';
+  }
 
   // --- Fill-in-blank Quiz ---
   const FILLIN_SIZE_DEFAULT = 10;
