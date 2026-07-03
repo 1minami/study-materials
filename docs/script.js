@@ -594,6 +594,14 @@
   if (mbMicBtn && !MbSR) {
     mbMicBtn.disabled = true;
     mbMicBtn.title = 'このブラウザは音声認識に対応していません（Chrome / Edge / Safari で利用可）';
+  } else if (mbMicBtn && navigator.brave && navigator.brave.isBrave) {
+    // Brave は API は存在するが音声認識バックエンドが無効のため動作しない
+    navigator.brave.isBrave().then((isBrave) => {
+      if (isBrave) {
+        mbMicBtn.disabled = true;
+        mbMicBtn.title = 'Brave は音声認識サービスが無効のため利用不可（Chrome / Edge で利用可）';
+      }
+    });
   }
 
   // --- Fill-in-blank Quiz ---
