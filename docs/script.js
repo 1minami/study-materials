@@ -525,18 +525,38 @@
     const rec = new MbSR();
     rec.lang = 'ja-JP';
     rec.continuous = true;
-    rec.interimResults = false;
+    // 途中経過も受け取り即判定（final 待ちだと無反応に見えるため）
+    rec.interimResults = true;
     rec.onresult = (ev) => {
-      const res = ev.results[ev.results.length - 1];
-      if (!res.isFinal) return;
-      const heard = res[0].transcript.trim();
-      if (mbMicStatus) mbMicStatus.textContent = '「' + heard + '」';
-      handleMbVoice(heard);
+      let interim = '';
+      let finalText = '';
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        const r = ev.results[i];
+        if (r.isFinal) finalText += r[0].transcript;
+        else interim += r[0].transcript;
+      }
+      const heard = (finalText || interim).trim();
+      if (heard && mbMicStatus) mbMicStatus.textContent = '「' + heard + '」';
+      if (heard) handleMbVoice(heard);
+    };
+    rec.onstart = () => {
+      if (mbMicOn && mbMicStatus) mbMicStatus.textContent = '音声待機中…';
     };
     rec.onerror = (ev) => {
+      console.warn('SpeechRecognition error:', ev.error);
+      if (!mbMicStatus) return;
       if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
         stopMbMic();
-        if (mbMicStatus) mbMicStatus.textContent = 'マイク利用不可';
+        mbMicStatus.textContent = 'マイク利用不可（サイトのマイク許可を確認）';
+      } else if (ev.error === 'audio-capture') {
+        stopMbMic();
+        mbMicStatus.textContent = 'マイク未検出（OSの入力デバイス設定を確認）';
+      } else if (ev.error === 'network') {
+        mbMicStatus.textContent = '音声サービス接続エラー（再試行中…）';
+      } else if (ev.error === 'no-speech') {
+        mbMicStatus.textContent = '発話を検出できない（マイク入力レベルを確認）';
+      } else if (ev.error !== 'aborted') {
+        mbMicStatus.textContent = '音声エラー: ' + ev.error;
       }
     };
     // continuous でも無音等で自動停止するため、ON の間は再開し続ける
