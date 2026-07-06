@@ -20,10 +20,13 @@ docs/
   ├── style.css        # CSS（ビルド時に自動コピー）
   ├── script.js        # JS（ビルド時に自動コピー）
   ├── quiz.json        # 過去問データ（ビルド時に自動生成）
-  └── fillin.json      # 穴埋め問題データ（ビルド時に自動生成）
+  ├── marubatsu.json   # 一問一答データ（docs/ 直接管理）
+  ├── fillin.json      # 穴埋め問題データ（ビルド時に自動生成）
+  └── takken-offline.html  # オフライン版（build_offline_html.py で生成）
 scripts/
   ├── fetch_egov.py           # e-Gov 法令取得スクリプト（3試験統合版）
-  └── build_takken_textbook.py  # 宅建教材 → HTML テキストブック + quiz.json 変換
+  ├── build_takken_textbook.py  # 宅建教材 → HTML テキストブック + quiz.json 変換
+  └── build_offline_html.py     # docs/ → 自己完結オフラインHTML 変換
 ```
 
 ## Web テキストブック
@@ -67,6 +70,21 @@ scripts/
 python scripts/build_takken_textbook.py   # HTML + CSS + JS + quiz.json を生成（docs/ にも自動コピー）
 git add docs/ && git commit -m "update textbook" && git push
 ```
+
+> **注意**: 一問一答（`marubatsu.json`）機能は `docs/` 配下に直接実装されており、`templates/` と `build_takken_textbook.py` には未反映。`build_takken_textbook.py` を再実行すると `docs/index.html`・`docs/script.js` が上書きされ一問一答が消えるため、実行前にテンプレートへの反映が必要。
+
+### オフライン版（takken-offline.html）
+
+CSS・JS・演習データ（quiz / 一問一答 / 穴埋め）をすべて 1 ファイルに埋め込んだ自己完結 HTML。ネット接続なしで全機能が動作する（`fetch` をシムして埋め込み JSON を返す）。
+
+```bash
+python scripts/build_offline_html.py   # docs/ の現行ファイルから docs/takken-offline.html を生成（約 1MB）
+```
+
+- **入手方法**: 公開ページのサイドバー「📥 オフライン版」からダウンロード、または `docs/takken-offline.html` を直接コピー
+- **使い方**: スマホ / PC のブラウザでファイルを開くだけ（機内モードでも動作）
+- **再生成タイミング**: `docs/` 配下（index.html / script.js / style.css / 各 JSON）を更新したら再実行して commit + push
+- 音声回答などネット必須の機能はオフラインでは動作しない
 
 ## 使い方
 
