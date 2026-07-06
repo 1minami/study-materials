@@ -90,15 +90,25 @@ python scripts/build_offline_html.py   # docs/ の現行ファイルから docs/
 
 ### 法令原文の取得
 
+e-Gov 法令 API **v2** を使用（旧 v1 はデータ更新停止・未施行改正の先取り混入があり使用禁止）。
+資格試験は「試験年の4月1日時点で施行されている法令」が出題基準のため、試験対策データは必ず `--asof <試験年>-04-01` を付けて取得する。
+
 ```bash
 cd projects/study-materials
-python scripts/fetch_egov.py                       # 全37法令を取得
-python scripts/fetch_egov.py --exam takken          # 宅建士関連のみ（15法令）
+python scripts/fetch_egov.py --exam takken --asof 2026-04-01   # 宅建士: 2026年度試験基準（15法令）
+python scripts/fetch_egov.py                       # 全37法令を取得（現時点の施行版）
 python scripts/fetch_egov.py --exam kanteishi       # 不動産鑑定士関連のみ（25法令）
 python scripts/fetch_egov.py --exam gyoseishoshi    # 行政書士関連のみ（11法令）
 python scripts/fetch_egov.py --law 民法             # 特定法令のみ
 python scripts/fetch_egov.py --list                 # 取得対象の一覧
 ```
+
+各出力ファイルの冒頭に取得日・時点指定（asof）・法令リビジョン・直近改正が記録される。
+`data/laws/` は `.gitignore` 済み（ローカル生成物。必要時に再取得する）。
+
+### 法令・教材の鮮度監査
+
+`/study-audit` スキル（`.claude/skills/study-audit/`）で、法令の再取得 → 前年度基準日との差分抽出（= 当年度試験の改正論点）→ `materials/` への反映漏れチェック → 修正までを実行できる。
 
 ### NotebookLM への投入
 

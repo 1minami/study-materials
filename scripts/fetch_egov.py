@@ -1,22 +1,28 @@
 """
-e-Gov法令APIから資格試験の重要法令の条文テキストを取得し、
+e-Gov法令API v2 から資格試験の重要法令の条文テキストを取得し、
 NotebookLMに投入しやすいMarkdown形式で保存するスクリプト。
 
 対応試験: 宅建士 / 不動産鑑定士 / 行政書士
 
+--asof で時点指定が可能。資格試験は「試験年の4月1日時点で施行されている法令」が
+出題基準のため、試験対策データは --asof <試験年>-04-01 で取得すること。
+（旧 API v1 はデータ更新が停止しており、未施行改正の先取り混入もあるため使用しない）
+
 Usage:
-    python scripts/fetch_egov.py                       # 全法令を取得
-    python scripts/fetch_egov.py --exam takken          # 宅建士関連のみ
-    python scripts/fetch_egov.py --exam kanteishi       # 不動産鑑定士関連のみ
-    python scripts/fetch_egov.py --exam gyoseishoshi    # 行政書士関連のみ
-    python scripts/fetch_egov.py --law 民法             # 特定の法令のみ取得
-    python scripts/fetch_egov.py --list                 # 取得対象の法令一覧を表示
+    python scripts/fetch_egov.py                              # 全法令を取得（現時点の施行版）
+    python scripts/fetch_egov.py --exam takken --asof 2026-04-01  # 宅建士: 2026年度試験基準
+    python scripts/fetch_egov.py --exam kanteishi             # 不動産鑑定士関連のみ
+    python scripts/fetch_egov.py --exam gyoseishoshi          # 行政書士関連のみ
+    python scripts/fetch_egov.py --law 民法                   # 特定の法令のみ取得
+    python scripts/fetch_egov.py --list                       # 取得対象の法令一覧を表示
 
 Output:
     data/laws/ ディレクトリに法令ごとのMarkdownファイルを出力
 """
 
 import argparse
+import datetime
+import json
 import os
 import sys
 import time
@@ -312,7 +318,7 @@ EXAM_NAMES = {
     "all": "全試験",
 }
 
-API_BASE = "https://laws.e-gov.go.jp/api/1"
+API_BASE = "https://laws.e-gov.go.jp/api/2"
 REQUEST_INTERVAL = 1  # API負荷軽減のため1秒間隔
 
 
@@ -323,15 +329,11 @@ def filter_by_exam(laws, exam):
     return [l for l in laws if exam in l["exams"]]
 
 
-def fetch_law_xml(law_num: str) -> ET.Element:
-    """e-Gov法令APIから法令XMLを取得"""
-    encoded = quote(law_num, safe="")
-    url = f"{API_BASE}/lawdata/{encoded}"
-    req = Request(url, headers={"User-Agent": "study-materials/1.0"})
-
+def _api_get(url: str, accept: str) -> bytes:
+    req = Request(url, headers={"User-Agent": "study-materials/1.0", "Accept": accept})
     try:
-        with urlopen(req, timeout=30) as resp:
-            data = resp.read()
+        with urlopen(req, timeout=120) as resp:
+            return resp.read()
     except HTTPError as e:
         print(f"  HTTPError {e.code}: {e.reason}")
         raise
@@ -339,15 +341,32 @@ def fetch_law_xml(law_num: str) -> ET.Element:
         print(f"  URLError: {e.reason}")
         raise
 
-    root = ET.fromstring(data)
-    result = root.find(".//Result")
-    if result is not None:
-        code = result.findtext("Code", "")
-        if code != "0":
-            msg = result.findtext("Message", "不明なエラー")
-            raise RuntimeError(f"API Error (Code={code}): {msg}")
 
-    return root
+def resolve_revision(law_num: str, asof: str | None) -> dict:
+    """e-Gov法令API v2 で法令番号からリビジョン情報を解決する。
+
+    asof を指定するとその時点で施行されていた版、省略時は現時点の施行版。
+    """
+    url = f"{API_BASE}/laws?law_num={quote(law_num, safe='')}&response_format=json"
+    if asof:
+        url += f"&asof={asof}"
+    data = json.loads(_api_get(url, "application/json"))
+    laws = data.get("laws", [])
+    if not laws:
+        raise RuntimeError(f"法令が見つかりません: {law_num} (asof={asof})")
+    return laws[0]["revision_info"]
+
+
+def fetch_law_xml(law_num: str, asof: str | None = None) -> tuple:
+    """e-Gov法令API v2 から法令XMLを取得し、(XML root, revision_info) を返す。
+
+    注意: 旧 v1 API はデータ更新が停止しており、未施行改正の先取り混入も
+    あったため使用しないこと。
+    """
+    rev = resolve_revision(law_num, asof)
+    rev_id = rev["law_revision_id"]
+    data = _api_get(f"{API_BASE}/law_data/{rev_id}?response_format=xml", "application/xml")
+    return ET.fromstring(data), rev
 
 
 def extract_text(element) -> str:
@@ -362,10 +381,16 @@ def extract_text(element) -> str:
     return "".join(parts)
 
 
-def xml_to_markdown(root: ET.Element, law_name: str) -> str:
+def xml_to_markdown(root: ET.Element, law_name: str, rev: dict = None, asof: str = None) -> str:
     """法令XMLをMarkdown形式に変換"""
     lines = [f"# {law_name}（条文）\n"]
-    lines.append("> e-Gov法令APIから自動取得\n")
+    lines.append("> e-Gov法令API v2 から自動取得\n")
+    if rev:
+        fetched = datetime.date.today().isoformat()
+        lines.append(f"> 取得日: {fetched} / 時点指定(asof): {asof or '指定なし（現時点の施行版）'}")
+        lines.append(f"> リビジョン: {rev.get('law_revision_id', '?')}")
+        lines.append(f"> 直近改正: {rev.get('amendment_law_num', '?')}"
+                     f"（施行 {rev.get('amendment_enforcement_date', '?')}）\n")
 
     law_body = root.find(".//LawBody")
     if law_body is None:
@@ -528,6 +553,8 @@ def main():
                         help="試験を指定してフィルタ（デフォルト: all）")
     parser.add_argument("--law", type=str, help="特定の法令名を指定して取得（部分一致）")
     parser.add_argument("--list", action="store_true", help="取得対象の法令一覧を表示")
+    parser.add_argument("--asof", type=str, default=None, metavar="YYYY-MM-DD",
+                        help="時点指定。試験対策では試験基準日（例: 2026-04-01）を指定する。省略時は現時点の施行版")
     parser.add_argument("--output", type=str, default="data/laws",
                         help="出力ディレクトリ（デフォルト: data/laws）")
     args = parser.parse_args()
@@ -557,7 +584,8 @@ def main():
             print(f"'{args.law}' に一致する法令が見つかりません。--list で一覧を確認してください。")
             sys.exit(1)
 
-    print(f"e-Gov法令APIから {len(targets)} 件の法令を取得します（{exam_label}）")
+    print(f"e-Gov法令API v2 から {len(targets)} 件の法令を取得します（{exam_label}）")
+    print(f"時点指定(asof): {args.asof or '指定なし（現時点の施行版）'}")
     print(f"出力先: {output_dir}/\n")
 
     success = 0
@@ -567,8 +595,8 @@ def main():
         print(f"[{i+1}/{len(targets)}] {law['name']}（{law['law_num']}）...")
 
         try:
-            xml_root = fetch_law_xml(law["law_num"])
-            md_content = xml_to_markdown(xml_root, law["name"])
+            xml_root, rev = fetch_law_xml(law["law_num"], asof=args.asof)
+            md_content = xml_to_markdown(xml_root, law["name"], rev=rev, asof=args.asof)
 
             filepath = os.path.join(output_dir, law["filename"])
             save_markdown(md_content, filepath)
