@@ -502,6 +502,13 @@ hr {
   flex-direction: column;
   max-height: calc(100vh - 80px);
 }
+/* PC: 一問一答モーダルは大きめ表示（min-height 固定で問題ごとの高さガタつきも防ぐ） */
+@media (min-width: 960px) {
+  #marubatsu-overlay .quiz-modal {
+    max-width: 1100px;
+    min-height: 70vh;
+  }
+}
 /* PC split layout: left=quiz, right=textbook */
 @media (min-width: 960px) {
   .quiz-modal--split {
@@ -8924,7 +8931,7 @@ hr {
     </div>
     <div class="quiz-body" id="marubatsu-body"></div>
     <div class="quiz-footer">
-      <span class="mb-key-hint">← ⭕　→ ❌　Enter 次へ</span>
+      <span class="mb-key-hint">← ⭕　→ ❌　回答後 ←→ 次へ</span>
       <button type="button" class="quiz-btn mb-mic-btn" id="mb-mic-btn" onclick="toggleMbMic()" aria-pressed="false" title="音声で回答（「まる」「ばつ」「次」）">🎤</button>
       <span class="mb-mic-status" id="mb-mic-status"></span>
       <button class="quiz-btn quiz-btn-primary" id="marubatsu-next-btn" onclick="nextMarubatsu()" hidden>次の問題 ▶</button>
@@ -9337,7 +9344,7 @@ hr {
     mbProgress.textContent = `${mbIdx + 1} / ${mbSet.length}（正解 ${mbScore}）`;
     mbNextBtn.hidden = false;
     mbNextBtn.disabled = false;
-    mbNextBtn.focus();
+    // focus しない: フォーカス中ボタンへの Enter/Space 誤爆で次へ進むのを防ぐ（次へは ← → のみ）
   }
 
   function showMbResult() {
@@ -9453,15 +9460,16 @@ hr {
     document.body.style.overflow = '';
   };
 
-  // --- Marubatsu キーボード回答（← = ⭕ / → = ❌ / Enter・Space = 次へ）---
+  // --- Marubatsu キーボード回答（← = ⭕ / → = ❌ / 回答後は ← → で次へ）---
   document.addEventListener('keydown', (e) => {
     if (!mbOverlay.classList.contains('visible')) return;
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-      if (mbAnswered || mbBody.querySelectorAll('.marubatsu-btn').length === 0) return;
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    if (e.repeat) return; // 長押しリピートで解説を飛ばさない
+    if (!mbAnswered) {
+      if (mbBody.querySelectorAll('.marubatsu-btn').length === 0) return;
       e.preventDefault();
       answerMb(e.key === 'ArrowLeft');
-    } else if (e.key === 'Enter' || e.key === ' ') {
-      if (!mbAnswered || mbNextBtn.hidden) return;
+    } else if (!mbNextBtn.hidden) {
       e.preventDefault();
       nextMarubatsu();
     }

@@ -367,7 +367,7 @@
     mbProgress.textContent = `${mbIdx + 1} / ${mbSet.length}（正解 ${mbScore}）`;
     mbNextBtn.hidden = false;
     mbNextBtn.disabled = false;
-    mbNextBtn.focus();
+    // focus しない: フォーカス中ボタンへの Enter/Space 誤爆で次へ進むのを防ぐ（次へは ← → のみ）
   }
 
   function showMbResult() {
@@ -483,15 +483,16 @@
     document.body.style.overflow = '';
   };
 
-  // --- Marubatsu キーボード回答（← = ⭕ / → = ❌ / Enter・Space = 次へ）---
+  // --- Marubatsu キーボード回答（← = ⭕ / → = ❌ / 回答後は ← → で次へ）---
   document.addEventListener('keydown', (e) => {
     if (!mbOverlay.classList.contains('visible')) return;
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-      if (mbAnswered || mbBody.querySelectorAll('.marubatsu-btn').length === 0) return;
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    if (e.repeat) return; // 長押しリピートで解説を飛ばさない
+    if (!mbAnswered) {
+      if (mbBody.querySelectorAll('.marubatsu-btn').length === 0) return;
       e.preventDefault();
       answerMb(e.key === 'ArrowLeft');
-    } else if (e.key === 'Enter' || e.key === ' ') {
-      if (!mbAnswered || mbNextBtn.hidden) return;
+    } else if (!mbNextBtn.hidden) {
       e.preventDefault();
       nextMarubatsu();
     }

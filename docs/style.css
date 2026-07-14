@@ -494,6 +494,13 @@ hr {
   flex-direction: column;
   max-height: calc(100vh - 80px);
 }
+/* PC: 一問一答モーダルは大きめ表示（min-height 固定で問題ごとの高さガタつきも防ぐ） */
+@media (min-width: 960px) {
+  #marubatsu-overlay .quiz-modal {
+    max-width: 1100px;
+    min-height: 70vh;
+  }
+}
 /* PC split layout: left=quiz, right=textbook */
 @media (min-width: 960px) {
   .quiz-modal--split {
