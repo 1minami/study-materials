@@ -508,6 +508,26 @@ hr {
     max-width: 1100px;
     min-height: 70vh;
   }
+  /* モーダル内の文字もモーダル拡大に合わせてスケールアップ */
+  #marubatsu-overlay .quiz-title { font-size: 19px; }
+  #marubatsu-overlay .quiz-progress { font-size: 14px; }
+  #marubatsu-overlay .quiz-q-num,
+  #marubatsu-overlay .quiz-chapter { font-size: 13px; }
+  #marubatsu-overlay .marubatsu-statement { font-size: 18px; padding: 20px 22px; }
+  #marubatsu-overlay .marubatsu-btn { font-size: 24px; padding: 16px 24px; max-width: 240px; }
+  #marubatsu-overlay .quiz-explanation { font-size: 16px; }
+  #marubatsu-overlay .quiz-verdict { font-size: 17px; }
+  #marubatsu-overlay .quiz-btn { font-size: 15px; padding: 10px 22px; }
+  #marubatsu-overlay .mb-key-hint,
+  #marubatsu-overlay .mb-mic-status { font-size: 13px; }
+  #marubatsu-overlay .mb-mic-btn { font-size: 18px; }
+  #marubatsu-overlay .quiz-score { font-size: 22px; }
+  /* 開始前の設定画面（fillin-setup 共有クラス）も同倍率 */
+  #marubatsu-overlay .fillin-setup-label { font-size: 15px; }
+  #marubatsu-overlay .fillin-cat { font-size: 15px; }
+  #marubatsu-overlay .fillin-cat em { font-size: 12px; }
+  #marubatsu-overlay .fillin-size-select { font-size: 15px; }
+  #marubatsu-overlay .fillin-btn-mini { font-size: 12px !important; }
 }
 /* PC split layout: left=quiz, right=textbook */
 @media (min-width: 960px) {
