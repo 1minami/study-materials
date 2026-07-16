@@ -3,9 +3,14 @@
 出力ファイル:
   - takken-textbook.html, style.css, script.js, quiz.json, fillin.json (プロジェクトルート)
   - docs/index.html, docs/style.css, docs/script.js, docs/quiz.json, docs/fillin.json (GitHub Pages 用)
+
+注意: templates/ は一問一答（marubatsu）機能が未反映（陳腐化）。フル実行すると
+docs/ の HTML/CSS/JS が上書きされ機能が失われる。fillin.json のみ再生成する場合は
+`python scripts/build_takken_textbook.py --fillin-only` を使うこと。
 """
 
 import re
+import sys
 import json
 import shutil
 import unicodedata
@@ -405,7 +410,9 @@ def build_quiz_json() -> list:
 # 穴埋め抽出: `**X**` 太字 + 文単位 (段落をparagraphとして保持)
 BOLD_RE = re.compile(r"\*\*([^\*\n]+?)\*\*")
 H_LINE_RE = re.compile(r"^#{1,6}\s+(.+?)\s*$")
-SECTION_HEADER_RE = re.compile(r"^##\s+(?:[0-9０-９]+\.\s*)?(.+?)\s*★*\s*$")
+SECTION_HEADER_RE = re.compile(
+    r"^##\s+(?:[0-9０-９]+\.\s*)?(.+?)\s*(★*)\s*$", re.MULTILINE
+)
 # 表セル内記号のみ等を除外する判定: 1文字以上の英数字/かな/漢字を含むかどうか
 HAS_MEANINGFUL_CHAR_RE = re.compile(
     r"[A-Za-z0-9０-９ぁ-んァ-ヶー一-龯々〆〤]"
@@ -420,6 +427,13 @@ EXCLUDE_BOLD_PATTERNS = [
     re.compile(r"^第[0-9０-９一二三四五六七八九十]+章$"),
     re.compile(r"^[（(][0-9０-９a-zA-Zア-ン]{1,3}[）)]$"),
 ]
+# 穴にする価値のないメタ語（法律用語は含めない）
+FILLIN_STOPWORDS = {
+    "効果", "要件", "原則", "例外", "注意", "重要", "ポイント",
+    "まとめ", "趣旨", "結論", "理由", "比較",
+}
+# タイプ入力で解答するため、長い句は穴として不成立
+FILLIN_MAX_ANSWER_LEN = 12
 
 
 def _is_valid_bold(s: str) -> bool:
@@ -428,9 +442,11 @@ def _is_valid_bold(s: str) -> bool:
         return False
     if "\n" in s:
         return False
-    if len(s) < 2 or len(s) > 40:
+    if len(s) < 2 or len(s) > FILLIN_MAX_ANSWER_LEN:
         return False
     if s in EXCLUDE_BOLD_PURE:
+        return False
+    if s in FILLIN_STOPWORDS:
         return False
     if not HAS_MEANINGFUL_CHAR_RE.search(s):
         return False
@@ -440,7 +456,42 @@ def _is_valid_bold(s: str) -> bool:
     return True
 
 
-SUBHEADING_RE = re.compile(r"^(#{3,6})\s+(.+?)\s*$", re.MULTILINE)
+SUBHEADING_RE = re.compile(r"^(#{3,6})\s+(.+?)\s*(★*)\s*$", re.MULTILINE)
+
+# 重要度スコアリング用
+INDEX_FILE_NAME = "99-用語索引.md"
+INDEX_TERM_RE = re.compile(r"^\|\s*([^|]+?)\s*\|", re.MULTILINE)
+READING_PAREN_RE = re.compile(r"（[^）]*）")
+DIGIT_RE = re.compile(r"[0-9０-９]")
+
+
+def load_index_terms() -> set:
+    """99-用語索引.md のテーブル1列目から主要用語の集合を抽出。
+
+    読み仮名の `（…）` は除去した形も登録する（例: 遺言（いごん）→ 遺言）。
+    """
+    fpath = MATERIALS_DIR / INDEX_FILE_NAME
+    if not fpath.exists():
+        return set()
+    terms = set()
+    for m in INDEX_TERM_RE.finditer(fpath.read_text(encoding="utf-8")):
+        t = m.group(1).strip()
+        if not t or t == "用語" or re.fullmatch(r"[-:]+", t):
+            continue
+        terms.add(t)
+        terms.add(READING_PAREN_RE.sub("", t).strip())
+    terms.discard("")
+    return terms
+
+
+def _importance(answer: str, stars: int, index_terms: set) -> int:
+    """穴の重要度スコア。見出しの★数 + 索引用語一致(+2) + 数字暗記(+1)。"""
+    score = stars
+    if answer in index_terms or READING_PAREN_RE.sub("", answer).strip() in index_terms:
+        score += 2
+    if DIGIT_RE.search(answer):
+        score += 1
+    return score
 
 
 def _normalize_paragraph(p: str) -> str:
@@ -453,7 +504,7 @@ def _normalize_paragraph(p: str) -> str:
     return "\n".join(lines)
 
 
-def parse_fillin_from_md(md_text: str, file_label: str, category: str) -> list:
+def parse_fillin_from_md(md_text: str, file_label: str, category: str, index_terms: set) -> list:
     """教材MDから穴埋め問題を抽出。
 
     抽出方針:
@@ -461,34 +512,26 @@ def parse_fillin_from_md(md_text: str, file_label: str, category: str) -> list:
       - 見出し行/表(`|`始まり)/コードブロック/HR(`---`)/引用(`>`)を除外
       - 段落内の `**X**` 太字を blank 候補とし、X ごとに1問生成
       - 同一段落内で同じ X が複数出現 → blank_count に集約、答えは1つ
+      - 見出しの★数・索引用語一致・数字の有無から importance を付与
     """
     # コードブロック範囲を除外（`...` で囲まれた部分）
     md_text = re.sub(r"```[\s\S]*?```", "", md_text)
 
-    # セクション境界 (## 見出し)
+    # セクション境界 (## 見出し): (位置, 名前, ★数)
     section_starts = []
     for m in SECTION_HEADER_RE.finditer(md_text):
-        section_starts.append((m.start(), m.group(1).strip()))
+        section_starts.append((m.start(), m.group(1).strip(), len(m.group(2))))
 
-    def section_for(pos: int) -> str:
-        current = ""
-        for s_pos, name in section_starts:
-            if s_pos <= pos:
-                current = name
-            else:
-                break
-        return current
-
-    # サブ見出し (h3-h6)
+    # サブ見出し (h3-h6): (位置, 名前, ★数)
     sub_starts = []
     for m in SUBHEADING_RE.finditer(md_text):
-        sub_starts.append((m.start(), m.group(2).strip().rstrip("★ ").strip()))
+        sub_starts.append((m.start(), m.group(2).strip(), len(m.group(3))))
 
-    def heading_for(pos: int) -> str:
-        current = ""
-        for s_pos, name in sub_starts:
+    def _nearest(starts: list, pos: int) -> tuple:
+        current = ("", 0, -1)
+        for s_pos, name, stars in starts:
             if s_pos <= pos:
-                current = name
+                current = (name, stars, s_pos)
             else:
                 break
         return current
@@ -521,6 +564,12 @@ def parse_fillin_from_md(md_text: str, file_label: str, category: str) -> list:
         valid = [b.strip() for b in bolds if _is_valid_bold(b)]
         if not valid:
             continue
+        # 段落の属するセクション/見出しと★数（前セクションの見出し漏れを防止）
+        sec_name, sec_stars, sec_pos = _nearest(section_starts, block_start)
+        head_name, head_stars, head_pos = _nearest(sub_starts, block_start)
+        if head_pos < sec_pos:
+            head_name, head_stars = "", 0
+        stars = max(sec_stars, head_stars)
         # 答え単位で集約（同一段落内同一語は1問）
         unique_answers = []
         seen_in_para = set()
@@ -531,7 +580,7 @@ def parse_fillin_from_md(md_text: str, file_label: str, category: str) -> list:
             unique_answers.append(b)
         for ans in unique_answers:
             blank_count = sum(1 for b in valid if b == ans)
-            key = (file_label, section_for(block_start), para, ans)
+            key = (file_label, sec_name, para, ans)
             if key in seen_keys:
                 continue
             seen_keys.add(key)
@@ -539,10 +588,11 @@ def parse_fillin_from_md(md_text: str, file_label: str, category: str) -> list:
                 "id": f"{file_label}-{len(questions) + 1}",
                 "chapter": file_label,
                 "category": category,
-                "section": section_for(block_start),
-                "heading": heading_for(block_start),
+                "section": sec_name,
+                "heading": head_name,
                 "answer": ans,
                 "blank_count": blank_count,
+                "importance": _importance(ans, stars, index_terms),
                 "paragraph": para,
             })
     return questions
@@ -550,6 +600,8 @@ def parse_fillin_from_md(md_text: str, file_label: str, category: str) -> list:
 
 def build_fillin_json() -> list:
     """教材MD全ファイルから穴埋め問題抽出。"""
+    index_terms = load_index_terms()
+    print(f"  loaded {len(index_terms)} index terms from {INDEX_FILE_NAME}")
     all_q = []
     for fname, category in FILLIN_FILES.items():
         fpath = MATERIALS_DIR / fname
@@ -558,10 +610,23 @@ def build_fillin_json() -> list:
             continue
         md = fpath.read_text(encoding="utf-8")
         label = fname.replace(".md", "")
-        qs = parse_fillin_from_md(md, label, category)
+        qs = parse_fillin_from_md(md, label, category, index_terms)
         print(f"  parsed {len(qs)} fillin from {fname}")
         all_q.extend(qs)
     return all_q
+
+
+def build_fillin_only():
+    """fillin.json のみ再生成（陳腐化した templates からの HTML/CSS/JS 上書きを回避）。"""
+    print("Parsing fill-in-blank questions...")
+    fillin = build_fillin_json()
+    fillin_json_str = json.dumps(fillin, ensure_ascii=False, indent=2)
+    OUTPUT_FILLIN.write_text(fillin_json_str, encoding="utf-8")
+    (DOCS_DIR / "fillin.json").write_text(fillin_json_str, encoding="utf-8")
+    fillin_kb = OUTPUT_FILLIN.stat().st_size / 1024
+    print(f"Generated fillin {fillin_kb:.0f} KB / {len(fillin)} 問:")
+    print(f"  {OUTPUT_FILLIN}")
+    print(f"  {DOCS_DIR / 'fillin.json'}")
 
 
 def main():
@@ -628,4 +693,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if "--fillin-only" in sys.argv:
+        build_fillin_only()
+    else:
+        main()

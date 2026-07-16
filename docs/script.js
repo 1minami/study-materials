@@ -478,7 +478,6 @@
 
   window.closeMarubatsu = function(e) {
     if (e && e.target && !e.target.classList.contains('quiz-overlay')) return;
-    stopMbMic();
     mbOverlay.classList.remove('visible');
     document.body.style.overflow = '';
   };
@@ -497,113 +496,6 @@
       nextMarubatsu();
     }
   });
-
-  // --- Marubatsu 音声回答 (Web Speech API) ---
-  const mbMicBtn = document.getElementById('mb-mic-btn');
-  const mbMicStatus = document.getElementById('mb-mic-status');
-  const MbSR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let mbRec = null;
-  let mbMicOn = false;
-
-  // normAns 済み（NFKC + カナ→ひらがな + 小文字化）の語で判定
-  const MB_VOICE_MARU = ['まる', '丸', '○', '◯', '正しい', '正解', 'せいかい'];
-  const MB_VOICE_BATSU = ['ばつ', '罰', '×', 'ぺけ', '誤り', 'あやまり', '間違い', 'まちがい', '不正解'];
-  const MB_VOICE_NEXT = ['つぎ', '次', 'ねくすと', '進む', 'すすむ'];
-
-  function handleMbVoice(text) {
-    const t = normAns(text);
-    if (!t) return;
-    const hasQuestion = mbBody.querySelectorAll('.marubatsu-btn').length > 0;
-    if (!mbAnswered && hasQuestion) {
-      if (MB_VOICE_BATSU.some(w => t.includes(w))) { answerMb(false); return; }
-      if (MB_VOICE_MARU.some(w => t.includes(w))) { answerMb(true); return; }
-    } else if (mbAnswered && !mbNextBtn.hidden) {
-      if (MB_VOICE_NEXT.some(w => t.includes(w))) nextMarubatsu();
-    }
-  }
-
-  function initMbRecognition() {
-    const rec = new MbSR();
-    rec.lang = 'ja-JP';
-    rec.continuous = true;
-    // 途中経過も受け取り即判定（final 待ちだと無反応に見えるため）
-    rec.interimResults = true;
-    rec.onresult = (ev) => {
-      let interim = '';
-      let finalText = '';
-      for (let i = ev.resultIndex; i < ev.results.length; i++) {
-        const r = ev.results[i];
-        if (r.isFinal) finalText += r[0].transcript;
-        else interim += r[0].transcript;
-      }
-      const heard = (finalText || interim).trim();
-      if (heard && mbMicStatus) mbMicStatus.textContent = '「' + heard + '」';
-      if (heard) handleMbVoice(heard);
-    };
-    rec.onstart = () => {
-      if (mbMicOn && mbMicStatus) mbMicStatus.textContent = '音声待機中…';
-    };
-    rec.onerror = (ev) => {
-      console.warn('SpeechRecognition error:', ev.error);
-      if (!mbMicStatus) return;
-      if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
-        stopMbMic();
-        mbMicStatus.textContent = 'マイク利用不可（サイトのマイク許可を確認）';
-      } else if (ev.error === 'audio-capture') {
-        stopMbMic();
-        mbMicStatus.textContent = 'マイク未検出（OSの入力デバイス設定を確認）';
-      } else if (ev.error === 'network') {
-        mbMicStatus.textContent = '音声サービス接続エラー（再試行中…）';
-      } else if (ev.error === 'no-speech') {
-        mbMicStatus.textContent = '発話を検出できない（マイク入力レベルを確認）';
-      } else if (ev.error !== 'aborted') {
-        mbMicStatus.textContent = '音声エラー: ' + ev.error;
-      }
-    };
-    // continuous でも無音等で自動停止するため、ON の間は再開し続ける
-    rec.onend = () => {
-      if (mbMicOn) { try { rec.start(); } catch (err) {} }
-    };
-    return rec;
-  }
-
-  function startMbMic() {
-    if (!MbSR || !mbMicBtn) return;
-    if (!mbRec) mbRec = initMbRecognition();
-    mbMicOn = true;
-    try { mbRec.start(); } catch (err) {}
-    mbMicBtn.classList.add('mic-listening');
-    mbMicBtn.setAttribute('aria-pressed', 'true');
-    if (mbMicStatus) mbMicStatus.textContent = '音声待機中…';
-  }
-
-  function stopMbMic() {
-    mbMicOn = false;
-    if (mbRec) { try { mbRec.stop(); } catch (err) {} }
-    if (mbMicBtn) {
-      mbMicBtn.classList.remove('mic-listening');
-      mbMicBtn.setAttribute('aria-pressed', 'false');
-    }
-    if (mbMicStatus) mbMicStatus.textContent = '';
-  }
-
-  window.toggleMbMic = function() {
-    if (mbMicOn) stopMbMic();
-    else startMbMic();
-  };
-
-  if (mbMicBtn && !MbSR) {
-    mbMicBtn.disabled = true;
-    mbMicBtn.title = 'このブラウザは音声認識に対応していません（Chrome / Edge / Safari で利用可）';
-  } else if (mbMicBtn && navigator.brave && navigator.brave.isBrave) {
-    // Brave は API は存在するが音声認識バックエンドが無効のため動作しない
-    navigator.brave.isBrave().then((isBrave) => {
-      if (isBrave) {
-        mbMicBtn.disabled = true;
-        mbMicBtn.title = 'Brave は音声認識サービスが無効のため利用不可（Chrome / Edge で利用可）';
-      }
-    });
-  }
 
   // --- Fill-in-blank Quiz ---
   const FILLIN_SIZE_DEFAULT = 10;
@@ -665,13 +557,23 @@
     return fillinPool;
   }
 
+  // 重み付き非復元抽選（Efraimidis-Spirakis A-Res）: importance が高い問ほど出やすい
+  function weightedSample(items, n) {
+    const picked = items
+      .map(q => ({ q, key: Math.pow(Math.random(), 1 / (1 + (q.importance || 0))) }))
+      .sort((a, b) => b.key - a.key)
+      .slice(0, n)
+      .map(x => x.q);
+    return shuffle(picked);
+  }
+
   function buildFillinSet(pool) {
     let filtered = pool;
     if (fillinSelectedCats && fillinSelectedCats.size > 0) {
       filtered = pool.filter(q => fillinSelectedCats.has(q.category || ''));
     }
     if (filtered.length === 0) return [];
-    return shuffle(filtered).slice(0, Math.min(fillinSize, filtered.length));
+    return weightedSample(filtered, Math.min(fillinSize, filtered.length));
   }
 
   function renderFillin() {
@@ -690,7 +592,27 @@
       ? `<div class="fillin-hint">同じ語が ${q.blank_count} 箇所あり。空欄1つに入力すれば全箇所判定。</div>`
       : '';
     const para = `<div class="fillin-paragraph">${paragraphToHtml(q.paragraph, q.answer, true)}</div>`;
-    fillinBody.innerHTML = meta + hint + para + `<div class="quiz-explanation" id="fillin-explanation" hidden></div>`;
+    const hintRow = `<div class="fillin-hint-row"><button type="button" class="quiz-btn fillin-btn-mini" id="fillin-hint-btn">💡 ヒント</button><span class="fillin-hint-display" id="fillin-hint-display"></span></div>`;
+    fillinBody.innerHTML = meta + hint + para + hintRow + `<div class="quiz-explanation" id="fillin-explanation" hidden></div>`;
+
+    // ヒント: 1回目=文字数、2回目=頭文字（ペナルティなし）
+    let hintStage = 0;
+    const hintBtn = fillinBody.querySelector('#fillin-hint-btn');
+    const hintDisp = fillinBody.querySelector('#fillin-hint-display');
+    hintBtn.addEventListener('click', () => {
+      if (fillinAnswered) return;
+      hintStage++;
+      const len = q.answer.length;
+      if (hintStage === 1) {
+        hintDisp.textContent = `${len}文字`;
+        hintBtn.textContent = '💡 もっと';
+      } else {
+        hintDisp.textContent = `「${q.answer[0]}」で始まる${len}文字`;
+        hintBtn.disabled = true;
+      }
+      const input = fillinBody.querySelector('.fillin-input');
+      if (input && !input.disabled) input.focus();
+    });
 
     const inputs = fillinBody.querySelectorAll('.fillin-input');
     if (inputs.length > 0) {
@@ -721,6 +643,9 @@
     const isCorrect = normAns(userAns) === normAns(q.answer);
     fillinAnswered = true;
     if (isCorrect) fillinScore++;
+
+    const hintBtn = fillinBody.querySelector('#fillin-hint-btn');
+    if (hintBtn) hintBtn.disabled = true;
 
     inputs.forEach(el => {
       el.disabled = true;
