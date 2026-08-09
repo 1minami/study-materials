@@ -545,7 +545,7 @@ hr {
   flex: 1;
   min-height: 0;
 }
-.quiz-textbook-pane { display: none; }
+.quiz-textbook-pane { display: none; position: relative; }
 @media (min-width: 960px) {
   .quiz-modal--split .quiz-textbook-pane { display: flex; }
 }
@@ -562,6 +562,19 @@ hr {
   border: none;
   width: 100%;
   min-height: 0;
+}
+/* 未回答時はテキストを伏せる（iframe のドキュメントは保持したまま） */
+.quiz-textbook-pane.is-hidden .quiz-textbook-iframe { visibility: hidden; }
+.quiz-textbook-pane.is-hidden::after {
+  content: "回答すると該当箇所を表示";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-muted);
+  font-size: 14px;
+  pointer-events: none;
 }
 .quiz-header {
   display: flex;
