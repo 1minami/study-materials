@@ -79,7 +79,17 @@ python scripts/build_takken_textbook.py   # HTML + CSS + JS + quiz.json を生�
 git add docs/ && git commit -m "update textbook" && git push
 ```
 
-> **注意**: 一問一答（`marubatsu.json`）機能は `docs/` 配下に直接実装されており、`templates/` と `build_takken_textbook.py` には未反映。`build_takken_textbook.py` を再実行すると `docs/index.html`・`docs/script.js` が上書きされ一問一答が消えるため、実行前にテンプレートへの反映が必要。
+> **⚠️ `build_takken_textbook.py` は現状そのまま実行しないこと。**
+>
+> `templates/script.js`・`templates/style.css` は 2026-08-09 に `docs/` の最新版と同期済み（JS/CSS は再実行しても退行しない）。
+> ただし **スクリプト内の HTML テンプレートが古い**まま残っており、以下が生成 HTML から消える:
+>
+> - 一問一答モーダル（`marubatsu-overlay` 一式）とサイドバーの「⭕ 一問一答」リンク
+> - ランダム問題演習の分割テキストペイン（`quiz-textbook-pane` / `quiz-textbook-iframe`）
+> - サイドバーの「📥 オフライン版」ダウンロードリンク
+>
+> 逆に `docs/index.html` 側は `materials/` の改正反映が古く、双方向に乖離している。
+> 解消するには `build_takken_textbook.py` の HTML テンプレートを `docs/index.html` 相当まで更新してから実行する。
 
 ### オフライン版（takken-offline.html）
 

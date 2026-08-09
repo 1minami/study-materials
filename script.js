@@ -18,7 +18,14 @@
   };
 
   main.addEventListener('click', () => { if (isMobile()) closeSidebar(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSidebar(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeSidebar();
+      if (typeof closeQuiz === 'function') closeQuiz();
+      if (typeof closeMarubatsu === 'function') closeMarubatsu();
+      if (typeof closeFillin === 'function') closeFillin();
+    }
+  });
 
   // Close sidebar on TOC link click (mobile)
   sidebar.querySelectorAll('.toc-section a').forEach(a => {
@@ -160,7 +167,10 @@
     if (!quizTextbookIframe) return;
     const anchorId = SECTION_TO_ID[section];
     if (!anchorId) return;
-    const url = 'takken-textbook.html#' + encodeURIComponent(anchorId);
+    // テキスト本体は自分自身。生成先が index.html / takken-textbook.html /
+    // takken-offline.html のいずれでも動くよう、自ページのファイル名を使う
+    const selfPage = location.pathname.split('/').pop() || 'index.html';
+    const url = selfPage + '#' + encodeURIComponent(anchorId);
     if (quizTextbookPane) quizTextbookPane.classList.remove('is-hidden');
     if (!quizTextbookLoaded) {
       quizTextbookIframe.src = url;
@@ -281,6 +291,223 @@
     }
   };
 
+  // --- Marubatsu (一問一答) ---
+  const MARUBATSU_SIZE_DEFAULT = 10;
+  const mbOverlay = document.getElementById('marubatsu-overlay');
+  const mbBody = document.getElementById('marubatsu-body');
+  const mbProgress = document.getElementById('marubatsu-progress');
+  const mbNextBtn = document.getElementById('marubatsu-next-btn');
+  let mbPool = null;
+  let mbSet = [];
+  let mbIdx = 0;
+  let mbScore = 0;
+  let mbAnswered = false;
+  let mbSize = MARUBATSU_SIZE_DEFAULT;
+  let mbSelectedCats = null;
+
+  async function loadMbPool() {
+    if (mbPool) return mbPool;
+    try {
+      const res = await fetch('marubatsu.json');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      mbPool = await res.json();
+    } catch (e) {
+      mbPool = [];
+      console.error('marubatsu.json load failed:', e);
+    }
+    return mbPool;
+  }
+
+  function buildMbSet(pool) {
+    let filtered = pool;
+    if (mbSelectedCats && mbSelectedCats.size > 0) {
+      filtered = pool.filter(q => mbSelectedCats.has(q.category || ''));
+    }
+    if (filtered.length === 0) return [];
+    return shuffle(filtered).slice(0, Math.min(mbSize, filtered.length));
+  }
+
+  function renderMb() {
+    const q = mbSet[mbIdx];
+    mbAnswered = false;
+    mbNextBtn.hidden = true;
+    mbNextBtn.textContent = (mbIdx === mbSet.length - 1) ? '結果を見る ▶' : '次の問題 ▶';
+    mbProgress.textContent = `${mbIdx + 1} / ${mbSet.length}（正解 ${mbScore}）`;
+
+    const path = [q.category, q.section].filter(Boolean).map(escapeHtml).join(' ／ ');
+    const meta = `<div class="quiz-meta"><span class="quiz-q-num">Q${mbIdx + 1}</span><span class="quiz-chapter">${path}</span></div>`;
+    const stmt = `<div class="marubatsu-statement">${escapeHtml(q.statement)}</div>`;
+    const btns = `<div class="marubatsu-buttons">
+      <button type="button" class="marubatsu-btn" data-ans="true">⭕ 正しい</button>
+      <button type="button" class="marubatsu-btn" data-ans="false">❌ 誤り</button>
+    </div>`;
+    mbBody.innerHTML = meta + stmt + btns + `<div class="quiz-explanation" id="mb-explanation" hidden></div>`;
+
+    mbBody.querySelectorAll('.marubatsu-btn').forEach(btn => {
+      btn.addEventListener('click', () => answerMb(btn.dataset.ans === 'true'));
+    });
+    mbBody.scrollTop = 0;
+  }
+
+  function answerMb(userAns) {
+    if (mbAnswered) return;
+    mbAnswered = true;
+    const q = mbSet[mbIdx];
+    const isCorrect = (userAns === q.answer);
+    if (isCorrect) mbScore++;
+
+    mbBody.querySelectorAll('.marubatsu-btn').forEach(btn => {
+      const btnAns = btn.dataset.ans === 'true';
+      btn.disabled = true;
+      if (btnAns === q.answer) btn.classList.add('correct');
+      else if (btnAns === userAns && !isCorrect) btn.classList.add('wrong');
+      if (btnAns !== q.answer && btnAns !== userAns) btn.classList.add('muted');
+    });
+
+    const expl = document.getElementById('mb-explanation');
+    const ansLabel = q.answer ? '⭕ 正しい' : '❌ 誤り';
+    const verdict = isCorrect
+      ? '<span class="quiz-verdict ok">○ 正解</span>'
+      : `<span class="quiz-verdict ng">× 不正解（正解: ${ansLabel}）</span>`;
+    expl.innerHTML = verdict + `<div class="quiz-explanation-body">${escapeHtml(q.explanation || '').replace(/\n/g, '<br>')}</div>`;
+    expl.hidden = false;
+
+    mbProgress.textContent = `${mbIdx + 1} / ${mbSet.length}（正解 ${mbScore}）`;
+    mbNextBtn.hidden = false;
+    mbNextBtn.disabled = false;
+    // focus しない: フォーカス中ボタンへの Enter/Space 誤爆で次へ進むのを防ぐ（次へは ← → のみ）
+  }
+
+  function showMbResult() {
+    const total = mbSet.length;
+    const pct = total ? Math.round((mbScore / total) * 100) : 0;
+    mbProgress.textContent = '終了';
+    mbBody.innerHTML = `<div class="quiz-score">スコア ${mbScore} / ${total}（正答率 ${pct}%）</div>`;
+    mbNextBtn.hidden = true;
+  }
+
+  window.nextMarubatsu = function() {
+    if (!mbAnswered) return;
+    if (mbIdx >= mbSet.length - 1) {
+      showMbResult();
+      return;
+    }
+    mbIdx++;
+    renderMb();
+  };
+
+  function renderMbSetup(pool) {
+    const catCount = {};
+    pool.forEach(q => {
+      const c = q.category || '(未分類)';
+      catCount[c] = (catCount[c] || 0) + 1;
+    });
+    const cats = Object.keys(catCount);
+    if (!mbSelectedCats) {
+      mbSelectedCats = new Set(cats);
+    }
+
+    const catItems = cats.map(c => {
+      const checked = mbSelectedCats.has(c) ? 'checked' : '';
+      return `<label class="fillin-cat"><input type="checkbox" data-cat="${escapeHtml(c)}" ${checked}><span>${escapeHtml(c)} <em>(${catCount[c]})</em></span></label>`;
+    }).join('');
+    const sizeOpts = [10, 20, 50, 100].map(n => {
+      const sel = (n === mbSize) ? 'selected' : '';
+      return `<option value="${n}" ${sel}>${n}問</option>`;
+    }).join('');
+
+    mbBody.innerHTML = `
+      <div class="fillin-setup">
+        <div class="fillin-setup-section">
+          <div class="fillin-setup-label">出題範囲（カテゴリ）</div>
+          <div class="fillin-setup-actions">
+            <button type="button" class="quiz-btn fillin-btn-mini" id="mb-cat-all">全選択</button>
+            <button type="button" class="quiz-btn fillin-btn-mini" id="mb-cat-none">全解除</button>
+          </div>
+          <div class="fillin-cats">${catItems}</div>
+        </div>
+        <div class="fillin-setup-section">
+          <div class="fillin-setup-label">問題数</div>
+          <select id="mb-size-select" class="fillin-size-select">${sizeOpts}</select>
+        </div>
+        <div class="fillin-setup-section fillin-setup-start">
+          <button type="button" class="quiz-btn quiz-btn-primary" id="mb-start-btn">開始 ▶</button>
+        </div>
+      </div>
+    `;
+
+    mbBody.querySelectorAll('input[type=checkbox][data-cat]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const c = cb.getAttribute('data-cat');
+        if (cb.checked) mbSelectedCats.add(c);
+        else mbSelectedCats.delete(c);
+      });
+    });
+    mbBody.querySelector('#mb-cat-all').addEventListener('click', () => {
+      mbSelectedCats = new Set(cats);
+      renderMbSetup(pool);
+    });
+    mbBody.querySelector('#mb-cat-none').addEventListener('click', () => {
+      mbSelectedCats = new Set();
+      renderMbSetup(pool);
+    });
+    mbBody.querySelector('#mb-size-select').addEventListener('change', (e) => {
+      mbSize = parseInt(e.target.value, 10) || MARUBATSU_SIZE_DEFAULT;
+    });
+    mbBody.querySelector('#mb-start-btn').addEventListener('click', () => startMb(pool));
+  }
+
+  function startMb(pool) {
+    mbSet = buildMbSet(pool);
+    if (mbSet.length === 0) {
+      mbBody.innerHTML = '<div class="quiz-empty">該当問題なし。<br>カテゴリ選択を見直してくれ。</div>';
+      mbNextBtn.hidden = true;
+      return;
+    }
+    mbIdx = 0;
+    mbScore = 0;
+    renderMb();
+  }
+
+  window.openMarubatsu = async function() {
+    mbOverlay.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+    mbBody.innerHTML = '<div class="quiz-empty">読み込み中…</div>';
+    mbProgress.textContent = '設定';
+    mbNextBtn.hidden = true;
+
+    const pool = await loadMbPool();
+    if (!pool || pool.length === 0) {
+      mbBody.innerHTML = '<div class="quiz-empty">一問一答データが見つからない。<br>marubatsu.json を確認。</div>';
+      return;
+    }
+    renderMbSetup(pool);
+  };
+
+  window.closeMarubatsu = function(e) {
+    if (!mbOverlay) return;
+    if (e && e.target && !e.target.classList.contains('quiz-overlay')) return;
+    mbOverlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  };
+
+  // --- Marubatsu キーボード回答（← = ⭕ / → = ❌ / 回答後は ← → で次へ）---
+  document.addEventListener('keydown', (e) => {
+    // 一問一答モーダルを持たないページ（takken-textbook.html）でも読み込まれる
+    if (!mbOverlay) return;
+    if (!mbOverlay.classList.contains('visible')) return;
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    if (e.repeat) return; // 長押しリピートで解説を飛ばさない
+    if (!mbAnswered) {
+      if (mbBody.querySelectorAll('.marubatsu-btn').length === 0) return;
+      e.preventDefault();
+      answerMb(e.key === 'ArrowLeft');
+    } else if (!mbNextBtn.hidden) {
+      e.preventDefault();
+      nextMarubatsu();
+    }
+  });
+
   // --- Fill-in-blank Quiz ---
   const FILLIN_SIZE_DEFAULT = 10;
   const fillinOverlay = document.getElementById('fillin-overlay');
@@ -341,13 +568,23 @@
     return fillinPool;
   }
 
+  // 重み付き非復元抽選（Efraimidis-Spirakis A-Res）: importance が高い問ほど出やすい
+  function weightedSample(items, n) {
+    const picked = items
+      .map(q => ({ q, key: Math.pow(Math.random(), 1 / (1 + (q.importance || 0))) }))
+      .sort((a, b) => b.key - a.key)
+      .slice(0, n)
+      .map(x => x.q);
+    return shuffle(picked);
+  }
+
   function buildFillinSet(pool) {
     let filtered = pool;
     if (fillinSelectedCats && fillinSelectedCats.size > 0) {
       filtered = pool.filter(q => fillinSelectedCats.has(q.category || ''));
     }
     if (filtered.length === 0) return [];
-    return shuffle(filtered).slice(0, Math.min(fillinSize, filtered.length));
+    return weightedSample(filtered, Math.min(fillinSize, filtered.length));
   }
 
   function renderFillin() {
@@ -366,7 +603,27 @@
       ? `<div class="fillin-hint">同じ語が ${q.blank_count} 箇所あり。空欄1つに入力すれば全箇所判定。</div>`
       : '';
     const para = `<div class="fillin-paragraph">${paragraphToHtml(q.paragraph, q.answer, true)}</div>`;
-    fillinBody.innerHTML = meta + hint + para + `<div class="quiz-explanation" id="fillin-explanation" hidden></div>`;
+    const hintRow = `<div class="fillin-hint-row"><button type="button" class="quiz-btn fillin-btn-mini" id="fillin-hint-btn">💡 ヒント</button><span class="fillin-hint-display" id="fillin-hint-display"></span></div>`;
+    fillinBody.innerHTML = meta + hint + para + hintRow + `<div class="quiz-explanation" id="fillin-explanation" hidden></div>`;
+
+    // ヒント: 1回目=文字数、2回目=頭文字（ペナルティなし）
+    let hintStage = 0;
+    const hintBtn = fillinBody.querySelector('#fillin-hint-btn');
+    const hintDisp = fillinBody.querySelector('#fillin-hint-display');
+    hintBtn.addEventListener('click', () => {
+      if (fillinAnswered) return;
+      hintStage++;
+      const len = q.answer.length;
+      if (hintStage === 1) {
+        hintDisp.textContent = `${len}文字`;
+        hintBtn.textContent = '💡 もっと';
+      } else {
+        hintDisp.textContent = `「${q.answer[0]}」で始まる${len}文字`;
+        hintBtn.disabled = true;
+      }
+      const input = fillinBody.querySelector('.fillin-input');
+      if (input && !input.disabled) input.focus();
+    });
 
     const inputs = fillinBody.querySelectorAll('.fillin-input');
     if (inputs.length > 0) {
@@ -397,6 +654,9 @@
     const isCorrect = normAns(userAns) === normAns(q.answer);
     fillinAnswered = true;
     if (isCorrect) fillinScore++;
+
+    const hintBtn = fillinBody.querySelector('#fillin-hint-btn');
+    if (hintBtn) hintBtn.disabled = true;
 
     inputs.forEach(el => {
       el.disabled = true;

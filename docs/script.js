@@ -167,7 +167,10 @@
     if (!quizTextbookIframe) return;
     const anchorId = SECTION_TO_ID[section];
     if (!anchorId) return;
-    const url = 'index.html#' + encodeURIComponent(anchorId);
+    // テキスト本体は自分自身。生成先が index.html / takken-textbook.html /
+    // takken-offline.html のいずれでも動くよう、自ページのファイル名を使う
+    const selfPage = location.pathname.split('/').pop() || 'index.html';
+    const url = selfPage + '#' + encodeURIComponent(anchorId);
     if (quizTextbookPane) quizTextbookPane.classList.remove('is-hidden');
     if (!quizTextbookLoaded) {
       quizTextbookIframe.src = url;
@@ -482,6 +485,7 @@
   };
 
   window.closeMarubatsu = function(e) {
+    if (!mbOverlay) return;
     if (e && e.target && !e.target.classList.contains('quiz-overlay')) return;
     mbOverlay.classList.remove('visible');
     document.body.style.overflow = '';
@@ -489,6 +493,8 @@
 
   // --- Marubatsu キーボード回答（← = ⭕ / → = ❌ / 回答後は ← → で次へ）---
   document.addEventListener('keydown', (e) => {
+    // 一問一答モーダルを持たないページ（takken-textbook.html）でも読み込まれる
+    if (!mbOverlay) return;
     if (!mbOverlay.classList.contains('visible')) return;
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
     if (e.repeat) return; // 長押しリピートで解説を飛ばさない

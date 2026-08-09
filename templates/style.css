@@ -487,12 +487,94 @@ hr {
   background: var(--card-bg);
   color: var(--fg);
   width: 100%;
-  max-width: 720px;
+  max-width: 900px;
   border-radius: var(--radius);
   box-shadow: 0 12px 48px rgba(0,0,0,.3);
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 80px);
+}
+/* PC: 一問一答モーダルは大きめ表示（min-height 固定で問題ごとの高さガタつきも防ぐ） */
+@media (min-width: 960px) {
+  #marubatsu-overlay .quiz-modal {
+    max-width: 1100px;
+    min-height: 70vh;
+  }
+  /* モーダル内の文字もモーダル拡大に合わせてスケールアップ */
+  #marubatsu-overlay .quiz-title { font-size: 19px; }
+  #marubatsu-overlay .quiz-progress { font-size: 14px; }
+  #marubatsu-overlay .quiz-q-num,
+  #marubatsu-overlay .quiz-chapter { font-size: 13px; }
+  #marubatsu-overlay .marubatsu-statement { font-size: 18px; padding: 20px 22px; }
+  #marubatsu-overlay .marubatsu-btn { font-size: 24px; padding: 16px 24px; max-width: 240px; }
+  #marubatsu-overlay .quiz-explanation { font-size: 16px; }
+  #marubatsu-overlay .quiz-verdict { font-size: 17px; }
+  #marubatsu-overlay .quiz-btn { font-size: 15px; padding: 10px 22px; }
+  #marubatsu-overlay .mb-key-hint { font-size: 13px; }
+  #marubatsu-overlay .quiz-score { font-size: 22px; }
+  /* 開始前の設定画面（fillin-setup 共有クラス）も同倍率 */
+  #marubatsu-overlay .fillin-setup-label { font-size: 15px; }
+  #marubatsu-overlay .fillin-cat { font-size: 15px; }
+  #marubatsu-overlay .fillin-cat em { font-size: 12px; }
+  #marubatsu-overlay .fillin-size-select { font-size: 15px; }
+  #marubatsu-overlay .fillin-btn-mini { font-size: 12px !important; }
+}
+/* PC split layout: left=quiz, right=textbook */
+@media (min-width: 960px) {
+  .quiz-modal--split {
+    max-width: 1400px;
+    flex-direction: row;
+  }
+  .quiz-modal--split .quiz-main {
+    flex: 0 0 50%;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-right: 1px solid var(--border);
+  }
+  .quiz-modal--split .quiz-textbook-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+}
+.quiz-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.quiz-textbook-pane { display: none; position: relative; }
+@media (min-width: 960px) {
+  .quiz-modal--split .quiz-textbook-pane { display: flex; }
+}
+.quiz-textbook-header {
+  padding: 16px 24px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.quiz-textbook-iframe {
+  flex: 1;
+  border: none;
+  width: 100%;
+  min-height: 0;
+}
+/* 未回答時はテキストを伏せる（iframe のドキュメントは保持したまま） */
+.quiz-textbook-pane.is-hidden .quiz-textbook-iframe { visibility: hidden; }
+.quiz-textbook-pane.is-hidden::after {
+  content: "回答すると該当箇所を表示";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-muted);
+  font-size: 14px;
+  pointer-events: none;
 }
 .quiz-header {
   display: flex;
@@ -728,6 +810,85 @@ hr {
   .quiz-choice { font-size: 13px; padding: 9px 12px; }
 }
 
+/* ========== Marubatsu (一問一答) ========== */
+.marubatsu-launcher {
+  background: linear-gradient(90deg, #059669, #0d9488);
+  color: #fff !important;
+  margin: 0 12px 12px;
+  border-radius: 8px;
+  padding: 10px 16px !important;
+  text-align: center;
+  letter-spacing: .02em;
+}
+.marubatsu-launcher:hover { opacity: .9; background: linear-gradient(90deg, #059669, #0d9488); }
+.marubatsu-statement {
+  background: var(--toc-bg);
+  border-left: 3px solid #059669;
+  border-radius: 6px;
+  padding: 16px 18px;
+  font-size: 15px;
+  line-height: 1.9;
+  margin-bottom: 16px;
+}
+.marubatsu-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.marubatsu-btn {
+  flex: 1;
+  max-width: 200px;
+  padding: 14px 20px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: 800;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--fg);
+}
+.marubatsu-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+.marubatsu-btn:disabled { cursor: default; opacity: .7; }
+.marubatsu-btn.correct {
+  border-color: #15803d;
+  background: #dcfce7;
+  color: #15803d;
+}
+.marubatsu-btn.wrong {
+  border-color: #b91c1c;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.marubatsu-btn.muted {
+  opacity: .4;
+}
+@media (prefers-color-scheme: dark) {
+  .marubatsu-btn.correct { background: #14532d; color: #86efac; }
+  .marubatsu-btn.wrong { background: #450a0a; color: #fca5a5; }
+}
+@media (max-width: 768px) {
+  .marubatsu-btn { font-size: 18px; padding: 12px 16px; }
+}
+.mb-key-hint {
+  margin-right: auto;
+  align-self: center;
+  font-size: 11px;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+@media (max-width: 768px) {
+  .mb-key-hint { display: none; }
+}
+
 /* ========== Fill-in-blank ========== */
 .fillin-launcher {
   background: linear-gradient(90deg, #7c3aed, #ec4899);
@@ -792,6 +953,17 @@ hr {
   font-weight: 700;
   color: #15803d;
   margin-left: 4px;
+}
+.fillin-hint-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 4px;
+}
+.fillin-hint-display {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-muted);
 }
 .fillin-answer-hl {
   background: rgba(34,197,94,.18);
