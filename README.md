@@ -20,13 +20,14 @@ docs/
   ├── style.css        # CSS（ビルド時に自動コピー）
   ├── script.js        # JS（ビルド時に自動コピー）
   ├── quiz.json        # 過去問データ（ビルド時に自動生成）
-  ├── marubatsu.json   # 一問一答データ（docs/ 直接管理）
+  ├── marubatsu.json   # 一問一答データ（docs/ 直接管理・唯一の正）
   ├── fillin.json      # 穴埋め問題データ（ビルド時に自動生成）
   └── takken-offline.html  # オフライン版（build_offline_html.py で生成）
 scripts/
   ├── fetch_egov.py           # e-Gov 法令取得スクリプト（3試験統合版）
   ├── build_takken_textbook.py  # 宅建教材 → HTML テキストブック + quiz.json 変換
-  └── build_offline_html.py     # docs/ → 自己完結オフラインHTML 変換
+  ├── build_offline_html.py     # docs/ → 自己完結オフラインHTML 変換
+  └── sync_marubatsu.py         # docs/marubatsu.json → ルートの複製へ同期（検証付き）
 ```
 
 ## Web テキストブック
@@ -55,9 +56,10 @@ scripts/
 
 サイドバー上部「⭕ 一問一答」リンクからモーダルを起動。
 
-- データ: `docs/marubatsu.json`（317問、docs/ 直接管理・ビルド対象外）
+- データ: `docs/marubatsu.json`（317問、docs/ 直接管理・ビルド対象外）が**唯一の正**
+- ルート直下の `marubatsu.json` は `takken-textbook.html` をローカルで開いたとき用の複製。`script.js` が相対パスで `fetch('marubatsu.json')` するため必要。**手で編集せず** `python scripts/sync_marubatsu.py` で docs から同期する（検証を通してからコピー。失敗時は書き換えず exit 1）
 - 出題形式: カテゴリ絞り込み + 問題数選択（10/20/50/100問）でランダム出題、⭕❌の2択即時採点
-- 問題追加: `/takken-marubatsu` スキル（`.claude/skills/takken-marubatsu/`）— 論点提案 → 承認 → 追記 → オフライン版再生成 → push まで対話形式で実行。難問・引っ掛け設計ガイドライン付き
+- 問題追加: `/takken-marubatsu` スキル（`.claude/skills/takken-marubatsu/`）— 論点提案 → 承認 → 追記 → ルート同期 → オフライン版再生成 → push まで対話形式で実行。難問・引っ掛け設計ガイドライン付き
 
 ### 穴埋め演習
 
