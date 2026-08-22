@@ -6,6 +6,8 @@
   [A] 正解が複数   … 設問が1つを問うのに、解説上の該当肢が2つ以上（または0）
   [B] 不一致       … answer フィールドと解説の判定が食い違う
   [C] 判定抽出不可 … 解説フォーマットが不揃いで自動判定できない（要目視）
+  [D] 逃げ口上     … 解説が「ただし本問の正解は肢N」「一見正しいが」等で判定を濁している
+                     （[A] をすり抜けた実質的な複数正解のシグナル。要目視）
 
 使い方:
     python scripts/audit_quiz.py            # docs/quiz.json を監査
@@ -31,6 +33,13 @@ OK_MARKS = "○◯✓✔"
 NG_MARKS = "✕✗×╳"
 OK_WORDS = ("正しい", "適切")
 NG_WORDS = ("誤り", "誤って", "不適切")
+# 解説が肢の正誤を断定できていないことを示す語。作問が破綻しているサインとして拾う。
+HEDGE_MARKERS = (
+    "本問では肢", "本問の正解", "出題の趣旨", "出題年の正解", "が正解とされ",
+    "一見正し", "正しいようにも見え", "正しいように見え", "正しい記述にも見え",
+    "と思われる", "が最も正確", "より基本的な正解", "最も適切",
+    "設問の前提", "前提が問題文と矛盾", "結論が変わる", "論点がある",
+)
 
 
 def extract_marks(explanation: str) -> dict:
@@ -51,7 +60,7 @@ def extract_marks(explanation: str) -> dict:
 
 
 def audit(questions: list) -> tuple:
-    ambiguous, mismatch, unparsed = [], [], []
+    ambiguous, mismatch, unparsed, hedged = [], [], [], []
     for q in questions:
         marks = extract_marks(q["explanation"])
         is_wrong_type = any(w in q["question"] for w in WRONG_TYPE_MARKERS)
@@ -65,7 +74,11 @@ def audit(questions: list) -> tuple:
             ambiguous.append((q, f"{label}と判定された肢が {len(hits)} 個 {hits} / answer={q['answer']}"))
         elif hits[0] != q["answer"]:
             mismatch.append((q, f"answer={q['answer']} だが解説では{label}=肢{hits[0]}"))
-    return ambiguous, mismatch, unparsed
+
+        found = [h for h in HEDGE_MARKERS if h in q["explanation"]]
+        if found:
+            hedged.append((q, "逃げ口上: " + " / ".join(found)))
+    return ambiguous, mismatch, unparsed, hedged
 
 
 def report(title: str, rows: list) -> None:
@@ -77,15 +90,16 @@ def report(title: str, rows: list) -> None:
 def main() -> int:
     path = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_QUIZ
     questions = json.loads(path.read_text(encoding="utf-8"))
-    ambiguous, mismatch, unparsed = audit(questions)
+    ambiguous, mismatch, unparsed, hedged = audit(questions)
 
     print(f"監査対象: {path} ({len(questions)} 問)")
     report("[A] 正解が複数（要修正）", ambiguous)
     report("[B] answer と解説の不一致（要修正）", mismatch)
     report("[C] 判定抽出不可（要目視）", unparsed)
+    report("[D] 逃げ口上あり（要目視）", hedged)
 
     ng = len(ambiguous) + len(mismatch)
-    print(f"\n結果: 要修正 {ng} 件 / 要目視 {len(unparsed)} 件")
+    print(f"\n結果: 要修正 {ng} 件 / 要目視 {len(unparsed) + len(hedged)} 件")
     return 1 if ng else 0
 
 
