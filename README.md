@@ -6,7 +6,7 @@
 
 ```
 materials/
-  ├── takken/          # 宅建士（23ファイル: 教材00-18 + 過去問19-22）
+  ├── takken/          # 宅建士（23ファイル: 教材00-18 + 論点別演習問題19-22）
   ├── kanteishi/       # 不動産鑑定士（試験概要 + 短答式/ + 論文式/）
   └── gyoseishoshi/    # 行政書士（14ファイル）
 data/
@@ -19,7 +19,7 @@ docs/
   ├── index.html       # 宅建テキスト（GitHub Pages で公開）
   ├── style.css        # CSS（ビルド時に自動コピー）
   ├── script.js        # JS（ビルド時に自動コピー）
-  ├── quiz.json        # 過去問データ（ビルド時に自動生成）
+  ├── quiz.json        # 4択演習問題データ（ビルド時に自動生成）
   ├── marubatsu.json   # 一問一答データ（docs/ 直接管理・唯一の正）
   ├── fillin.json      # 穴埋め問題データ（ビルド時に自動生成）
   └── takken-offline.html  # オフライン版（build_offline_html.py で生成）
@@ -27,7 +27,8 @@ scripts/
   ├── fetch_egov.py           # e-Gov 法令取得スクリプト（3試験統合版）
   ├── build_takken_textbook.py  # 宅建教材 → HTML テキストブック + quiz.json 変換
   ├── build_offline_html.py     # docs/ → 自己完結オフラインHTML 変換
-  └── sync_marubatsu.py         # docs/marubatsu.json → ルートの複製へ同期（検証付き）
+  ├── sync_marubatsu.py         # docs/marubatsu.json → ルートの複製へ同期（検証付き）
+  └── audit_quiz.py             # quiz.json の「正解が1つに定まらない問題」を検出（要修正時 exit 1）
 ```
 
 ## Web テキストブック
@@ -36,11 +37,11 @@ scripts/
 
 **URL**: https://1minami.github.io/study-materials/
 
-- 全科目 + 過去問演習（23ファイル統合）
+- 全科目 + 4択演習（23ファイル統合）
 - 左サイドバー目次、スクロール追従ハイライト
 - スマホ対応（レスポンシブ）、ダークモード対応、印刷対応
 - 章ごとの学習メモ（右サイドバー、`localStorage` 保存）
-- **ランダム問題演習**: 過去問128問プールから10問ランダム出題、1問ずつ即時採点+解説表示
+- **ランダム問題演習**: 論点別演習問題129問プールから10問ランダム出題、1問ずつ即時採点+解説表示
 - **穴埋め演習**: 教材本文の太字キーワードを空欄化（362問プール、テキスト入力で完全一致判定）
 
 ### ランダム問題演習
@@ -51,6 +52,8 @@ scripts/
 - 出題形式: 4択、全範囲ランダム10問
 - 採点: 選択肢クリックで即時正誤判定 → 解説展開 → 「次の問題」で進行 → 最終スコア表示
 - データ: ビルド時に `quiz.json` を自動生成（`fetch` でロード）
+- **これらは本試験の過去問そのものではなく、論点別に作成したオリジナルの4択演習問題**。各問の見出しは出題年度ではなく論点名（例: `### 問題7-1（申込みの場所と事務所等の範囲）`）で管理する
+- 品質チェック: `python scripts/audit_quiz.py` で「正解が複数ある問題」「正解と解説の不一致」を検出できる。問題を追加・修正したら必ず実行し、要修正0件を確認すること
 
 ### 一問一答（○×）
 
@@ -81,17 +84,16 @@ python scripts/build_takken_textbook.py   # HTML + CSS + JS + quiz.json を生�
 git add docs/ && git commit -m "update textbook" && git push
 ```
 
-> **⚠️ `build_takken_textbook.py` は現状そのまま実行しないこと。**
+> `templates/script.js`・`templates/style.css`、およびスクリプト内の HTML テンプレートは `docs/` の公開版と同期済み（2026-08-22）。フル実行しても一問一答モーダル・分割テキストペイン・オフライン版リンクは失われない。
 >
-> `templates/script.js`・`templates/style.css` は 2026-08-09 に `docs/` の最新版と同期済み（JS/CSS は再実行しても退行しない）。
-> ただし **スクリプト内の HTML テンプレートが古い**まま残っており、以下が生成 HTML から消える:
+> JSON だけ作り直したい場合は部分ビルドを使う:
 >
-> - 一問一答モーダル（`marubatsu-overlay` 一式）とサイドバーの「⭕ 一問一答」リンク
-> - ランダム問題演習の分割テキストペイン（`quiz-textbook-pane` / `quiz-textbook-iframe`）
-> - サイドバーの「📥 オフライン版」ダウンロードリンク
+> ```bash
+> python scripts/build_takken_textbook.py --quiz-only     # quiz.json のみ
+> python scripts/build_takken_textbook.py --fillin-only   # fillin.json のみ
+> ```
 >
-> 逆に `docs/index.html` 側は `materials/` の改正反映が古く、双方向に乖離している。
-> 解消するには `build_takken_textbook.py` の HTML テンプレートを `docs/index.html` 相当まで更新してから実行する。
+> テンプレート（`templates/` またはスクリプト内 HTML）を変更したときは、フル実行後に `marubatsu-overlay` / `quiz-textbook-pane` / `offline-download` が `docs/index.html` に残っているか確認すること。
 
 ### オフライン版（takken-offline.html）
 

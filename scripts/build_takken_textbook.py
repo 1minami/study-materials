@@ -4,9 +4,9 @@
   - takken-textbook.html, style.css, script.js, quiz.json, fillin.json (プロジェクトルート)
   - docs/index.html, docs/style.css, docs/script.js, docs/quiz.json, docs/fillin.json (GitHub Pages 用)
 
-注意: templates/ は一問一答（marubatsu）機能が未反映（陳腐化）。フル実行すると
-docs/ の HTML/CSS/JS が上書きされ機能が失われる。fillin.json のみ再生成する場合は
-`python scripts/build_takken_textbook.py --fillin-only` を使うこと。
+JSON のみ再生成したい場合は以下のオプションを使う。
+  python scripts/build_takken_textbook.py --quiz-only    # quiz.json のみ
+  python scripts/build_takken_textbook.py --fillin-only  # fillin.json のみ
 """
 
 import re
@@ -172,7 +172,13 @@ def build_toc(sections: dict) -> str:
     toc += '  <a href="#" class="toc-section-title quiz-launcher" onclick="openQuiz();return false;">📝 ランダム問題演習</a>\n'
     toc += '</div>\n'
     toc += '<div class="toc-section">\n'
+    toc += '  <a href="#" class="toc-section-title marubatsu-launcher" onclick="openMarubatsu();return false;">⭕ 一問一答</a>\n'
+    toc += '</div>\n'
+    toc += '<div class="toc-section">\n'
     toc += '  <a href="#" class="toc-section-title fillin-launcher" onclick="openFillin();return false;">✍️ 穴埋め演習</a>\n'
+    toc += '</div>\n'
+    toc += '<div class="toc-section">\n'
+    toc += '  <a href="takken-offline.html" class="toc-section-title offline-download" download="takken-offline.html">📥 オフライン版</a>\n'
     toc += '</div>\n'
     for sec_name, sec_data in sections.items():
         sec_id = slugify(sec_name)
@@ -254,15 +260,36 @@ HTML_TEMPLATE = """\
 <button class="back-top" onclick="scrollTo({{top:0,behavior:'smooth'}})" title="トップへ戻る">↑</button>
 
 <div class="quiz-overlay" id="quiz-overlay" onclick="closeQuiz(event)">
+  <div class="quiz-modal quiz-modal--split" onclick="event.stopPropagation()">
+    <div class="quiz-main">
+      <div class="quiz-header">
+        <div class="quiz-title">📝 ランダム問題演習</div>
+        <div class="quiz-progress" id="quiz-progress"></div>
+        <button class="quiz-close" onclick="closeQuiz()" aria-label="閉じる">✕</button>
+      </div>
+      <div class="quiz-body" id="quiz-body"></div>
+      <div class="quiz-footer">
+        <button class="quiz-btn quiz-btn-primary" id="quiz-next-btn" onclick="nextQuiz()" disabled>次の問題 ▶</button>
+      </div>
+    </div>
+    <div class="quiz-textbook-pane" id="quiz-textbook-pane">
+      <div class="quiz-textbook-header">📖 テキスト</div>
+      <iframe id="quiz-textbook-iframe" class="quiz-textbook-iframe"></iframe>
+    </div>
+  </div>
+</div>
+
+<div class="quiz-overlay" id="marubatsu-overlay" onclick="closeMarubatsu(event)">
   <div class="quiz-modal" onclick="event.stopPropagation()">
     <div class="quiz-header">
-      <div class="quiz-title">📝 ランダム問題演習</div>
-      <div class="quiz-progress" id="quiz-progress"></div>
-      <button class="quiz-close" onclick="closeQuiz()" aria-label="閉じる">✕</button>
+      <div class="quiz-title">⭕ 一問一答</div>
+      <div class="quiz-progress" id="marubatsu-progress"></div>
+      <button class="quiz-close" onclick="closeMarubatsu()" aria-label="閉じる">✕</button>
     </div>
-    <div class="quiz-body" id="quiz-body"></div>
+    <div class="quiz-body" id="marubatsu-body"></div>
     <div class="quiz-footer">
-      <button class="quiz-btn quiz-btn-primary" id="quiz-next-btn" onclick="nextQuiz()" disabled>次の問題 ▶</button>
+      <span class="mb-key-hint">← ⭕　→ ❌　回答後 ←→ 次へ</span>
+      <button class="quiz-btn quiz-btn-primary" id="marubatsu-next-btn" onclick="nextMarubatsu()" hidden>次の問題 ▶</button>
     </div>
   </div>
 </div>
@@ -616,6 +643,19 @@ def build_fillin_json() -> list:
     return all_q
 
 
+def build_quiz_only():
+    """quiz.json のみ再生成（陳腐化した templates からの HTML/CSS/JS 上書きを回避）。"""
+    print("Parsing past-exam questions...")
+    quiz = build_quiz_json()
+    quiz_json_str = json.dumps(quiz, ensure_ascii=False, indent=2)
+    OUTPUT_QUIZ.write_text(quiz_json_str, encoding="utf-8")
+    (DOCS_DIR / "quiz.json").write_text(quiz_json_str, encoding="utf-8")
+    quiz_kb = OUTPUT_QUIZ.stat().st_size / 1024
+    print(f"Generated quiz {quiz_kb:.0f} KB / {len(quiz)} 問:")
+    print(f"  {OUTPUT_QUIZ}")
+    print(f"  {DOCS_DIR / 'quiz.json'}")
+
+
 def build_fillin_only():
     """fillin.json のみ再生成（陳腐化した templates からの HTML/CSS/JS 上書きを回避）。"""
     print("Parsing fill-in-blank questions...")
@@ -695,5 +735,7 @@ def main():
 if __name__ == "__main__":
     if "--fillin-only" in sys.argv:
         build_fillin_only()
+    elif "--quiz-only" in sys.argv:
+        build_quiz_only()
     else:
         main()
