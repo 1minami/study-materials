@@ -302,6 +302,7 @@
   let mbIdx = 0;
   let mbScore = 0;
   let mbAnswered = false;
+  let mbWrong = [];
   let mbSize = MARUBATSU_SIZE_DEFAULT;
   let mbSelectedCats = null;
 
@@ -355,6 +356,7 @@
     const q = mbSet[mbIdx];
     const isCorrect = (userAns === q.answer);
     if (isCorrect) mbScore++;
+    else mbWrong.push(q);
 
     mbBody.querySelectorAll('.marubatsu-btn').forEach(btn => {
       const btnAns = btn.dataset.ans === 'true';
@@ -382,7 +384,31 @@
     const total = mbSet.length;
     const pct = total ? Math.round((mbScore / total) * 100) : 0;
     mbProgress.textContent = '終了';
-    mbBody.innerHTML = `<div class="quiz-score">スコア ${mbScore} / ${total}（正答率 ${pct}%）</div>`;
+
+    const score = `<div class="quiz-score">スコア ${mbScore} / ${total}（正答率 ${pct}%）</div>`;
+    let review;
+    if (mbWrong.length === 0) {
+      review = '<div class="mb-review-perfect">全問正解 🎉</div>';
+    } else {
+      const items = mbWrong.map((q, i) => {
+        const path = [q.category, q.section].filter(Boolean).map(escapeHtml).join(' ／ ');
+        const ansLabel = q.answer ? '⭕ 正しい' : '❌ 誤り';
+        const expl = escapeHtml(q.explanation || '').replace(/\n/g, '<br>');
+        return `<li class="mb-review-item">
+          <div class="quiz-meta"><span class="quiz-q-num">${i + 1}</span><span class="quiz-chapter">${path}</span></div>
+          <div class="mb-review-statement">${escapeHtml(q.statement)}</div>
+          <div class="mb-review-answer">正解: ${ansLabel}</div>
+          ${expl ? `<div class="mb-review-explanation">${expl}</div>` : ''}
+        </li>`;
+      }).join('');
+      review = `<div class="mb-review">
+        <div class="mb-review-title">間違えた問題（${mbWrong.length}問）</div>
+        <ol class="mb-review-list">${items}</ol>
+      </div>`;
+    }
+
+    mbBody.innerHTML = score + review;
+    mbBody.scrollTop = 0;
     mbNextBtn.hidden = true;
   }
 
@@ -466,6 +492,7 @@
     }
     mbIdx = 0;
     mbScore = 0;
+    mbWrong = [];
     renderMb();
   }
 

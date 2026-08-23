@@ -888,6 +888,56 @@ hr {
 @media (max-width: 768px) {
   .mb-key-hint { display: none; }
 }
+.mb-review-perfect {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #15803d;
+  padding: 12px;
+}
+.mb-review-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--fg);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  border-bottom: 2px solid var(--border);
+}
+.mb-review-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.mb-review-item {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.mb-review-item:last-child { border-bottom: none; }
+.mb-review-statement {
+  background: var(--toc-bg);
+  border-left: 3px solid #b91c1c;
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.9;
+  margin: 6px 0 8px;
+}
+.mb-review-answer {
+  font-size: 14px;
+  font-weight: 700;
+  color: #15803d;
+  margin-bottom: 6px;
+}
+.mb-review-explanation {
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--fg);
+  white-space: pre-wrap;
+}
+@media (prefers-color-scheme: dark) {
+  .mb-review-perfect { color: #86efac; }
+  .mb-review-answer { color: #86efac; }
+}
 
 /* ========== Fill-in-blank ========== */
 .fillin-launcher {

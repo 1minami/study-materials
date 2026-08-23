@@ -62,6 +62,7 @@ scripts/
 - データ: `docs/marubatsu.json`（317問、docs/ 直接管理・ビルド対象外）が**唯一の正**
 - ルート直下の `marubatsu.json` は `takken-textbook.html` をローカルで開いたとき用の複製。`script.js` が相対パスで `fetch('marubatsu.json')` するため必要。**手で編集せず** `python scripts/sync_marubatsu.py` で docs から同期する（検証を通してからコピー。失敗時は書き換えず exit 1）
 - 出題形式: カテゴリ絞り込み + 問題数選択（10/20/50/100問）でランダム出題、⭕❌の2択即時採点
+- 結果画面: スコア + 正答率に加え、**間違えた問題の一覧**（カテゴリ／章・問題文・正解・解説）を表示。全問正解時は「全問正解 🎉」のみ
 - 問題追加: `/takken-marubatsu` スキル（`.claude/skills/takken-marubatsu/`）— 論点提案 → 承認 → 追記 → ルート同期 → オフライン版再生成 → push まで対話形式で実行。難問・引っ掛け設計ガイドライン付き
 
 ### 穴埋め演習
