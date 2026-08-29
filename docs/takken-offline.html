@@ -9140,7 +9140,7 @@ hr {
 
 <button class="back-top" onclick="scrollTo({top:0,behavior:'smooth'})" title="トップへ戻る">↑</button>
 
-<div class="quiz-overlay" id="quiz-overlay" onclick="closeQuiz(event)">
+<div class="quiz-overlay" id="quiz-overlay">
   <div class="quiz-modal quiz-modal--split" onclick="event.stopPropagation()">
     <div class="quiz-main">
       <div class="quiz-header">
@@ -9160,7 +9160,7 @@ hr {
   </div>
 </div>
 
-<div class="quiz-overlay" id="marubatsu-overlay" onclick="closeMarubatsu(event)">
+<div class="quiz-overlay" id="marubatsu-overlay">
   <div class="quiz-modal" onclick="event.stopPropagation()">
     <div class="quiz-header">
       <div class="quiz-title">⭕ 一問一答</div>
@@ -9175,7 +9175,7 @@ hr {
   </div>
 </div>
 
-<div class="quiz-overlay" id="fillin-overlay" onclick="closeFillin(event)">
+<div class="quiz-overlay" id="fillin-overlay">
   <div class="quiz-modal" onclick="event.stopPropagation()">
     <div class="quiz-header">
       <div class="quiz-title">✍️ 穴埋め演習</div>
@@ -9594,8 +9594,7 @@ hr {
     renderQuestion();
   };
 
-  window.closeQuiz = function(e) {
-    if (e && e.target && !e.target.classList.contains('quiz-overlay')) return;
+  window.closeQuiz = function() {
     quizOverlay.classList.remove('visible');
     document.body.style.overflow = '';
     if (quizTextbookIframe) {
@@ -9824,9 +9823,8 @@ hr {
     renderMbSetup(pool);
   };
 
-  window.closeMarubatsu = function(e) {
+  window.closeMarubatsu = function() {
     if (!mbOverlay) return;
-    if (e && e.target && !e.target.classList.contains('quiz-overlay')) return;
     mbOverlay.classList.remove('visible');
     document.body.style.overflow = '';
   };
@@ -10137,8 +10135,7 @@ hr {
     renderFillinSetup(pool);
   };
 
-  window.closeFillin = function(e) {
-    if (e && e.target && !e.target.classList.contains('quiz-overlay')) return;
+  window.closeFillin = function() {
     fillinOverlay.classList.remove('visible');
     document.body.style.overflow = '';
   };

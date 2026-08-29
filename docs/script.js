@@ -381,8 +381,7 @@
     renderQuestion();
   };
 
-  window.closeQuiz = function(e) {
-    if (e && e.target && !e.target.classList.contains('quiz-overlay')) return;
+  window.closeQuiz = function() {
     quizOverlay.classList.remove('visible');
     document.body.style.overflow = '';
     if (quizTextbookIframe) {
@@ -611,9 +610,8 @@
     renderMbSetup(pool);
   };
 
-  window.closeMarubatsu = function(e) {
+  window.closeMarubatsu = function() {
     if (!mbOverlay) return;
-    if (e && e.target && !e.target.classList.contains('quiz-overlay')) return;
     mbOverlay.classList.remove('visible');
     document.body.style.overflow = '';
   };
@@ -924,8 +922,7 @@
     renderFillinSetup(pool);
   };
 
-  window.closeFillin = function(e) {
-    if (e && e.target && !e.target.classList.contains('quiz-overlay')) return;
+  window.closeFillin = function() {
     fillinOverlay.classList.remove('visible');
     document.body.style.overflow = '';
   };

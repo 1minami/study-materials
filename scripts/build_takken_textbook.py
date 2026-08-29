@@ -259,7 +259,7 @@ HTML_TEMPLATE = """\
 
 <button class="back-top" onclick="scrollTo({{top:0,behavior:'smooth'}})" title="トップへ戻る">↑</button>
 
-<div class="quiz-overlay" id="quiz-overlay" onclick="closeQuiz(event)">
+<div class="quiz-overlay" id="quiz-overlay">
   <div class="quiz-modal quiz-modal--split" onclick="event.stopPropagation()">
     <div class="quiz-main">
       <div class="quiz-header">
@@ -279,7 +279,7 @@ HTML_TEMPLATE = """\
   </div>
 </div>
 
-<div class="quiz-overlay" id="marubatsu-overlay" onclick="closeMarubatsu(event)">
+<div class="quiz-overlay" id="marubatsu-overlay">
   <div class="quiz-modal" onclick="event.stopPropagation()">
     <div class="quiz-header">
       <div class="quiz-title">⭕ 一問一答</div>
@@ -294,7 +294,7 @@ HTML_TEMPLATE = """\
   </div>
 </div>
 
-<div class="quiz-overlay" id="fillin-overlay" onclick="closeFillin(event)">
+<div class="quiz-overlay" id="fillin-overlay">
   <div class="quiz-modal" onclick="event.stopPropagation()">
     <div class="quiz-header">
       <div class="quiz-title">✍️ 穴埋め演習</div>
