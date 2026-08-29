@@ -128,6 +128,105 @@
   const quizTextbookIframe = document.getElementById('quiz-textbook-iframe');
   const quizTextbookPane = document.getElementById('quiz-textbook-pane');
   const SECTION_TO_ID = {"37条書面":"09-宅建業法②業務規制-16","8種制限（自ら売主制限）":"10-宅建業法③報酬・監督-2","その他の法令上の制限":"00-試験概要-7","その他の税（国税・地方税の横断整理）":"17-税・価格-1","クーリング・オフ":"09-宅建業法②業務規制-27","不動産取得税":"17-税・価格-2","不動産登記法":"07-不動産登記法-1","不動産鑑定評価基準":"17-税・価格-33","不法行為・使用者責任":"03-民法債権-30","代理":"01-民法総則-12","住宅瑕疵担保履行法":"10-宅建業法③報酬・監督-22","借地借家法":"05-借地借家法-1","債務不履行・契約不適合責任":"03-民法債権-2","免許制度":"08-宅建業法①総則・免許-7","区分所有法":"06-区分所有法-1","印紙税":"17-税・価格-25","営業保証金・保証協会":"08-宅建業法①総則・免許-17","固定資産税":"17-税・価格-9","国土利用計画法":"13-国土利用計画法-1","土地区画整理法":"15-土地区画整理法-1","地価公示法":"17-税・価格-30","報酬に関する制限":"10-宅建業法③報酬・監督-11","媒介契約":"09-宅建業法②業務規制-6","宅地建物取引士":"00-試験概要-1","宅地造成等規制法（盛土規制法）":"16-盛土規制法-1","広告・その他の業務規制":"09-宅建業法②業務規制-23","建築基準法 ─ 建蔽率・容積率":"12-建築基準法-11","建築基準法 ─ 用途制限・道路・その他":"12-建築基準法-10","意思表示":"01-民法総則-5","所得税（譲渡所得）":"17-税・価格-15","抵当権":"02-民法物権-22","時効":"01-民法総則-19","物権変動":"02-民法物権-2","登録免許税":"17-税・価格-22","監督処分・罰則":"10-宅建業法③報酬・監督-18","相続":"04-民法親族相続-1","賃貸借":"03-民法債権-12","贈与税・相続税（税制改正関連）":"17-税・価格-1","農地法":"14-農地法-1","都市計画法 ─ 都市計画の内容":"11-都市計画法-1","都市計画法 ─ 開発許可制度":"11-都市計画法-7","重要事項説明（35条書面）":"09-宅建業法②業務規制-9"};
+  // --- 演習 → 学習メモへの追加（PC のみ / 4択演習） ---
+  function chapterIdForSection(section) {
+    const anchorId = SECTION_TO_ID[section];
+    if (!anchorId) return null;
+    return anchorId.replace(/-\d+$/, '');
+  }
+
+  function quizNoteKey(chapterId) { return 'takken-note-' + chapterId; }
+
+  function quizNoteMarker(q) { return '[' + (q.id || '') + ']'; }
+
+  function readNoteBody(chapterId) {
+    // 表示中の章は textarea が最新（debounce 保存前の入力を取りこぼさない）
+    if (currentNoteId === chapterId && noteTextarea) return noteTextarea.value;
+    return localStorage.getItem(quizNoteKey(chapterId)) || '';
+  }
+
+  function quizNoteAdded(chapterId, q) {
+    if (!chapterId || !q.id) return false;
+    return readNoteBody(chapterId).indexOf(quizNoteMarker(q)) !== -1;
+  }
+
+  function quizNoteToday() {
+    const d = new Date();
+    const p2 = (n) => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+  }
+
+  function buildQuizNoteEntry(q, memo) {
+    const topic = [q.section, q.source].filter(Boolean).join('／') || q.category || '';
+    const lines = ['--- 演習 ' + quizNoteToday() + ' ' + quizNoteMarker(q) + ' ---'];
+    if (topic) lines.push('論点: ' + topic);
+    if (q.explanation) lines.push('解説: ' + String(q.explanation).trim());
+    if (memo && memo.trim()) lines.push('メモ: ' + memo.trim());
+    return lines.join('\n');
+  }
+
+  function appendQuizNote(q, memo) {
+    const chapterId = chapterIdForSection(q.section);
+    if (!chapterId) return null;
+    const cur = readNoteBody(chapterId);
+    const entry = buildQuizNoteEntry(q, memo);
+    const next = cur ? (cur.replace(/\s+$/, '') + '\n\n' + entry) : entry;
+    localStorage.setItem(quizNoteKey(chapterId), next);
+    if (currentNoteId === chapterId && noteTextarea) {
+      clearTimeout(saveTimer);
+      noteTextarea.value = next;
+      noteTextarea.scrollTop = noteTextarea.scrollHeight;
+    }
+    return chapterId;
+  }
+
+  function renderQuizNoteAdd(q) {
+    const expl = document.getElementById('quiz-explanation');
+    if (!expl) return;
+    const chapterId = chapterIdForSection(q.section);
+    if (!chapterId) return;
+
+    const box = document.createElement('div');
+    box.className = 'quiz-note-add';
+    box.innerHTML =
+      '<div class="quiz-note-head">📌 テキストに追加<span class="quiz-note-target">' + escapeHtml(chapterId) + '</span></div>' +
+      '<textarea class="quiz-note-input" id="quiz-note-input" rows="2" placeholder="メモ（任意・Ctrl+Enter で追加）"></textarea>' +
+      '<div class="quiz-note-actions">' +
+        '<button type="button" class="quiz-btn quiz-note-btn" id="quiz-note-btn">📌 テキストに追加</button>' +
+        '<span class="quiz-note-status" id="quiz-note-status"></span>' +
+      '</div>';
+    expl.appendChild(box);
+
+    const btn = box.querySelector('#quiz-note-btn');
+    const input = box.querySelector('#quiz-note-input');
+    const status = box.querySelector('#quiz-note-status');
+
+    if (quizNoteAdded(chapterId, q)) {
+      btn.disabled = true;
+      btn.textContent = '✓ 追加済み';
+      input.disabled = true;
+      status.textContent = 'この問題は追加済み';
+      return;
+    }
+
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      const added = appendQuizNote(q, input.value);
+      if (!added) return;
+      btn.disabled = true;
+      btn.textContent = '✓ 追加済み';
+      input.disabled = true;
+      status.textContent = added + ' の学習メモに追加';
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        btn.click();
+      }
+    });
+  }
+
   let quizTextbookLoaded = false;
   let quizPool = null;
   let quizSet = [];
@@ -238,6 +337,7 @@
     quizProgress.textContent = `${quizIdx + 1} / ${quizSet.length}（正解 ${quizScore}）`;
     quizNextBtn.disabled = false;
     updateTextbookPane(q.section);
+    renderQuizNoteAdd(q);
   }
 
   function showResult() {

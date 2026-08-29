@@ -795,6 +795,61 @@ hr {
 .quiz-verdict.ok { color: #15803d; }
 .quiz-verdict.ng { color: #b91c1c; }
 .quiz-explanation-body { color: var(--fg); white-space: pre-wrap; }
+
+/* ===== 演習 → 学習メモへの追加（PC のみ） ===== */
+.quiz-note-add {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+.quiz-note-head {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fg-muted);
+  margin-bottom: 6px;
+}
+.quiz-note-target {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+.quiz-note-input {
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--fg);
+  background: var(--card-bg);
+  resize: vertical;
+  outline: none;
+  transition: border-color .15s;
+}
+.quiz-note-input:focus { border-color: var(--accent); }
+.quiz-note-input::placeholder { color: var(--fg-muted); }
+.quiz-note-input:disabled { opacity: .55; }
+.quiz-note-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+.quiz-note-btn { padding: 6px 14px; font-size: 12px; }
+.quiz-note-btn:disabled { cursor: default; opacity: .6; background: var(--card-bg); }
+.quiz-note-status { font-size: 11px; color: var(--fg-muted); }
+
+/* 右サイドバー（学習メモ）が消える幅では追加先が見えないため非表示 */
+@media (max-width: 1024px) {
+  .quiz-note-add { display: none; }
+}
 .quiz-result-msg {
   text-align: center;
   color: var(--fg-muted);
