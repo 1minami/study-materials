@@ -1161,9 +1161,79 @@ hr {
   .fillin-cats { grid-template-columns: 1fr; }
 }
 
+/* ========== ページ内検索（サイドバー常設） ========== */
+.toc-search {
+  position: sticky;
+  top: -12px;
+  z-index: 5;
+  margin: -12px 0 10px;
+  padding: 12px 14px 10px;
+  background: var(--toc-bg);
+  border-bottom: 1px solid var(--border);
+}
+.toc-search input {
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+}
+.toc-search input:focus { border-color: var(--accent); }
+.toc-search.is-empty input { border-color: #dc2626; }
+.toc-search-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+.toc-search-count {
+  flex: 1 1 auto;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+.toc-search-btn {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.toc-search-btn:hover:not(:disabled) { background: var(--accent-light); border-color: var(--border); }
+.toc-search-btn:disabled { opacity: .35; cursor: default; }
+
+mark.search-hit {
+  background: #fde68a;
+  color: inherit;
+  border-radius: 2px;
+  scroll-margin-top: calc(var(--header-h) + 24px);
+}
+mark.search-hit.is-current {
+  background: #fb923c;
+  outline: 2px solid #ea580c;
+}
+@media (prefers-color-scheme: dark) {
+  mark.search-hit { background: #78591c; }
+  mark.search-hit.is-current { background: #c2620d; outline-color: #fdba74; }
+}
+
 /* ========== Print ========== */
 @media print {
   .header, .sidebar, .right-sidebar, .back-top, .menu-toggle, .sidebar-overlay { display: none !important; }
+  mark.search-hit, mark.search-hit.is-current { background: none; outline: none; }
   .main { margin: 0; padding: 0; max-width: 100%; }
   .chapter { break-inside: avoid; border: none; box-shadow: none; padding: 0; margin-bottom: 16px; }
   .part { break-before: page; }

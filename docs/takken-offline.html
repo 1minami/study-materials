@@ -1169,9 +1169,79 @@ hr {
   .fillin-cats { grid-template-columns: 1fr; }
 }
 
+/* ========== ページ内検索（サイドバー常設） ========== */
+.toc-search {
+  position: sticky;
+  top: -12px;
+  z-index: 5;
+  margin: -12px 0 10px;
+  padding: 12px 14px 10px;
+  background: var(--toc-bg);
+  border-bottom: 1px solid var(--border);
+}
+.toc-search input {
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+}
+.toc-search input:focus { border-color: var(--accent); }
+.toc-search.is-empty input { border-color: #dc2626; }
+.toc-search-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+.toc-search-count {
+  flex: 1 1 auto;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+.toc-search-btn {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.toc-search-btn:hover:not(:disabled) { background: var(--accent-light); border-color: var(--border); }
+.toc-search-btn:disabled { opacity: .35; cursor: default; }
+
+mark.search-hit {
+  background: #fde68a;
+  color: inherit;
+  border-radius: 2px;
+  scroll-margin-top: calc(var(--header-h) + 24px);
+}
+mark.search-hit.is-current {
+  background: #fb923c;
+  outline: 2px solid #ea580c;
+}
+@media (prefers-color-scheme: dark) {
+  mark.search-hit { background: #78591c; }
+  mark.search-hit.is-current { background: #c2620d; outline-color: #fdba74; }
+}
+
 /* ========== Print ========== */
 @media print {
   .header, .sidebar, .right-sidebar, .back-top, .menu-toggle, .sidebar-overlay { display: none !important; }
+  mark.search-hit, mark.search-hit.is-current { background: none; outline: none; }
   .main { margin: 0; padding: 0; max-width: 100%; }
   .chapter { break-inside: avoid; border: none; box-shadow: none; padding: 0; margin-bottom: 16px; }
   .part { break-before: page; }
@@ -1194,6 +1264,15 @@ hr {
 <aside class="sidebar">
 <nav id="toc" class="toc">
 <h2>目次</h2>
+<div class="toc-search" id="searchbar">
+  <input type="search" id="search-input" placeholder="🔍 テキスト内を検索" autocomplete="off" spellcheck="false" aria-label="テキスト内を検索">
+  <div class="toc-search-nav">
+    <span class="toc-search-count" id="search-count">0 / 0</span>
+    <button class="toc-search-btn" id="search-prev" title="前へ (Shift+Enter)" aria-label="前へ">↑</button>
+    <button class="toc-search-btn" id="search-next" title="次へ (Enter)" aria-label="次へ">↓</button>
+    <button class="toc-search-btn" id="search-close" title="クリア (Esc)" aria-label="クリア">✕</button>
+  </div>
+</div>
 <div class="toc-section">
   <a href="#" class="toc-section-title quiz-launcher" onclick="openQuiz();return false;">📝 ランダム問題演習</a>
 </div>
@@ -10141,6 +10220,203 @@ hr {
   };
 
   // --- Active TOC highlight + Notes sync ---
+  // --- ページ内検索（サイドバー常設 / 本文のみ）---
+  const searchbar = document.getElementById('searchbar');
+  const searchInput = document.getElementById('search-input');
+  const searchCount = document.getElementById('search-count');
+  const searchPrevBtn = document.getElementById('search-prev');
+  const searchNextBtn = document.getElementById('search-next');
+  const searchClearBtn = document.getElementById('search-close');
+  const SEARCH_LIMIT = 1000;          // ハイライト上限（1文字検索でのフリーズ防止）
+  const SEARCH_DEBOUNCE = 200;
+  let searchHits = [];                // 挿入した <mark> 要素
+  let searchIndex = -1;
+  let searchTruncated = false;
+  let searchTimer = null;
+  let searchComposing = false;        // IME 変換中
+
+  function anyModalOpen() {
+    return !!document.querySelector('.quiz-overlay.visible');
+  }
+
+  // <mark> を外して元のテキストノードに戻す（normalize まで行い DOM を検索前と同一にする）
+  function clearSearchHighlights() {
+    const parents = new Set();
+    searchHits.forEach(mark => {
+      const parent = mark.parentNode;
+      if (!parent) return;
+      parent.replaceChild(document.createTextNode(mark.textContent), mark);
+      parents.add(parent);
+    });
+    parents.forEach(p => p.normalize());
+    searchHits = [];
+    searchIndex = -1;
+    searchTruncated = false;
+  }
+
+  function searchTextNodes(root) {
+    const nodes = [];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        if (!node.nodeValue) return NodeFilter.FILTER_REJECT;
+        const tag = node.parentNode && node.parentNode.nodeName;
+        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'MARK') return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    let n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    return nodes;
+  }
+
+  // 本文（.chapter 配下）のテキストノードを走査して <mark class="search-hit"> で包む。
+  // 単一テキストノード内のマッチのみ拾う（<strong> 等でタグが割れた語は対象外）。
+  function highlightSearch(term) {
+    const needleLower = term.toLowerCase();
+    const chapters = main.querySelectorAll('.chapter');
+    for (let c = 0; c < chapters.length; c++) {
+      const nodes = searchTextNodes(chapters[c]);
+      for (let i = 0; i < nodes.length; i++) {
+        const raw = nodes[i].nodeValue;
+        const lower = raw.toLowerCase();
+        // toLowerCase で文字数が変わる稀な文字を含む場合は大文字小文字を区別して検索
+        const caseless = lower.length === raw.length;
+        const hay = caseless ? lower : raw;
+        const needle = caseless ? needleLower : term;
+        let target = nodes[i];
+        let consumed = 0;   // target の先頭が raw 上のどの位置か
+        let from = 0;
+        let idx;
+        while ((idx = hay.indexOf(needle, from)) !== -1) {
+          const matched = target.splitText(idx - consumed);
+          const rest = matched.splitText(needle.length);
+          const mark = document.createElement('mark');
+          mark.className = 'search-hit';
+          matched.parentNode.replaceChild(mark, matched);
+          mark.appendChild(matched);
+          searchHits.push(mark);
+          if (searchHits.length >= SEARCH_LIMIT) {
+            searchTruncated = true;
+            return;
+          }
+          target = rest;
+          consumed = idx + needle.length;
+          from = consumed;
+        }
+      }
+    }
+  }
+
+  function updateSearchCount() {
+    const total = searchHits.length + (searchTruncated ? '+' : '');
+    const current = searchHits.length ? searchIndex + 1 : 0;
+    searchCount.textContent = current + ' / ' + total;
+    const noHit = searchHits.length === 0;
+    searchPrevBtn.disabled = noHit;
+    searchNextBtn.disabled = noHit;
+  }
+
+  // closeNav: 手動ナビ（Enter / 上下ボタン）時のみ true。スマホではジャンプ後にサイドバーを閉じる
+  function setSearchCurrent(i, closeNav) {
+    if (!searchHits.length) {
+      searchIndex = -1;
+      updateSearchCount();
+      return;
+    }
+    if (searchIndex >= 0 && searchHits[searchIndex]) {
+      searchHits[searchIndex].classList.remove('is-current');
+    }
+    searchIndex = (i % searchHits.length + searchHits.length) % searchHits.length;
+    const el = searchHits[searchIndex];
+    el.classList.add('is-current');
+    if (closeNav && isMobile()) closeSidebar();
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    updateSearchCount();
+  }
+
+  function runSearch() {
+    clearSearchHighlights();
+    const term = searchInput.value;
+    if (!term) {
+      searchbar.classList.remove('is-empty');
+      updateSearchCount();
+      return;
+    }
+    highlightSearch(term);
+    searchbar.classList.toggle('is-empty', searchHits.length === 0);
+    if (searchHits.length) setSearchCurrent(0, false);
+    else updateSearchCount();
+  }
+
+  function scheduleSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(runSearch, SEARCH_DEBOUNCE);
+  }
+
+  // Ctrl+F: サイドバーの検索欄へフォーカス（スマホではサイドバーを開く）
+  function focusSearch() {
+    if (isMobile() && !sidebar.classList.contains('open')) toggleSidebar();
+    searchInput.focus();
+    searchInput.select();
+  }
+
+  function clearSearch() {
+    clearTimeout(searchTimer);
+    clearSearchHighlights();
+    searchInput.value = '';
+    searchbar.classList.remove('is-empty');
+    updateSearchCount();
+  }
+
+  if (searchbar && searchInput) {
+    searchInput.addEventListener('compositionstart', () => { searchComposing = true; });
+    searchInput.addEventListener('compositionend', () => {
+      searchComposing = false;
+      scheduleSearch();
+    });
+    searchInput.addEventListener('input', () => {
+      if (!searchComposing) scheduleSearch();
+    });
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      if (searchComposing || e.isComposing) return;   // 変換確定の Enter は無視
+      if (!searchHits.length) {
+        clearTimeout(searchTimer);
+        runSearch();
+        return;
+      }
+      setSearchCurrent(searchIndex + (e.shiftKey ? -1 : 1), true);
+    });
+    searchNextBtn.addEventListener('click', () => setSearchCurrent(searchIndex + 1, true));
+    searchPrevBtn.addEventListener('click', () => setSearchCurrent(searchIndex - 1, true));
+    searchClearBtn.addEventListener('click', () => {
+      clearSearch();
+      searchInput.focus();
+    });
+
+    // capture フェーズで拾い、Esc が既存ハンドラ（サイドバー/モーダル閉じ）へ伝播しないようにする
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) {
+        if (anyModalOpen()) return;   // クイズ系モーダル表示中はブラウザ標準の検索に委ねる
+        e.preventDefault();
+        focusSearch();
+        return;
+      }
+      if (e.key === 'Escape' && (searchInput.value || searchHits.length)) {
+        clearSearch();
+        // モーダル表示中はそのまま伝播させ、既存ハンドラでモーダルも閉じる
+        if (!anyModalOpen()) {
+          e.preventDefault();
+          e.stopPropagation();
+          searchInput.blur();
+        }
+      }
+    }, true);
+
+    updateSearchCount();
+  }
+
   const tocLinks = document.querySelectorAll('.toc-section li a');
   const chapters = document.querySelectorAll('.chapter');
   const tocObserver = new IntersectionObserver((entries) => {

@@ -928,6 +928,203 @@
   };
 
   // --- Active TOC highlight + Notes sync ---
+  // --- ページ内検索（サイドバー常設 / 本文のみ）---
+  const searchbar = document.getElementById('searchbar');
+  const searchInput = document.getElementById('search-input');
+  const searchCount = document.getElementById('search-count');
+  const searchPrevBtn = document.getElementById('search-prev');
+  const searchNextBtn = document.getElementById('search-next');
+  const searchClearBtn = document.getElementById('search-close');
+  const SEARCH_LIMIT = 1000;          // ハイライト上限（1文字検索でのフリーズ防止）
+  const SEARCH_DEBOUNCE = 200;
+  let searchHits = [];                // 挿入した <mark> 要素
+  let searchIndex = -1;
+  let searchTruncated = false;
+  let searchTimer = null;
+  let searchComposing = false;        // IME 変換中
+
+  function anyModalOpen() {
+    return !!document.querySelector('.quiz-overlay.visible');
+  }
+
+  // <mark> を外して元のテキストノードに戻す（normalize まで行い DOM を検索前と同一にする）
+  function clearSearchHighlights() {
+    const parents = new Set();
+    searchHits.forEach(mark => {
+      const parent = mark.parentNode;
+      if (!parent) return;
+      parent.replaceChild(document.createTextNode(mark.textContent), mark);
+      parents.add(parent);
+    });
+    parents.forEach(p => p.normalize());
+    searchHits = [];
+    searchIndex = -1;
+    searchTruncated = false;
+  }
+
+  function searchTextNodes(root) {
+    const nodes = [];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        if (!node.nodeValue) return NodeFilter.FILTER_REJECT;
+        const tag = node.parentNode && node.parentNode.nodeName;
+        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'MARK') return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    let n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    return nodes;
+  }
+
+  // 本文（.chapter 配下）のテキストノードを走査して <mark class="search-hit"> で包む。
+  // 単一テキストノード内のマッチのみ拾う（<strong> 等でタグが割れた語は対象外）。
+  function highlightSearch(term) {
+    const needleLower = term.toLowerCase();
+    const chapters = main.querySelectorAll('.chapter');
+    for (let c = 0; c < chapters.length; c++) {
+      const nodes = searchTextNodes(chapters[c]);
+      for (let i = 0; i < nodes.length; i++) {
+        const raw = nodes[i].nodeValue;
+        const lower = raw.toLowerCase();
+        // toLowerCase で文字数が変わる稀な文字を含む場合は大文字小文字を区別して検索
+        const caseless = lower.length === raw.length;
+        const hay = caseless ? lower : raw;
+        const needle = caseless ? needleLower : term;
+        let target = nodes[i];
+        let consumed = 0;   // target の先頭が raw 上のどの位置か
+        let from = 0;
+        let idx;
+        while ((idx = hay.indexOf(needle, from)) !== -1) {
+          const matched = target.splitText(idx - consumed);
+          const rest = matched.splitText(needle.length);
+          const mark = document.createElement('mark');
+          mark.className = 'search-hit';
+          matched.parentNode.replaceChild(mark, matched);
+          mark.appendChild(matched);
+          searchHits.push(mark);
+          if (searchHits.length >= SEARCH_LIMIT) {
+            searchTruncated = true;
+            return;
+          }
+          target = rest;
+          consumed = idx + needle.length;
+          from = consumed;
+        }
+      }
+    }
+  }
+
+  function updateSearchCount() {
+    const total = searchHits.length + (searchTruncated ? '+' : '');
+    const current = searchHits.length ? searchIndex + 1 : 0;
+    searchCount.textContent = current + ' / ' + total;
+    const noHit = searchHits.length === 0;
+    searchPrevBtn.disabled = noHit;
+    searchNextBtn.disabled = noHit;
+  }
+
+  // closeNav: 手動ナビ（Enter / 上下ボタン）時のみ true。スマホではジャンプ後にサイドバーを閉じる
+  function setSearchCurrent(i, closeNav) {
+    if (!searchHits.length) {
+      searchIndex = -1;
+      updateSearchCount();
+      return;
+    }
+    if (searchIndex >= 0 && searchHits[searchIndex]) {
+      searchHits[searchIndex].classList.remove('is-current');
+    }
+    searchIndex = (i % searchHits.length + searchHits.length) % searchHits.length;
+    const el = searchHits[searchIndex];
+    el.classList.add('is-current');
+    if (closeNav && isMobile()) closeSidebar();
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    updateSearchCount();
+  }
+
+  function runSearch() {
+    clearSearchHighlights();
+    const term = searchInput.value;
+    if (!term) {
+      searchbar.classList.remove('is-empty');
+      updateSearchCount();
+      return;
+    }
+    highlightSearch(term);
+    searchbar.classList.toggle('is-empty', searchHits.length === 0);
+    if (searchHits.length) setSearchCurrent(0, false);
+    else updateSearchCount();
+  }
+
+  function scheduleSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(runSearch, SEARCH_DEBOUNCE);
+  }
+
+  // Ctrl+F: サイドバーの検索欄へフォーカス（スマホではサイドバーを開く）
+  function focusSearch() {
+    if (isMobile() && !sidebar.classList.contains('open')) toggleSidebar();
+    searchInput.focus();
+    searchInput.select();
+  }
+
+  function clearSearch() {
+    clearTimeout(searchTimer);
+    clearSearchHighlights();
+    searchInput.value = '';
+    searchbar.classList.remove('is-empty');
+    updateSearchCount();
+  }
+
+  if (searchbar && searchInput) {
+    searchInput.addEventListener('compositionstart', () => { searchComposing = true; });
+    searchInput.addEventListener('compositionend', () => {
+      searchComposing = false;
+      scheduleSearch();
+    });
+    searchInput.addEventListener('input', () => {
+      if (!searchComposing) scheduleSearch();
+    });
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      if (searchComposing || e.isComposing) return;   // 変換確定の Enter は無視
+      if (!searchHits.length) {
+        clearTimeout(searchTimer);
+        runSearch();
+        return;
+      }
+      setSearchCurrent(searchIndex + (e.shiftKey ? -1 : 1), true);
+    });
+    searchNextBtn.addEventListener('click', () => setSearchCurrent(searchIndex + 1, true));
+    searchPrevBtn.addEventListener('click', () => setSearchCurrent(searchIndex - 1, true));
+    searchClearBtn.addEventListener('click', () => {
+      clearSearch();
+      searchInput.focus();
+    });
+
+    // capture フェーズで拾い、Esc が既存ハンドラ（サイドバー/モーダル閉じ）へ伝播しないようにする
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) {
+        if (anyModalOpen()) return;   // クイズ系モーダル表示中はブラウザ標準の検索に委ねる
+        e.preventDefault();
+        focusSearch();
+        return;
+      }
+      if (e.key === 'Escape' && (searchInput.value || searchHits.length)) {
+        clearSearch();
+        // モーダル表示中はそのまま伝播させ、既存ハンドラでモーダルも閉じる
+        if (!anyModalOpen()) {
+          e.preventDefault();
+          e.stopPropagation();
+          searchInput.blur();
+        }
+      }
+    }, true);
+
+    updateSearchCount();
+  }
+
   const tocLinks = document.querySelectorAll('.toc-section li a');
   const chapters = document.querySelectorAll('.chapter');
   const tocObserver = new IntersectionObserver((entries) => {

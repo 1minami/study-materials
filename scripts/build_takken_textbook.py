@@ -168,6 +168,15 @@ def add_ids_to_headings(html: str, prefix: str) -> str:
 def build_toc(sections: dict) -> str:
     """目次HTMLを生成"""
     toc = '<nav id="toc" class="toc">\n<h2>目次</h2>\n'
+    toc += '<div class="toc-search" id="searchbar">\n'
+    toc += '  <input type="search" id="search-input" placeholder="🔍 テキスト内を検索" autocomplete="off" spellcheck="false" aria-label="テキスト内を検索">\n'
+    toc += '  <div class="toc-search-nav">\n'
+    toc += '    <span class="toc-search-count" id="search-count">0 / 0</span>\n'
+    toc += '    <button class="toc-search-btn" id="search-prev" title="前へ (Shift+Enter)" aria-label="前へ">↑</button>\n'
+    toc += '    <button class="toc-search-btn" id="search-next" title="次へ (Enter)" aria-label="次へ">↓</button>\n'
+    toc += '    <button class="toc-search-btn" id="search-close" title="クリア (Esc)" aria-label="クリア">✕</button>\n'
+    toc += '  </div>\n'
+    toc += '</div>\n'
     toc += '<div class="toc-section">\n'
     toc += '  <a href="#" class="toc-section-title quiz-launcher" onclick="openQuiz();return false;">📝 ランダム問題演習</a>\n'
     toc += '</div>\n'
