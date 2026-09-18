@@ -885,52 +885,11 @@ hr {
   line-height: 1.9;
   margin-bottom: 16px;
 }
-/* --- スワイプカード（右 = ⭕ / 左 = ❌）--- */
-.mb-card {
-  position: relative;
-  touch-action: pan-y;          /* 縦スクロールはブラウザに残し、横だけ JS が拾う */
-  user-select: none;
-  -webkit-user-select: none;
-  will-change: transform;
-}
-.mb-card.is-dragging { cursor: grabbing; }
-.mb-card.is-returning { transition: transform .2s ease; }
-.mb-card.is-flying { transition: transform .25s ease-out, opacity .25s ease-out; }
-.mb-card.is-correct .marubatsu-statement { border-left-color: #15803d; }
-.mb-card.is-wrong .marubatsu-statement { border-left-color: #b91c1c; }
-.mb-stamp {
-  position: absolute;
-  top: 12px;
-  z-index: 1;
-  padding: 4px 12px;
-  border: 3px solid;
-  border-radius: 8px;
-  font-size: 17px;
-  font-weight: 900;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-}
-.mb-stamp-o {
-  left: 12px;
-  transform: rotate(-12deg);
-  color: #15803d;
-  border-color: #15803d;
-  background: rgba(220,252,231,.92);
-}
-.mb-stamp-x {
-  right: 12px;
-  transform: rotate(12deg);
-  color: #b91c1c;
-  border-color: #b91c1c;
-  background: rgba(254,226,226,.92);
-}
-@media (prefers-color-scheme: dark) {
-  .mb-stamp-o { color: #86efac; border-color: #86efac; background: rgba(20,83,45,.92); }
-  .mb-stamp-x { color: #fca5a5; border-color: #fca5a5; background: rgba(69,10,10,.92); }
-}
+/* 回答後は問題文の左罫を正誤で色分け */
+.marubatsu-statement.is-correct { border-left-color: #15803d; }
+.marubatsu-statement.is-wrong { border-left-color: #b91c1c; }
 
-/* --- 回答バー（フッター固定。左 = ❌ / 右 = ⭕ でスワイプ方向と一致）--- */
+/* --- 回答バー（フッター固定。左 = ⭕ / 右 = ❌ でキー操作と一致）--- */
 .mb-answer-bar {
   display: flex;
   gap: 12px;
@@ -1003,7 +962,6 @@ hr {
     min-height: 56px;
     font-size: 16px;
   }
-  .mb-stamp { font-size: 15px; }
 }
 .mb-review-perfect {
   text-align: center;

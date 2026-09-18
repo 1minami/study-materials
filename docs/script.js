@@ -405,9 +405,6 @@
   let mbWrong = [];
   let mbSize = MARUBATSU_SIZE_DEFAULT;
   let mbSelectedCats = null;
-  let mbLock = false;    // カードのフライアウト中は回答を受け付けない
-  let mbDrag = null;     // ドラッグ中の状態（pointerId / 起点座標 / カード要素）
-  let mbFlyTimer = null; // フライアウト完了タイマー（閉じたら破棄する）
 
   async function loadMbPool() {
     if (mbPool) return mbPool;
@@ -431,15 +428,15 @@
     return shuffle(filtered).slice(0, Math.min(mbSize, filtered.length));
   }
 
-  // 回答ボタンはフッター固定（スマホで親指が届く位置）。左 = ❌ / 右 = ⭕ でスワイプ方向と揃える
+  // 回答ボタンはフッター固定（スマホで親指が届く位置）。左 = ⭕ / 右 = ❌ でキー操作と揃える
   function showMbAnswerBar() {
     if (!mbAnswerBar) return;
     mbAnswerBar.innerHTML = `
-      <button type="button" class="marubatsu-btn" data-ans="false">❌ 誤り</button>
-      <button type="button" class="marubatsu-btn" data-ans="true">⭕ 正しい</button>`;
+      <button type="button" class="marubatsu-btn" data-ans="true">⭕ 正しい</button>
+      <button type="button" class="marubatsu-btn" data-ans="false">❌ 誤り</button>`;
     mbAnswerBar.hidden = false;
     mbAnswerBar.querySelectorAll('.marubatsu-btn').forEach(btn => {
-      btn.addEventListener('click', () => mbAnswerByGesture(btn.dataset.ans === 'true'));
+      btn.addEventListener('click', () => answerMb(btn.dataset.ans === 'true'));
     });
   }
 
@@ -452,111 +449,17 @@
   function renderMb() {
     const q = mbSet[mbIdx];
     mbAnswered = false;
-    mbLock = false;
-    mbDrag = null;
     mbNextBtn.hidden = true;
     mbNextBtn.textContent = (mbIdx === mbSet.length - 1) ? '結果を見る ▶' : '次の問題 ▶';
     mbProgress.textContent = `${mbIdx + 1} / ${mbSet.length}（正解 ${mbScore}）`;
 
     const path = [q.category, q.section].filter(Boolean).map(escapeHtml).join(' ／ ');
     const meta = `<div class="quiz-meta"><span class="quiz-q-num">Q${mbIdx + 1}</span><span class="quiz-chapter">${path}</span></div>`;
-    const card = `<div class="mb-card" id="mb-card">
-      <div class="mb-stamp mb-stamp-o" aria-hidden="true">⭕ 正しい</div>
-      <div class="mb-stamp mb-stamp-x" aria-hidden="true">❌ 誤り</div>
-      <div class="marubatsu-statement">${escapeHtml(q.statement)}</div>
-    </div>`;
-    mbBody.innerHTML = meta + card + `<div class="quiz-explanation" id="mb-explanation" hidden></div>`;
+    const stmt = `<div class="marubatsu-statement" id="mb-statement">${escapeHtml(q.statement)}</div>`;
+    mbBody.innerHTML = meta + stmt + `<div class="quiz-explanation" id="mb-explanation" hidden></div>`;
 
-    bindMbSwipe(document.getElementById('mb-card'));
     showMbAnswerBar();
     mbBody.scrollTop = 0;
-  }
-
-  // --- カードスワイプ（右 = ⭕ / 左 = ❌）---
-  function mbSwipeThreshold(card) {
-    return Math.min(120, Math.max(48, card.offsetWidth * 0.25));
-  }
-
-  function mbSetCardTransform(card, dx) {
-    card.style.transform = `translateX(${dx}px) rotate(${dx / 20}deg)`;
-    const ratio = Math.min(Math.abs(dx) / mbSwipeThreshold(card), 1);
-    const stampO = card.querySelector('.mb-stamp-o');
-    const stampX = card.querySelector('.mb-stamp-x');
-    if (stampO) stampO.style.opacity = dx > 0 ? ratio : 0;
-    if (stampX) stampX.style.opacity = dx < 0 ? ratio : 0;
-  }
-
-  function bindMbSwipe(card) {
-    if (!card) return;
-    card.addEventListener('pointerdown', (e) => {
-      if (mbAnswered || mbLock) return;
-      if (e.pointerType === 'mouse' && e.button !== 0) return;
-      mbDrag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, active: false, card };
-    });
-    card.addEventListener('pointermove', (e) => {
-      if (!mbDrag || e.pointerId !== mbDrag.id || mbAnswered || mbLock) return;
-      const dx = e.clientX - mbDrag.x0;
-      const dy = e.clientY - mbDrag.y0;
-      if (!mbDrag.active) {
-        if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.2) {
-          mbDrag.active = true;
-          card.classList.add('is-dragging');
-          try { card.setPointerCapture(e.pointerId); } catch (_) {}
-        } else if (Math.abs(dy) > 10) {
-          mbDrag = null;   // 縦スクロール優先。このジェスチャは手放す
-          return;
-        } else {
-          return;
-        }
-      }
-      e.preventDefault();
-      mbDrag.dx = dx;
-      mbSetCardTransform(card, dx);
-    });
-    const onUp = (e) => {
-      if (!mbDrag || e.pointerId !== mbDrag.id) return;
-      const dx = mbDrag.dx;
-      const wasActive = mbDrag.active;
-      mbDrag = null;
-      card.classList.remove('is-dragging');
-      if (!wasActive) return;
-      if (Math.abs(dx) >= mbSwipeThreshold(card)) {
-        mbFlyOut(card, dx > 0);
-      } else {
-        card.classList.add('is-returning');
-        mbSetCardTransform(card, 0);
-        setTimeout(() => card.classList.remove('is-returning'), 200);
-      }
-    };
-    card.addEventListener('pointerup', onUp);
-    card.addEventListener('pointercancel', onUp);
-  }
-
-  // カードを飛ばしてから回答確定。カード自体は元位置に戻す（問題文を読み返せるように）
-  function mbFlyOut(card, userAns) {
-    mbLock = true;
-    card.classList.add('is-flying');
-    card.style.transform = `translateX(${userAns ? 140 : -140}%) rotate(${userAns ? 18 : -18}deg)`;
-    card.style.opacity = '0';
-    clearTimeout(mbFlyTimer);
-    mbFlyTimer = setTimeout(() => {
-      mbFlyTimer = null;
-      mbLock = false;
-      if (card.isConnected) {
-        card.classList.remove('is-flying');
-        card.style.opacity = '';
-        mbSetCardTransform(card, 0);
-      }
-      answerMb(userAns);
-    }, 250);
-  }
-
-  // ボタン・キー・スワイプの共通入口（カードがあれば飛ばす演出を挟む）
-  function mbAnswerByGesture(userAns) {
-    if (mbAnswered || mbLock) return;
-    const card = document.getElementById('mb-card');
-    if (card) mbFlyOut(card, userAns);
-    else answerMb(userAns);
   }
 
   function answerMb(userAns) {
@@ -570,8 +473,8 @@
     // 回答バーは「次の問題」ボタンに場所を譲る
     hideMbAnswerBar();
 
-    const card = document.getElementById('mb-card');
-    if (card) card.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
+    const stmtEl = document.getElementById('mb-statement');
+    if (stmtEl) stmtEl.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
 
     const expl = document.getElementById('mb-explanation');
     const ansLabel = q.answer ? '⭕ 正しい' : '❌ 誤り';
@@ -716,8 +619,6 @@
     mbNextBtn.hidden = true;
     hideMbAnswerBar();
     mbAnswered = false;
-    mbLock = false;
-    mbDrag = null;
 
     const pool = await loadMbPool();
     if (!pool || pool.length === 0) {
@@ -731,24 +632,19 @@
     if (!mbOverlay) return;
     mbOverlay.classList.remove('visible');
     document.body.style.overflow = '';
-    mbDrag = null;
-    clearTimeout(mbFlyTimer);   // 閉じた後にスコアが加算されないよう破棄
-    mbFlyTimer = null;
-    mbLock = false;
   };
 
-  // --- Marubatsu キーボード回答（→ = ⭕ / ← = ❌ / 回答後は ← → で次へ）※スワイプ方向と揃える ---
+  // --- Marubatsu キーボード回答（← = ⭕ / → = ❌ / 回答後は ← → で次へ）---
   document.addEventListener('keydown', (e) => {
     // 一問一答モーダルを持たないページ（takken-textbook.html）でも読み込まれる
     if (!mbOverlay) return;
     if (!mbOverlay.classList.contains('visible')) return;
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
     if (e.repeat) return; // 長押しリピートで解説を飛ばさない
-    if (mbLock) return;   // カードのフライアウト中
     if (!mbAnswered) {
-      if (!document.getElementById('mb-card')) return;
+      if (!document.getElementById('mb-statement')) return;
       e.preventDefault();
-      mbAnswerByGesture(e.key === 'ArrowRight');
+      answerMb(e.key === 'ArrowLeft');
     } else if (!mbNextBtn.hidden) {
       e.preventDefault();
       nextMarubatsu();
