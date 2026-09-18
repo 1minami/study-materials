@@ -8006,8 +8006,9 @@
       <button class="quiz-close" onclick="closeMarubatsu()" aria-label="閉じる">✕</button>
     </div>
     <div class="quiz-body" id="marubatsu-body"></div>
-    <div class="quiz-footer">
-      <span class="mb-key-hint">← ⭕　→ ❌　回答後 ←→ 次へ</span>
+    <div class="quiz-footer mb-footer">
+      <span class="mb-key-hint">→ ⭕　← ❌　回答後 ←→ 次へ（スワイプ可）</span>
+      <div class="mb-answer-bar" id="mb-answer-bar" hidden></div>
       <button class="quiz-btn quiz-btn-primary" id="marubatsu-next-btn" onclick="nextMarubatsu()" hidden>次の問題 ▶</button>
     </div>
   </div>

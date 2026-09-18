@@ -885,12 +885,59 @@ hr {
   line-height: 1.9;
   margin-bottom: 16px;
 }
-.marubatsu-buttons {
+/* --- スワイプカード（右 = ⭕ / 左 = ❌）--- */
+.mb-card {
+  position: relative;
+  touch-action: pan-y;          /* 縦スクロールはブラウザに残し、横だけ JS が拾う */
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform;
+}
+.mb-card.is-dragging { cursor: grabbing; }
+.mb-card.is-returning { transition: transform .2s ease; }
+.mb-card.is-flying { transition: transform .25s ease-out, opacity .25s ease-out; }
+.mb-card.is-correct .marubatsu-statement { border-left-color: #15803d; }
+.mb-card.is-wrong .marubatsu-statement { border-left-color: #b91c1c; }
+.mb-stamp {
+  position: absolute;
+  top: 12px;
+  z-index: 1;
+  padding: 4px 12px;
+  border: 3px solid;
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: 900;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+.mb-stamp-o {
+  left: 12px;
+  transform: rotate(-12deg);
+  color: #15803d;
+  border-color: #15803d;
+  background: rgba(220,252,231,.92);
+}
+.mb-stamp-x {
+  right: 12px;
+  transform: rotate(12deg);
+  color: #b91c1c;
+  border-color: #b91c1c;
+  background: rgba(254,226,226,.92);
+}
+@media (prefers-color-scheme: dark) {
+  .mb-stamp-o { color: #86efac; border-color: #86efac; background: rgba(20,83,45,.92); }
+  .mb-stamp-x { color: #fca5a5; border-color: #fca5a5; background: rgba(69,10,10,.92); }
+}
+
+/* --- 回答バー（フッター固定。左 = ❌ / 右 = ⭕ でスワイプ方向と一致）--- */
+.mb-answer-bar {
   display: flex;
   gap: 12px;
+  flex: 1;
   justify-content: center;
-  margin-bottom: 12px;
 }
+.mb-answer-bar[hidden] { display: none; }
 .marubatsu-btn {
   flex: 1;
   max-width: 200px;
@@ -913,26 +960,6 @@ hr {
   background: var(--accent-light);
 }
 .marubatsu-btn:disabled { cursor: default; opacity: .7; }
-.marubatsu-btn.correct {
-  border-color: #15803d;
-  background: #dcfce7;
-  color: #15803d;
-}
-.marubatsu-btn.wrong {
-  border-color: #b91c1c;
-  background: #fee2e2;
-  color: #b91c1c;
-}
-.marubatsu-btn.muted {
-  opacity: .4;
-}
-@media (prefers-color-scheme: dark) {
-  .marubatsu-btn.correct { background: #14532d; color: #86efac; }
-  .marubatsu-btn.wrong { background: #450a0a; color: #fca5a5; }
-}
-@media (max-width: 768px) {
-  .marubatsu-btn { font-size: 18px; padding: 12px 16px; }
-}
 .mb-key-hint {
   margin-right: auto;
   align-self: center;
@@ -942,6 +969,41 @@ hr {
 }
 @media (max-width: 768px) {
   .mb-key-hint { display: none; }
+}
+
+/* --- スマホ: 全画面モーダル + 下部固定の大きい回答ボタン --- */
+@media (max-width: 768px) {
+  #marubatsu-overlay { padding: 0; }
+  #marubatsu-overlay .quiz-modal {
+    max-width: none;
+    border-radius: 0;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+  }
+  #marubatsu-overlay .quiz-header {
+    padding: 14px 16px;
+    padding-top: calc(14px + env(safe-area-inset-top, 0px));
+  }
+  #marubatsu-overlay .quiz-body { padding: 16px; }
+  #marubatsu-overlay .quiz-footer {
+    gap: 10px;
+    padding: 10px 16px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  #marubatsu-overlay .marubatsu-btn {
+    max-width: none;
+    min-height: 56px;
+    padding: 12px 8px;
+    font-size: 18px;
+  }
+  #marubatsu-overlay #marubatsu-next-btn {
+    flex: 1;
+    min-height: 56px;
+    font-size: 16px;
+  }
+  .mb-stamp { font-size: 15px; }
 }
 .mb-review-perfect {
   text-align: center;
