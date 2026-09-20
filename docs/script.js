@@ -332,6 +332,20 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  // 解説文の軽量 Markdown 変換（**太字** / `code` / 行頭リスト）。
+  // 解説は教材 Markdown から生成されるため記法が混じる。4択・一問一答で共用
+  function explanationToHtml(text) {
+    if (text == null || text === '') return '';
+    return String(text).split('\n').map(line => {
+      let html = escapeHtml(line);
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+      html = html.replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>');
+      const listM = html.match(/^\s*(?:[-*]|\d+\.)\s+(.*)$/);
+      if (listM) return '<div class="expl-li">・' + listM[1] + '</div>';
+      return '<div class="expl-line">' + html + '</div>';
+    }).join('');
+  }
+
   function shuffle(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -423,7 +437,7 @@
     const verdict = isCorrect
       ? '<span class="quiz-verdict ok">○ 正解</span>'
       : `<span class="quiz-verdict ng">× 不正解（正解: ${correct}）</span>`;
-    expl.innerHTML = verdict + `<div class="quiz-explanation-body">${escapeHtml(q.explanation || '').replace(/\n/g, '<br>')}</div>`;
+    expl.innerHTML = verdict + `<div class="quiz-explanation-body">${explanationToHtml(q.explanation)}</div>`;
     expl.hidden = false;
 
     quizProgress.textContent = `${quizIdx + 1} / ${quizSet.length}（正解 ${quizScore}）`;
@@ -574,7 +588,7 @@
     const verdict = isCorrect
       ? '<span class="quiz-verdict ok">○ 正解</span>'
       : `<span class="quiz-verdict ng">× 不正解（あなた: ${userLabel} ／ 正解: ${ansLabel}）</span>`;
-    expl.innerHTML = verdict + `<div class="quiz-explanation-body">${escapeHtml(q.explanation || '').replace(/\n/g, '<br>')}</div>`;
+    expl.innerHTML = verdict + `<div class="quiz-explanation-body">${explanationToHtml(q.explanation)}</div>`;
     expl.hidden = false;
 
     mbProgress.textContent = `${mbIdx + 1} / ${mbSet.length}（正解 ${mbScore}）`;
@@ -599,7 +613,7 @@
       const items = mbWrong.map((q, i) => {
         const path = [q.category, q.section].filter(Boolean).map(escapeHtml).join(' ／ ');
         const ansLabel = q.answer ? '⭕ 正しい' : '❌ 誤り';
-        const expl = escapeHtml(q.explanation || '').replace(/\n/g, '<br>');
+        const expl = explanationToHtml(q.explanation);
         return `<li class="mb-review-item">
           <div class="quiz-meta"><span class="quiz-q-num">${i + 1}</span><span class="quiz-chapter">${path}</span></div>
           <div class="mb-review-statement">${escapeHtml(q.statement)}</div>
