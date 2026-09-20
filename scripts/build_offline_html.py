@@ -8,8 +8,8 @@ marubatsu.json / fillin.json）をソースとし、CSS・JS・JSONをすべて�
 出力ファイル:
   - docs/takken-offline.html (GitHub Pages からダウンロード可能)
 
-注意: templates/ と build_takken_textbook.py は一問一答機能が未反映（陳腐化）のため、
-本スクリプトは docs/ の現行ファイルのみを参照する。
+ソースは docs/ の現行ファイル（build_takken_textbook.py の出力 + docs 直管理の
+marubatsu.json）。本スクリプトは build_takken_textbook.py の実行後に流すこと。
 """
 
 import json

@@ -325,6 +325,7 @@
   let quizIdx = 0;
   let quizScore = 0;
   let quizAnswered = false;
+  let quizWrong = [];   // セッション内のみ保持（結果画面の「間違えた問題」一覧用）
 
   function escapeHtml(s) {
     return String(s)
@@ -425,6 +426,7 @@
     const correct = q.answer;
     const isCorrect = (n === correct);
     if (isCorrect) quizScore++;
+    else quizWrong.push({ q, chosen: n });
 
     quizBody.querySelectorAll('.quiz-choice').forEach(btn => {
       const v = parseInt(btn.dataset.n, 10);
@@ -450,9 +452,35 @@
     const total = quizSet.length;
     const pct = total ? Math.round((quizScore / total) * 100) : 0;
     quizProgress.textContent = `終了`;
-    quizBody.innerHTML = `
-      <div class="quiz-score">スコア ${quizScore} / ${total}（正答率 ${pct}%）</div>
-    `;
+
+    const score = `<div class="quiz-score">スコア ${quizScore} / ${total}（正答率 ${pct}%）</div>`;
+    let review;
+    if (quizWrong.length === 0) {
+      review = '<div class="mb-review-perfect">全問正解 🎉</div>';
+    } else {
+      // 一覧の見た目は一問一答の結果画面と共通（.mb-review-* を流用）
+      const items = quizWrong.map((w, i) => {
+        const q = w.q;
+        const path = [q.category, q.section, q.source].filter(Boolean).map(escapeHtml).join(' ／ ');
+        const correctText = escapeHtml(q.choices[q.answer - 1] || '');
+        const chosenText = escapeHtml(q.choices[w.chosen - 1] || '');
+        const expl = explanationToHtml(q.explanation);
+        return `<li class="mb-review-item">
+          <div class="quiz-meta"><span class="quiz-q-num">${i + 1}</span><span class="quiz-chapter">${path}</span></div>
+          <div class="mb-review-statement">${escapeHtml(q.question).replace(/\n/g, '<br>')}</div>
+          <div class="mb-review-answer">正解: ${q.answer}　${correctText}</div>
+          <div class="mb-review-chosen">あなたの回答: ${w.chosen}　${chosenText}</div>
+          ${expl ? `<div class="mb-review-explanation">${expl}</div>` : ''}
+        </li>`;
+      }).join('');
+      review = `<div class="mb-review">
+        <div class="mb-review-title">間違えた問題（${quizWrong.length}問）</div>
+        <ol class="mb-review-list">${items}</ol>
+      </div>`;
+    }
+
+    quizBody.innerHTML = score + review;
+    quizBody.scrollTop = 0;
     quizNextBtn.disabled = true;
     quizNextBtn.textContent = '次の問題 ▶';
   }
@@ -484,6 +512,7 @@
     quizSet = shuffle(pool).slice(0, Math.min(QUIZ_SIZE, pool.length));
     quizIdx = 0;
     quizScore = 0;
+    quizWrong = [];
     renderQuestion();
   };
 

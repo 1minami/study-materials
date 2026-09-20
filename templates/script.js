@@ -128,11 +128,85 @@
   const quizTextbookIframe = document.getElementById('quiz-textbook-iframe');
   const quizTextbookPane = document.getElementById('quiz-textbook-pane');
   const SECTION_TO_ID = {"37条書面":"09-宅建業法②業務規制-16","8種制限（自ら売主制限）":"10-宅建業法③報酬・監督-2","その他の法令上の制限":"00-試験概要-7","その他の税（国税・地方税の横断整理）":"17-税・価格-1","クーリング・オフ":"09-宅建業法②業務規制-27","不動産取得税":"17-税・価格-2","不動産登記法":"07-不動産登記法-1","不動産鑑定評価基準":"17-税・価格-33","不法行為・使用者責任":"03-民法債権-30","代理":"01-民法総則-12","住宅瑕疵担保履行法":"10-宅建業法③報酬・監督-22","借地借家法":"05-借地借家法-1","債務不履行・契約不適合責任":"03-民法債権-2","免許制度":"08-宅建業法①総則・免許-7","区分所有法":"06-区分所有法-1","印紙税":"17-税・価格-25","営業保証金・保証協会":"08-宅建業法①総則・免許-17","固定資産税":"17-税・価格-9","国土利用計画法":"13-国土利用計画法-1","土地区画整理法":"15-土地区画整理法-1","地価公示法":"17-税・価格-30","報酬に関する制限":"10-宅建業法③報酬・監督-11","媒介契約":"09-宅建業法②業務規制-6","宅地建物取引士":"00-試験概要-1","宅地造成等規制法（盛土規制法）":"16-盛土規制法-1","広告・その他の業務規制":"09-宅建業法②業務規制-23","建築基準法 ─ 建蔽率・容積率":"12-建築基準法-11","建築基準法 ─ 用途制限・道路・その他":"12-建築基準法-10","意思表示":"01-民法総則-5","所得税（譲渡所得）":"17-税・価格-15","抵当権":"02-民法物権-22","時効":"01-民法総則-19","物権変動":"02-民法物権-2","登録免許税":"17-税・価格-22","監督処分・罰則":"10-宅建業法③報酬・監督-18","相続":"04-民法親族相続-1","賃貸借":"03-民法債権-12","贈与税・相続税（税制改正関連）":"17-税・価格-1","農地法":"14-農地法-1","都市計画法 ─ 都市計画の内容":"11-都市計画法-1","都市計画法 ─ 開発許可制度":"11-都市計画法-7","重要事項説明（35条書面）":"09-宅建業法②業務規制-9"};
-  // --- 演習 → 学習メモへの追加（PC のみ / 4択演習） ---
+  // --- 演習 → 学習メモへの追加（PC のみ / 4択演習・一問一答） ---
+  // 一問一答（marubatsu.json）の section 表記は 4択（quiz.json）と異なるため別マップを持つ
+  const MB_SECTION_TO_CHAPTER = {
+    // 権利関係
+    "制限行為能力者": "01-民法総則",
+    "意思表示": "01-民法総則",
+    "代理": "01-民法総則",
+    "時効": "01-民法総則",
+    "条件": "01-民法総則",
+    "物権変動": "02-民法物権",
+    "共有": "02-民法物権",
+    "抵当権": "02-民法物権",
+    "相隣関係": "02-民法物権",
+    "債務不履行": "03-民法債権",
+    "危険負担": "03-民法債権",
+    "契約不適合責任": "03-民法債権",
+    "売買": "03-民法債権",
+    "賃貸借": "03-民法債権",
+    "連帯債務": "03-民法債権",
+    "保証": "03-民法債権",
+    "不法行為": "03-民法債権",
+    "債権譲渡": "03-民法債権",
+    "相殺": "03-民法債権",
+    "相続": "04-民法親族相続",
+    "遺言": "04-民法親族相続",
+    "遺留分": "04-民法親族相続",
+    "配偶者居住権": "04-民法親族相続",
+    "借地借家法": "05-借地借家法",
+    "区分所有法": "06-区分所有法",
+    "不動産登記法": "07-不動産登記法",
+    // 宅建業法
+    "宅建業の定義": "08-宅建業法①総則・免許",
+    "免許制度": "08-宅建業法①総則・免許",
+    "欠格事由": "08-宅建業法①総則・免許",
+    "事務所": "08-宅建業法①総則・免許",
+    "案内所等": "08-宅建業法①総則・免許",
+    "営業保証金": "08-宅建業法①総則・免許",
+    "保証協会": "08-宅建業法①総則・免許",
+    "宅地建物取引士": "09-宅建業法②業務規制",
+    "媒介契約": "09-宅建業法②業務規制",
+    "重要事項説明": "09-宅建業法②業務規制",
+    "37条書面": "09-宅建業法②業務規制",
+    "広告等の規制": "09-宅建業法②業務規制",
+    "その他の業務規制": "09-宅建業法②業務規制",
+    "クーリング・オフ": "09-宅建業法②業務規制",
+    "8種制限": "10-宅建業法③報酬・監督",
+    "報酬": "10-宅建業法③報酬・監督",
+    "監督処分": "10-宅建業法③報酬・監督",
+    "住宅瑕疵担保履行法": "10-宅建業法③報酬・監督",
+    // 法令上の制限
+    "都市計画法": "11-都市計画法",
+    "建築基準法": "12-建築基準法",
+    "国土利用計画法": "13-国土利用計画法",
+    "農地法": "14-農地法",
+    "土地区画整理法": "15-土地区画整理法",
+    "盛土規制法": "16-盛土規制法",
+    // 税・価格
+    "不動産取得税": "17-税・価格",
+    "固定資産税": "17-税・価格",
+    "所得税": "17-税・価格",
+    "登録免許税": "17-税・価格",
+    "印紙税": "17-税・価格",
+    "地価公示法": "17-税・価格",
+    "不動産鑑定評価": "17-税・価格",
+    // 免除科目
+    "住宅金融支援機構": "18-免除科目",
+    "景品表示法": "18-免除科目",
+    "土地の知識": "18-免除科目",
+    "建物の知識": "18-免除科目"
+  };
+
   function chapterIdForSection(section) {
     const anchorId = SECTION_TO_ID[section];
     if (!anchorId) return null;
     return anchorId.replace(/-\d+$/, '');
+  }
+
+  function mbChapterIdForSection(section) {
+    return MB_SECTION_TO_CHAPTER[section] || null;
   }
 
   function quizNoteKey(chapterId) { return 'takken-note-' + chapterId; }
@@ -165,11 +239,22 @@
     return lines.join('\n');
   }
 
-  function appendQuizNote(q, memo) {
-    const chapterId = chapterIdForSection(q.section);
+  function buildMbNoteEntry(q, memo) {
+    const topic = [q.category, q.section].filter(Boolean).join('／');
+    const lines = ['--- 一問一答 ' + quizNoteToday() + ' ' + quizNoteMarker(q) + ' ---'];
+    if (topic) lines.push('論点: ' + topic);
+    // ○× は問題文がないと後から読めないため statement ごと残す
+    if (q.statement) {
+      lines.push('問題: ' + String(q.statement).trim() + '（正解: ' + (q.answer ? '⭕ 正しい' : '❌ 誤り') + '）');
+    }
+    if (q.explanation) lines.push('解説: ' + String(q.explanation).trim());
+    if (memo && memo.trim()) lines.push('メモ: ' + memo.trim());
+    return lines.join('\n');
+  }
+
+  function appendNote(chapterId, entry) {
     if (!chapterId) return null;
     const cur = readNoteBody(chapterId);
-    const entry = buildQuizNoteEntry(q, memo);
     const next = cur ? (cur.replace(/\s+$/, '') + '\n\n' + entry) : entry;
     localStorage.setItem(quizNoteKey(chapterId), next);
     if (currentNoteId === chapterId && noteTextarea) {
@@ -180,26 +265,25 @@
     return chapterId;
   }
 
-  function renderQuizNoteAdd(q) {
-    const expl = document.getElementById('quiz-explanation');
-    if (!expl) return;
-    const chapterId = chapterIdForSection(q.section);
-    if (!chapterId) return;
+  // 4択演習・一問一答 共通の「テキストに追加」欄。
+  // id ではなく class で引く（演習モーダル間での id 衝突を避ける）
+  function renderNoteAdd(expl, chapterId, q, buildEntry) {
+    if (!expl || !chapterId) return;
 
     const box = document.createElement('div');
     box.className = 'quiz-note-add';
     box.innerHTML =
       '<div class="quiz-note-head">📌 テキストに追加<span class="quiz-note-target">' + escapeHtml(chapterId) + '</span></div>' +
-      '<textarea class="quiz-note-input" id="quiz-note-input" rows="2" placeholder="メモ（任意・Ctrl+Enter で追加）"></textarea>' +
+      '<textarea class="quiz-note-input" rows="2" placeholder="メモ（任意・Ctrl+Enter で追加）"></textarea>' +
       '<div class="quiz-note-actions">' +
-        '<button type="button" class="quiz-btn quiz-note-btn" id="quiz-note-btn">📌 テキストに追加</button>' +
-        '<span class="quiz-note-status" id="quiz-note-status"></span>' +
+        '<button type="button" class="quiz-btn quiz-note-btn">📌 テキストに追加</button>' +
+        '<span class="quiz-note-status"></span>' +
       '</div>';
     expl.appendChild(box);
 
-    const btn = box.querySelector('#quiz-note-btn');
-    const input = box.querySelector('#quiz-note-input');
-    const status = box.querySelector('#quiz-note-status');
+    const btn = box.querySelector('.quiz-note-btn');
+    const input = box.querySelector('.quiz-note-input');
+    const status = box.querySelector('.quiz-note-status');
 
     if (quizNoteAdded(chapterId, q)) {
       btn.disabled = true;
@@ -211,7 +295,7 @@
 
     btn.addEventListener('click', () => {
       if (btn.disabled) return;
-      const added = appendQuizNote(q, input.value);
+      const added = appendNote(chapterId, buildEntry(q, input.value));
       if (!added) return;
       btn.disabled = true;
       btn.textContent = '✓ 追加済み';
@@ -227,17 +311,40 @@
     });
   }
 
+  function renderQuizNoteAdd(q) {
+    renderNoteAdd(document.getElementById('quiz-explanation'), chapterIdForSection(q.section), q, buildQuizNoteEntry);
+  }
+
+  function renderMbNoteAdd(q) {
+    renderNoteAdd(document.getElementById('mb-explanation'), mbChapterIdForSection(q.section), q, buildMbNoteEntry);
+  }
+
   let quizTextbookLoaded = false;
   let quizPool = null;
   let quizSet = [];
   let quizIdx = 0;
   let quizScore = 0;
   let quizAnswered = false;
+  let quizWrong = [];   // セッション内のみ保持（結果画面の「間違えた問題」一覧用）
 
   function escapeHtml(s) {
     return String(s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // 解説文の軽量 Markdown 変換（**太字** / `code` / 行頭リスト）。
+  // 解説は教材 Markdown から生成されるため記法が混じる。4択・一問一答で共用
+  function explanationToHtml(text) {
+    if (text == null || text === '') return '';
+    return String(text).split('\n').map(line => {
+      let html = escapeHtml(line);
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+      html = html.replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>');
+      const listM = html.match(/^\s*(?:[-*]|\d+\.)\s+(.*)$/);
+      if (listM) return '<div class="expl-li">・' + listM[1] + '</div>';
+      return '<div class="expl-line">' + html + '</div>';
+    }).join('');
   }
 
   function shuffle(arr) {
@@ -319,6 +426,7 @@
     const correct = q.answer;
     const isCorrect = (n === correct);
     if (isCorrect) quizScore++;
+    else quizWrong.push({ q, chosen: n });
 
     quizBody.querySelectorAll('.quiz-choice').forEach(btn => {
       const v = parseInt(btn.dataset.n, 10);
@@ -331,7 +439,7 @@
     const verdict = isCorrect
       ? '<span class="quiz-verdict ok">○ 正解</span>'
       : `<span class="quiz-verdict ng">× 不正解（正解: ${correct}）</span>`;
-    expl.innerHTML = verdict + `<div class="quiz-explanation-body">${escapeHtml(q.explanation || '').replace(/\n/g, '<br>')}</div>`;
+    expl.innerHTML = verdict + `<div class="quiz-explanation-body">${explanationToHtml(q.explanation)}</div>`;
     expl.hidden = false;
 
     quizProgress.textContent = `${quizIdx + 1} / ${quizSet.length}（正解 ${quizScore}）`;
@@ -344,9 +452,35 @@
     const total = quizSet.length;
     const pct = total ? Math.round((quizScore / total) * 100) : 0;
     quizProgress.textContent = `終了`;
-    quizBody.innerHTML = `
-      <div class="quiz-score">スコア ${quizScore} / ${total}（正答率 ${pct}%）</div>
-    `;
+
+    const score = `<div class="quiz-score">スコア ${quizScore} / ${total}（正答率 ${pct}%）</div>`;
+    let review;
+    if (quizWrong.length === 0) {
+      review = '<div class="mb-review-perfect">全問正解 🎉</div>';
+    } else {
+      // 一覧の見た目は一問一答の結果画面と共通（.mb-review-* を流用）
+      const items = quizWrong.map((w, i) => {
+        const q = w.q;
+        const path = [q.category, q.section, q.source].filter(Boolean).map(escapeHtml).join(' ／ ');
+        const correctText = escapeHtml(q.choices[q.answer - 1] || '');
+        const chosenText = escapeHtml(q.choices[w.chosen - 1] || '');
+        const expl = explanationToHtml(q.explanation);
+        return `<li class="mb-review-item">
+          <div class="quiz-meta"><span class="quiz-q-num">${i + 1}</span><span class="quiz-chapter">${path}</span></div>
+          <div class="mb-review-statement">${escapeHtml(q.question).replace(/\n/g, '<br>')}</div>
+          <div class="mb-review-answer">正解: ${q.answer}　${correctText}</div>
+          <div class="mb-review-chosen">あなたの回答: ${w.chosen}　${chosenText}</div>
+          ${expl ? `<div class="mb-review-explanation">${expl}</div>` : ''}
+        </li>`;
+      }).join('');
+      review = `<div class="mb-review">
+        <div class="mb-review-title">間違えた問題（${quizWrong.length}問）</div>
+        <ol class="mb-review-list">${items}</ol>
+      </div>`;
+    }
+
+    quizBody.innerHTML = score + review;
+    quizBody.scrollTop = 0;
     quizNextBtn.disabled = true;
     quizNextBtn.textContent = '次の問題 ▶';
   }
@@ -378,6 +512,7 @@
     quizSet = shuffle(pool).slice(0, Math.min(QUIZ_SIZE, pool.length));
     quizIdx = 0;
     quizScore = 0;
+    quizWrong = [];
     renderQuestion();
   };
 
@@ -482,10 +617,11 @@
     const verdict = isCorrect
       ? '<span class="quiz-verdict ok">○ 正解</span>'
       : `<span class="quiz-verdict ng">× 不正解（あなた: ${userLabel} ／ 正解: ${ansLabel}）</span>`;
-    expl.innerHTML = verdict + `<div class="quiz-explanation-body">${escapeHtml(q.explanation || '').replace(/\n/g, '<br>')}</div>`;
+    expl.innerHTML = verdict + `<div class="quiz-explanation-body">${explanationToHtml(q.explanation)}</div>`;
     expl.hidden = false;
 
     mbProgress.textContent = `${mbIdx + 1} / ${mbSet.length}（正解 ${mbScore}）`;
+    renderMbNoteAdd(q);
     mbNextBtn.hidden = false;
     mbNextBtn.disabled = false;
     // 解説はカードの下に出るため、スマホでは画面外になりやすい。見える位置まで送る
@@ -506,7 +642,7 @@
       const items = mbWrong.map((q, i) => {
         const path = [q.category, q.section].filter(Boolean).map(escapeHtml).join(' ／ ');
         const ansLabel = q.answer ? '⭕ 正しい' : '❌ 誤り';
-        const expl = escapeHtml(q.explanation || '').replace(/\n/g, '<br>');
+        const expl = explanationToHtml(q.explanation);
         return `<li class="mb-review-item">
           <div class="quiz-meta"><span class="quiz-q-num">${i + 1}</span><span class="quiz-chapter">${path}</span></div>
           <div class="mb-review-statement">${escapeHtml(q.statement)}</div>
@@ -641,6 +777,9 @@
     if (!mbOverlay.classList.contains('visible')) return;
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
     if (e.repeat) return; // 長押しリピートで解説を飛ばさない
+    // メモ欄の入力中は ← → をカーソル移動として扱う（次の問題へ飛ばさない）
+    const t = e.target;
+    if (t && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT' || t.isContentEditable)) return;
     if (!mbAnswered) {
       if (!document.getElementById('mb-statement')) return;
       e.preventDefault();

@@ -795,6 +795,10 @@ hr {
 .quiz-verdict.ok { color: #15803d; }
 .quiz-verdict.ng { color: #b91c1c; }
 .quiz-explanation-body { color: var(--fg); white-space: pre-wrap; }
+/* 解説の軽量 Markdown 変換後の行（explanationToHtml） */
+.expl-line { margin: 3px 0; }
+.expl-line:empty { height: .6em; }
+.expl-li { margin: 3px 0 3px 8px; padding-left: 1em; text-indent: -1em; }
 
 /* ===== 演習 → 学習メモへの追加（PC のみ） ===== */
 .quiz-note-add {
@@ -1003,6 +1007,12 @@ hr {
   color: #15803d;
   margin-bottom: 6px;
 }
+.mb-review-chosen {
+  font-size: 14px;
+  font-weight: 700;
+  color: #b91c1c;
+  margin-bottom: 6px;
+}
 .mb-review-explanation {
   font-size: 13px;
   line-height: 1.9;
@@ -1012,6 +1022,7 @@ hr {
 @media (prefers-color-scheme: dark) {
   .mb-review-perfect { color: #86efac; }
   .mb-review-answer { color: #86efac; }
+  .mb-review-chosen { color: #fca5a5; }
 }
 
 /* ========== Fill-in-blank ========== */
