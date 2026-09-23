@@ -144,10 +144,33 @@ def shift_headings(html: str, level: int = 1) -> str:
     return html
 
 
+LIST_ITEM_RE = re.compile(r"^( +)(?=[-*+] |\d+\. )")
+FENCE_RE = re.compile(r"^\s*(```|~~~)")
+
+
+def normalize_list_indent(md_text: str) -> str:
+    """ネストリストのインデントを2スペース刻み→4スペース刻みに正規化
+
+    Python-Markdown（sane_lists）はネストに4スペース必要。教材MDは2スペースで
+    書かれているため、そのままだとネストが解除されフラットな箇条書きになる。
+    コードフェンス内は対象外。
+    """
+    lines = md_text.splitlines()
+    in_fence = False
+    for i, line in enumerate(lines):
+        if FENCE_RE.match(line):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        lines[i] = LIST_ITEM_RE.sub(lambda m: " " * (len(m.group(1)) * 2), line)
+    return "\n".join(lines)
+
+
 def convert_md_to_html(md_text: str) -> str:
     """Markdown→HTML変換"""
     extensions = ["tables", "fenced_code", "nl2br", "sane_lists", "smarty"]
-    return markdown.markdown(md_text, extensions=extensions)
+    return markdown.markdown(normalize_list_indent(md_text), extensions=extensions)
 
 
 def add_ids_to_headings(html: str, prefix: str) -> str:
