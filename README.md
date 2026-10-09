@@ -150,6 +150,15 @@ git add docs/ && git commit -m "update textbook" && git push
 >
 > テンプレート（`templates/` またはスクリプト内 HTML）を変更したときは、フル実行後に `marubatsu-overlay` / `quiz-textbook-pane` / `offline-download` が `docs/index.html` に残っているか確認すること。
 
+### 本文の装飾ルール
+
+教材 Markdown は素のテキストのまま書き、装飾はビルド時に付与する（`build_takken_textbook.py` の `decorate_html()`）。
+
+- **太字**（`**語**`）: 見出しの青と区別するため別色（`templates/style.css` の `--em`）
+- **見出し内の `★`**（頻出度）: `<span class="stars">` で包みバッジ表示（`--star`）
+- **行頭が `⚠` の箇条書き・段落**: `class="caution"` を付け囲み表示（`--warn-bg` / `--warn-border`）。文中の `⚠` は対象外
+- 見出しの強弱: h2（章・青字）> h3（節・薄青帯）> h4（項・左マーカー）> h5（小見出し・淡色）
+
 ### オフライン版（takken-offline.html）
 
 CSS・JS・演習データ（quiz / 一問一答 / 穴埋め）をすべて 1 ファイルに埋め込んだ自己完結 HTML。ネット接続なしで全機能が動作する（`fetch` をシムして埋め込み JSON を返す）。

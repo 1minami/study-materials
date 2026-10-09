@@ -15,6 +15,10 @@
   --border: #e5e5e5;
   --card-bg: #ffffff;
   --toc-bg: #f8fafc;
+  --em: #be123c;
+  --star: #d97706;
+  --warn-bg: #fffbeb;
+  --warn-border: #f59e0b;
   --sidebar-w: 280px;
   --right-sidebar-w: 260px;
   --header-h: 56px;
@@ -31,6 +35,10 @@
     --border: #334155;
     --card-bg: #1e293b;
     --toc-bg: #1e293b;
+    --em: #fb7185;
+    --star: #fbbf24;
+    --warn-bg: rgba(245,158,11,.12);
+    --warn-border: #d97706;
   }
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -266,20 +274,43 @@ body {
 }
 
 /* ========== Headings ========== */
+/* 階層: h2（章・青字）> h3（節・薄青帯）> h4（項・左マーカー）> h5（小見出し・淡色） */
 h3 {
-  font-size: clamp(15px, 1.2vw + 8px, 18px);
-  font-weight: 700;
-  margin: 24px 0 12px;
-  padding-bottom: 4px;
-  border-bottom: 2px solid var(--border);
+  font-size: clamp(16px, 1.2vw + 8px, 19px);
+  font-weight: 800;
+  margin: 40px 0 14px;
+  padding: 8px 14px;
+  background: var(--accent-light);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  line-height: 1.5;
 }
 h4 {
   font-size: clamp(14px, 1vw + 8px, 16px);
   font-weight: 700;
-  margin: 20px 0 8px;
-  color: var(--accent);
+  margin: 22px 0 8px;
+  padding-left: 10px;
+  border-left: 3px solid var(--accent);
+  line-height: 1.5;
 }
-h5 { font-size: 15px; font-weight: 700; margin: 16px 0 8px; }
+h5 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 16px 0 6px;
+  color: var(--fg-muted);
+}
+/* 見出し内の頻出度（build_takken_textbook.py の decorate_html が付与） */
+.stars {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: .78em;
+  font-weight: 400;
+  letter-spacing: .08em;
+  color: var(--star);
+  vertical-align: .08em;
+  white-space: nowrap;
+}
+.stars-lead { margin-left: 0; margin-right: 6px; }
 h6 { font-size: 14px; font-weight: 700; margin: 12px 0 6px; }
 
 /* ========== Text ========== */
@@ -292,12 +323,22 @@ blockquote {
   border-radius: 0 8px 8px 0;
   font-size: 0.9em;
 }
-strong { color: var(--accent); font-weight: 700; }
+/* 強調は見出し・リンクの青と区別するため別色 */
+strong { color: var(--em); font-weight: 700; }
 
 /* ========== Lists ========== */
 ul, ol { margin: 8px 0 8px 24px; }
 li { margin: 4px 0; }
 li > ul, li > ol { margin: 4px 0 4px 20px; }
+/* ⚠ で始まる注意書き（decorate_html が付与）。⚠ 自体がマーカー代わり */
+li.caution,
+p.caution {
+  background: var(--warn-bg);
+  border-left: 3px solid var(--warn-border);
+  border-radius: 0 6px 6px 0;
+  padding: 4px 10px;
+}
+li.caution { list-style: none; margin-left: -22px; }
 
 /* ========== Tables ========== */
 .table-wrap {
@@ -329,12 +370,14 @@ table {
   margin: 12px 0;
   font-size: clamp(12px, 0.8vw + 8px, 14px);
 }
-thead { background: var(--accent); color: #fff; }
+thead { background: var(--accent-light); color: var(--fg); }
+thead strong { color: inherit; }
 th {
   padding: 10px 12px;
   text-align: left;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
+  border-bottom: 2px solid var(--accent);
 }
 td {
   padding: 8px 12px;
@@ -1278,6 +1321,7 @@ mark.search-hit.is-current {
   .part { break-before: page; }
   body { font-size: 11pt; line-height: 1.6; }
   table { font-size: 10pt; }
+  h3, thead, li.caution, p.caution { background: none; }
 }
 
 </style>
@@ -1477,27 +1521,27 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <h3 id="00-試験概要-4">各科目の特徴と攻略</h3>
-<h4 id="00-試験概要-5">★★★ 宅建業法（20問）— 最重要・得点源</h4>
+<h4 id="00-試験概要-5"><span class="stars stars-lead" data-n="3">★★★</span> 宅建業法（20問）— 最重要・得点源</h4>
 <ul>
 <li>条文ベースの出題が多く、暗記で得点しやすい</li>
 <li>20問中18問以上を目標にすべき</li>
 <li>頻出テーマ: 免許、宅建士、営業保証金、保証協会、媒介契約、重要事項説明（35条）、37条書面、8種制限、報酬、監督処分</li>
 </ul>
-<h4 id="00-試験概要-6">★★ 権利関係（14問）— 難易度高・差がつく</h4>
+<h4 id="00-試験概要-6"><span class="stars stars-lead" data-n="2">★★</span> 権利関係（14問）— 難易度高・差がつく</h4>
 <ul>
 <li>民法が中心（10問程度）、借地借家法・区分所有法・不動産登記法で各1問</li>
 <li>民法は範囲が広く深いため、頻出論点に絞った学習が効率的</li>
 <li>14問中8〜10問を目標</li>
 <li>頻出テーマ: 意思表示、代理、時効、物権変動、抵当権、債務不履行、契約不適合責任、賃貸借、相続</li>
 </ul>
-<h4 id="00-試験概要-7">★★ 法令上の制限（8問）— 暗記科目</h4>
+<h4 id="00-試験概要-7"><span class="stars stars-lead" data-n="2">★★</span> 法令上の制限（8問）— 暗記科目</h4>
 <ul>
 <li>都市計画法・建築基準法が各2問、その他で4問</li>
 <li>数字の暗記が重要（面積要件、届出期間等）</li>
 <li>8問中6問以上を目標</li>
 <li>頻出テーマ: 開発許可、用途制限、建蔽率・容積率、高さ制限、農地法3条4条5条、届出制</li>
 </ul>
-<h4 id="00-試験概要-8">★ 税・価格（3問）</h4>
+<h4 id="00-試験概要-8"><span class="stars stars-lead" data-n="1">★</span> 税・価格（3問）</h4>
 <ul>
 <li>所得税・印紙税・不動産取得税・固定資産税・登録免許税から出題</li>
 <li>地価公示法・不動産鑑定評価基準も出題される</li>
@@ -1582,7 +1626,7 @@ mark.search-hit.is-current {
 <blockquote>
 <p>権利関係（問1〜問14）の基礎。意思表示・代理・時効は毎年出題される超頻出分野。</p>
 </blockquote>
-<h3 id="01-民法総則-2">1. 制限行為能力者 ★★</h3>
+<h3 id="01-民法総則-2">1. 制限行為能力者 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="01-民法総則-3">意思能力</h4>
 <ul>
 <li>意思表示をした時に<strong>意思能力</strong>を有しなかったとき → その法律行為は<strong>無効</strong>（取消しではない）</li>
@@ -1656,7 +1700,7 @@ mark.search-hit.is-current {
 <ul>
 <li><strong>法定代理人・保佐人・補助人</strong> → いつでも追認できる</li>
 <li><strong>制限行為能力者本人</strong> → 行為能力者となった後（取消しの原因となっていた状況が消滅した後）、かつ<strong>取消権を有することを知った後</strong>でなければ追認できない<ul>
-<li>⚠ 被保佐人・被補助人（成年被後見人を除く）は、保佐人・補助人の<strong>同意を得れば</strong>能力回復前でも追認できる</li>
+<li class="caution">⚠ 被保佐人・被補助人（成年被後見人を除く）は、保佐人・補助人の<strong>同意を得れば</strong>能力回復前でも追認できる</li>
 </ul>
 </li>
 <li><strong>法定追認</strong>（125条）: 追認できる時以後に、全部又は一部の<strong>履行</strong>、履行の<strong>請求</strong>、<strong>担保</strong>の供与、取得した権利の全部又は一部の<strong>譲渡</strong>、強制執行 等 → 追認したものとみなす</li>
@@ -1690,9 +1734,9 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ 未成年者・成年被後見人<strong>本人</strong>に対する催告は効果がない（意思表示の受領能力がない）</li>
+<li class="caution">⚠ 未成年者・成年被後見人<strong>本人</strong>に対する催告は効果がない（意思表示の受領能力がない）</li>
 </ul>
-<h3 id="01-民法総則-8">2. 意思表示 ★★★</h3>
+<h3 id="01-民法総則-8">2. 意思表示 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="01-民法総則-9">心裡留保（93条）</h4>
 <ul>
 <li>表意者が真意でないことを知ってした意思表示（冗談・嘘）</li>
@@ -1700,7 +1744,7 @@ mark.search-hit.is-current {
 <li><strong>例外</strong>: 相手方が表意者の真意でないことを知り、又は知ることができたとき → <strong>無効</strong></li>
 <li>例外で無効となる場合も、<strong>善意</strong>の第三者に対抗できない</li>
 </ul>
-<h4 id="01-民法総則-10">通謀虚偽表示（94条）★★★</h4>
+<h4 id="01-民法総則-10">通謀虚偽表示（94条）<span class="stars" data-n="3">★★★</span></h4>
 <ul>
 <li>相手方と通じてした虚偽の意思表示（例: 差押えを逃れるため、AとBが通謀して土地をBに仮装譲渡）</li>
 <li><strong>効果</strong>: 当事者間では<strong>無効</strong></li>
@@ -1714,7 +1758,7 @@ mark.search-hit.is-current {
 <li>「第三者」にあたる者: 仮装譲受人からの<strong>譲受人</strong>、仮装譲受人の不動産に<strong>抵当権</strong>の設定を受けた者、仮装譲受人の不動産を<strong>差し押さえた</strong>債権者</li>
 <li>「第三者」にあたらない者: 仮装譲受人の<strong>一般債権者</strong>（差押え前）、土地の仮装譲渡における<strong>土地上の建物の賃借人</strong></li>
 </ul>
-<h4 id="01-民法総則-11">錯誤（95条）★★</h4>
+<h4 id="01-民法総則-11">錯誤（95条）<span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li><strong>要件</strong>: 次の錯誤で、その錯誤が法律行為の目的及び取引上の社会通念に照らして<strong>重要なもの</strong>であること<ol>
 <li>意思表示に対応する意思を欠く錯誤（<strong>表示の錯誤</strong>。例: 1万円と書くつもりで10万円と書いた）</li>
@@ -1732,7 +1776,7 @@ mark.search-hit.is-current {
 </li>
 <li>錯誤による取消しは、<strong>善意でかつ過失がない</strong>第三者に対抗できない</li>
 </ul>
-<h4 id="01-民法総則-12">詐欺（96条）★★</h4>
+<h4 id="01-民法総則-12">詐欺（96条）<span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li><strong>効果</strong>: 取消し可能</li>
 <li><strong>第三者詐欺</strong>（相手方以外の者が詐欺をした）: 相手方が詐欺の事実を<strong>知り、又は知ることができた</strong>ときに限り取消可能</li>
@@ -1741,7 +1785,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 </ul>
-<h4 id="01-民法総則-13">強迫（96条）★★</h4>
+<h4 id="01-民法総則-13">強迫（96条）<span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li><strong>効果</strong>: 取消し可能</li>
 <li>第三者による強迫でも、相手方の善意・悪意を問わず<strong>常に取消し可能</strong>（詐欺と異なる）</li>
@@ -1789,14 +1833,14 @@ mark.search-hit.is-current {
 </tr>
 </tbody>
 </table>
-<h3 id="01-民法総則-15">3. 代理 ★★★</h3>
+<h3 id="01-民法総則-15">3. 代理 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="01-民法総則-16">代理の基本構造</h4>
 <ul>
 <li><strong>有権代理の要件</strong>: ①代理権の存在 ②<strong>顕名</strong>（本人のためにすることを示す） ③代理権の範囲内の行為</li>
 <li><strong>顕名なしの場合</strong>: 代理人自身のためにしたものとみなす。ただし相手方が代理人であることを<strong>知り又は知ることができた</strong>ときは本人に効果帰属</li>
 <li><strong>代理人の行為能力</strong>: 代理人は<strong>行為能力者である必要はない</strong><ul>
 <li>制限行為能力者が代理人としてした行為は、行為能力の制限を理由に<strong>取り消せない</strong>（本人が制限行為能力者を代理人に選んだ以上、自己責任）</li>
-<li>⚠ 例外: 制限行為能力者が<strong>他の制限行為能力者の法定代理人</strong>としてした行為は取り消せる</li>
+<li class="caution">⚠ 例外: 制限行為能力者が<strong>他の制限行為能力者の法定代理人</strong>としてした行為は取り消せる</li>
 </ul>
 </li>
 <li><strong>代理行為の瑕疵</strong>: 詐欺・強迫・錯誤・善意悪意等は、原則として<strong>代理人</strong>を基準に判断<ul>
@@ -1837,8 +1881,8 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ 本人の<strong>後見開始</strong>の審判では代理権は消滅しない</li>
-<li>⚠ 代理人が<strong>保佐開始</strong>・<strong>補助開始</strong>の審判を受けても代理権は消滅しない</li>
+<li class="caution">⚠ 本人の<strong>後見開始</strong>の審判では代理権は消滅しない</li>
+<li class="caution">⚠ 代理人が<strong>保佐開始</strong>・<strong>補助開始</strong>の審判を受けても代理権は消滅しない</li>
 </ul>
 <h4 id="01-民法総則-18">自己契約・双方代理（108条）</h4>
 <ul>
@@ -1880,7 +1924,7 @@ mark.search-hit.is-current {
 <li>復代理人を選任しても、代理人の代理権は消滅しない</li>
 <li>代理人の代理権が消滅すると、復代理人の代理権も消滅する</li>
 </ul>
-<h4 id="01-民法総則-21">無権代理 ★★★</h4>
+<h4 id="01-民法総則-21">無権代理 <span class="stars" data-n="3">★★★</span></h4>
 <ul>
 <li>無権代理行為は、本人が追認しなければ本人に効果が帰属しない</li>
 <li><strong>本人の選択肢</strong>: <strong>追認</strong> or <strong>追認拒絶</strong><ul>
@@ -1951,7 +1995,7 @@ mark.search-hit.is-current {
 </tr>
 </tbody>
 </table>
-<h4 id="01-民法総則-23">表見代理 ★★</h4>
+<h4 id="01-民法総則-23">表見代理 <span class="stars" data-n="2">★★</span></h4>
 <table>
 <thead>
 <tr>
@@ -1983,7 +2027,7 @@ mark.search-hit.is-current {
 <li>表見代理が成立する場合でも、相手方は表見代理を主張せず、無権代理人の責任（117条）を追及することもできる（判例）</li>
 <li>109条・110条、112条・110条の<strong>重畳適用</strong>も認められる</li>
 </ul>
-<h3 id="01-民法総則-24">4. 時効 ★★★</h3>
+<h3 id="01-民法総則-24">4. 時効 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="01-民法総則-25">取得時効</h4>
 <table>
 <thead>
@@ -2060,7 +2104,7 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ <strong>所有権</strong>は消滅時効にかからない</li>
+<li class="caution">⚠ <strong>所有権</strong>は消滅時効にかからない</li>
 <li>いずれか早い方が到来した時点で時効が完成する</li>
 </ul>
 <h4 id="01-民法総則-27">時効の完成猶予・更新</h4>
@@ -2108,13 +2152,13 @@ mark.search-hit.is-current {
 <li>承認には、相手方の権利について処分の<strong>行為能力・権限は不要</strong>（被保佐人も単独で承認できる）</li>
 </ul>
 </li>
-<li>⚠ 催告による完成猶予中にした協議の合意、協議の合意による完成猶予中にした催告は、いずれも完成猶予の効力なし</li>
+<li class="caution">⚠ 催告による完成猶予中にした協議の合意、協議の合意による完成猶予中にした催告は、いずれも完成猶予の効力なし</li>
 </ul>
 <h4 id="01-民法総則-28">時効の援用・放棄</h4>
 <ul>
 <li><strong>時効の援用</strong>: 当事者が援用しなければ、裁判所は時効によって裁判できない<ul>
 <li>消滅時効の援用権者: 債務者のほか、<strong>保証人</strong>・<strong>物上保証人</strong>・抵当不動産の<strong>第三取得者</strong>など権利の消滅について正当な利益を有する者</li>
-<li>⚠ <strong>後順位抵当権者</strong>は、先順位抵当権の被担保債権の消滅時効を援用<strong>できない</strong>（判例）</li>
+<li class="caution">⚠ <strong>後順位抵当権者</strong>は、先順位抵当権の被担保債権の消滅時効を援用<strong>できない</strong>（判例）</li>
 </ul>
 </li>
 <li>時効の効力は、その<strong>起算日に遡る</strong>（取得時効なら占有開始時から所有者だったことになる）</li>
@@ -2146,18 +2190,18 @@ mark.search-hit.is-current {
 <blockquote>
 <p>物権変動（177条）と抵当権は毎年出題される超頻出分野。</p>
 </blockquote>
-<h3 id="02-民法物権-2">1. 物権変動 ★★★</h3>
+<h3 id="02-民法物権-2">1. 物権変動 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="02-民法物権-3">意思主義（176条）</h4>
 <ul>
 <li>物権の設定・移転は、<strong>当事者の意思表示のみ</strong>で効力を生ずる</li>
 <li>登記や引渡しは対抗要件であり、成立要件ではない</li>
 <li>売買契約の場合、特約がなければ<strong>契約締結時</strong>に所有権が移転する（代金支払い・登記・引渡しは不要）</li>
 </ul>
-<h4 id="02-民法物権-4">不動産の対抗要件（177条）★★★</h4>
+<h4 id="02-民法物権-4">不動産の対抗要件（177条）<span class="stars" data-n="3">★★★</span></h4>
 <ul>
 <li>不動産に関する物権変動は、<strong>登記</strong>をしなければ第三者に対抗できない</li>
 <li>二重譲渡では、先に<strong>登記</strong>を備えた方が優先（契約の先後・代金支払いの有無・善意悪意は無関係）</li>
-<li>⚠ <strong>単なる悪意者</strong>（先に売買があったことを知っているだけの者）も177条の第三者にあたる → 先に登記すれば勝つ</li>
+<li class="caution">⚠ <strong>単なる悪意者</strong>（先に売買があったことを知っているだけの者）も177条の第三者にあたる → 先に登記すれば勝つ</li>
 </ul>
 <h5 id="02-民法物権-5">177条の「第三者」に該当する者（登記がなければ対抗できない）</h5>
 <ul>
@@ -2253,8 +2297,8 @@ mark.search-hit.is-current {
 <ul>
 <li>時効完成後の第三者が先に登記した場合でも、その登記の後に、改めて時効取得に必要な期間占有を継続すれば、登記なくして時効取得を対抗できる（判例）</li>
 </ul>
-<h3 id="02-民法物権-12">2. 所有権 ★</h3>
-<h4 id="02-民法物権-13">共有 ★★</h4>
+<h3 id="02-民法物権-12">2. 所有権 <span class="stars" data-n="1">★</span></h3>
+<h4 id="02-民法物権-13">共有 <span class="stars" data-n="2">★★</span></h4>
 <table>
 <thead>
 <tr>
@@ -2318,7 +2362,7 @@ mark.search-hit.is-current {
 <li><strong>袋地の通行権</strong>（公道に至るための他の土地の通行権）:<ul>
 <li>袋地の所有者は、公道に至るため、その土地を囲んでいる他の土地を通行できる（通行場所・方法は他の土地のために<strong>損害が最も少ない</strong>もの）</li>
 <li>通行地の損害に対して<strong>償金</strong>を支払う</li>
-<li>⚠ 土地の<strong>分割</strong>・一部譲渡によって袋地が生じた場合 → <strong>分割された他方の土地のみ</strong>を通行でき、<strong>償金は不要</strong></li>
+<li class="caution">⚠ 土地の<strong>分割</strong>・一部譲渡によって袋地が生じた場合 → <strong>分割された他方の土地のみ</strong>を通行でき、<strong>償金は不要</strong></li>
 <li>袋地の所有権を取得した者は、<strong>登記がなくても</strong>通行権を主張できる（判例）</li>
 </ul>
 </li>
@@ -2344,7 +2388,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 <li>対抗要件: <strong>登記</strong><ul>
-<li>⚠ 通路として継続的に使用されていることが客観的に明らかで、承役地の譲受人がそれを認識できた場合 → 譲受人は登記の欠缺を主張できない（判例）</li>
+<li class="caution">⚠ 通路として継続的に使用されていることが客観的に明らかで、承役地の譲受人がそれを認識できた場合 → 譲受人は登記の欠缺を主張できない（判例）</li>
 </ul>
 </li>
 </ul>
@@ -2406,7 +2450,7 @@ mark.search-hit.is-current {
 </li>
 <li><strong>特徴</strong>: 優先弁済権なし、競売申立ては形式的競売のみ（優先弁済のための競売は不可）</li>
 <li>不動産にも成立する。登記は不要（占有が要件）</li>
-<li>⚠ 留置権が成立しない場合:<ul>
+<li class="caution">⚠ 留置権が成立しない場合:<ul>
 <li>占有が<strong>不法行為</strong>によって始まった場合（不法占拠者が支出した費用）</li>
 <li><strong>敷金返還請求権</strong>に基づく建物の留置（敷金返還と明渡しは明渡しが先履行）</li>
 <li><strong>造作買取請求権</strong>に基づく建物の留置（造作代金は建物に関して生じた債権ではない）</li>
@@ -2452,7 +2496,7 @@ mark.search-hit.is-current {
 <li>動産質: 質権者は目的物を使用収益できない（原則）</li>
 <li>不動産質: 質権者は目的物を<strong>使用収益できる</strong>（その代わり管理費用を負担し、利息を請求できない）。存続期間は<strong>10年</strong>以内</li>
 </ul>
-<h4 id="02-民法物権-23">抵当権 ★★★</h4>
+<h4 id="02-民法物権-23">抵当権 <span class="stars" data-n="3">★★★</span></h4>
 <h5 id="02-民法物権-24">基本</h5>
 <ul>
 <li>目的物の<strong>占有を移転しない</strong> → 設定者が引き続き使用収益可能</li>
@@ -2472,7 +2516,7 @@ mark.search-hit.is-current {
 <li><strong>従たる権利</strong>にも及ぶ（借地上の建物に抵当権 → <strong>借地権</strong>にも及ぶ）</li>
 <li>果実: 被担保債権に<strong>債務不履行があった後</strong>に生じた果実（賃料等）に及ぶ</li>
 <li>被担保債権の<strong>利息</strong>: 後順位抵当権者等がいる場合、<strong>満期となった最後の2年分</strong>についてのみ抵当権を行使できる（遅延損害金と通算して2年分）<ul>
-<li>⚠ 後順位抵当権者等がいなければ、2年分の制限はない</li>
+<li class="caution">⚠ 後順位抵当権者等がいなければ、2年分の制限はない</li>
 </ul>
 </li>
 </ul>
@@ -2483,7 +2527,7 @@ mark.search-hit.is-current {
 <li><strong>抵当権者の同意の登記</strong>（387条）: 登記した賃貸借は、その前に登記をした<strong>すべての抵当権者が同意</strong>し、その<strong>同意の登記</strong>があれば、抵当権者に対抗できる</li>
 <li><strong>建物明渡猶予制度</strong>（395条）: 抵当権に対抗できない建物賃借人で、<strong>競売手続開始前</strong>から使用収益している者は、買受人の買受けの時から<strong>6か月</strong>の明渡猶予<ul>
 <li>猶予期間中も使用の対価（賃料相当額）は<strong>買受人</strong>に支払う（1か月分以上の支払いを催告されても支払わない → 猶予なし）</li>
-<li>⚠ 猶予されるのは<strong>建物</strong>の賃借人のみ（土地の賃借人は対象外）</li>
+<li class="caution">⚠ 猶予されるのは<strong>建物</strong>の賃借人のみ（土地の賃借人は対象外）</li>
 </ul>
 </li>
 </ul>
@@ -2511,11 +2555,11 @@ mark.search-hit.is-current {
 </table>
 <ul>
 <li>抵当権消滅請求は、競売による<strong>差押えの効力発生前</strong>にしなければならない</li>
-<li>⚠ <strong>主たる債務者・保証人</strong>（その承継人）は抵当権消滅請求をできない</li>
+<li class="caution">⚠ <strong>主たる債務者・保証人</strong>（その承継人）は抵当権消滅請求をできない</li>
 <li>抵当権者が承諾しない場合、書面の送付を受けた後<strong>2か月以内</strong>に競売を申し立てる必要がある（申し立てなければ承諾したものとみなす）</li>
 <li>第三取得者は、抵当不動産について必要費・有益費を支出したときは、競売代金から<strong>優先償還</strong>を受けられる</li>
 </ul>
-<h5 id="02-民法物権-28">法定地上権（388条）★★</h5>
+<h5 id="02-民法物権-28">法定地上権（388条）<span class="stars" data-n="2">★★</span></h5>
 <ul>
 <li><strong>成立要件</strong>（すべて満たすこと）:<ol>
 <li>抵当権設定時に土地上に<strong>建物が存在</strong></li>
@@ -2578,7 +2622,7 @@ mark.search-hit.is-current {
 <blockquote>
 <p>債務不履行、契約不適合責任、賃貸借、連帯債務・保証は頻出。</p>
 </blockquote>
-<h3 id="03-民法債権-2">1. 債務不履行 ★★★</h3>
+<h3 id="03-民法債権-2">1. 債務不履行 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="03-民法債権-3">類型</h4>
 <table>
 <thead>
@@ -2659,7 +2703,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 </ul>
-<h4 id="03-民法債権-7">契約の解除 ★★</h4>
+<h4 id="03-民法債権-7">契約の解除 <span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li><strong>催告解除</strong>（541条）: 相当の期間を定めて履行を催告 → 期間内に履行なし → 解除<ul>
 <li>期間経過時の不履行が契約・取引上の社会通念に照らして<strong>軽微</strong>なときは解除不可</li>
@@ -2689,8 +2733,8 @@ mark.search-hit.is-current {
 </ul>
 </li>
 </ul>
-<h3 id="03-民法債権-9">3. 売買 ★★</h3>
-<h4 id="03-民法債権-10">契約不適合責任（562条〜572条）★★★</h4>
+<h3 id="03-民法債権-9">3. 売買 <span class="stars" data-n="2">★★</span></h3>
+<h4 id="03-民法債権-10">契約不適合責任（562条〜572条）<span class="stars" data-n="3">★★★</span></h4>
 <p>2020年改正で「瑕疵担保責任」から「契約不適合責任」に変更。引き渡された目的物が<strong>種類・品質・数量</strong>に関して、又は移転した<strong>権利</strong>が契約の内容に適合しない場合の売主の責任。</p>
 <h5 id="03-民法債権-11">買主の権利</h5>
 <table>
@@ -2736,7 +2780,7 @@ mark.search-hit.is-current {
 <h5 id="03-民法債権-13">担保責任を負わない旨の特約</h5>
 <ul>
 <li>特約自体は有効</li>
-<li>⚠ 売主が<strong>知りながら告げなかった事実</strong>、売主が自ら第三者のために設定・譲渡した権利については、責任を免れない</li>
+<li class="caution">⚠ 売主が<strong>知りながら告げなかった事実</strong>、売主が自ら第三者のために設定・譲渡した権利については、責任を免れない</li>
 <li>宅建業者が自ら売主・買主が業者でない場合は、宅建業法40条の制限あり（引渡しから2年以上の通知期間とする特約のみ有効）</li>
 </ul>
 <h5 id="03-民法債権-14">他人物売買</h5>
@@ -2744,25 +2788,25 @@ mark.search-hit.is-current {
 <li>他人の物の売買契約も<strong>有効</strong>。売主は権利を取得して買主に移転する義務を負う</li>
 <li>移転できない → 買主は債務不履行の一般原則により解除・損害賠償請求ができる</li>
 </ul>
-<h4 id="03-民法債権-15">手付（557条）★★</h4>
+<h4 id="03-民法債権-15">手付（557条）<span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li>特約がなければ<strong>解約手付</strong>と推定</li>
 <li>買主: 手付を<strong>放棄</strong>して解除</li>
 <li>売主: 手付の<strong>倍額を現実に提供</strong>して解除（口頭の提供・通知だけでは不可）</li>
 <li><strong>相手方</strong>が契約の<strong>履行に着手</strong>するまでに限る<ul>
-<li>⚠ <strong>自分</strong>が履行に着手していても、相手方が未着手なら解除できる</li>
+<li class="caution">⚠ <strong>自分</strong>が履行に着手していても、相手方が未着手なら解除できる</li>
 </ul>
 </li>
 <li>履行の着手: 客観的に外部から認識できる形で履行行為の一部をし、又は履行の提供のために欠くことのできない前提行為をした場合（中間金の支払い、登記申請等）</li>
 <li>手付解除の場合、<strong>損害賠償請求はできない</strong>（手付の額で清算済み）</li>
 <li>手付は解約手付であると同時に違約手付とすることもできる</li>
 </ul>
-<h3 id="03-民法債権-16">4. 賃貸借 ★★★</h3>
+<h3 id="03-民法債権-16">4. 賃貸借 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="03-民法債権-17">存続期間</h4>
 <ul>
 <li>最長<strong>50年</strong>（604条。50年より長い期間を定めても50年に短縮）</li>
 <li>最短の制限なし</li>
-<li>⚠ 建物所有目的の土地賃貸借・建物賃貸借は借地借家法が優先（借地借家法の章を参照）</li>
+<li class="caution">⚠ 建物所有目的の土地賃貸借・建物賃貸借は借地借家法が優先（借地借家法の章を参照）</li>
 </ul>
 <h4 id="03-民法債権-18">賃貸人の義務</h4>
 <ul>
@@ -2807,7 +2851,7 @@ mark.search-hit.is-current {
 <li><strong>原状回復義務</strong>（621条）: 受け取った後に生じた損傷を原状に復する。ただし<strong>通常損耗・経年変化</strong>、賃借人の帰責事由によらない損傷は除く（2020年改正で明文化）</li>
 <li>賃借物の一部が賃借人の帰責事由によらず滅失等で使用収益できなくなった → 賃料はその割合に応じて<strong>当然に減額</strong></li>
 </ul>
-<h4 id="03-民法債権-21">賃借権の譲渡・転貸（612条）★★</h4>
+<h4 id="03-民法債権-21">賃借権の譲渡・転貸（612条）<span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li>賃貸人の<strong>承諾</strong>が必要</li>
 <li>無断譲渡・転貸 → 賃貸人は解除可能<ul>
@@ -2867,7 +2911,7 @@ mark.search-hit.is-current {
 <li>賃借権が譲渡された場合、敷金は<strong>旧賃借人</strong>に返還される（新賃借人に承継されない）</li>
 <li>賃貸人が変わった場合、敷金は新賃貸人に<strong>承継</strong>される</li>
 </ul>
-<h3 id="03-民法債権-24">5. 連帯債務 ★★</h3>
+<h3 id="03-民法債権-24">5. 連帯債務 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="03-民法債権-25">基本</h4>
 <ul>
 <li>各連帯債務者は全額について履行義務を負う</li>
@@ -2911,12 +2955,12 @@ mark.search-hit.is-current {
 <h4 id="03-民法債権-27">求償</h4>
 <ul>
 <li>弁済した連帯債務者は、他の連帯債務者に対して各自の<strong>負担部分</strong>について求償可能<ul>
-<li>⚠ 自己の負担部分を<strong>超えなくても</strong>、弁済額に応じて求償できる</li>
+<li class="caution">⚠ 自己の負担部分を<strong>超えなくても</strong>、弁済額に応じて求償できる</li>
 </ul>
 </li>
 <li>事前・事後の通知を怠ると、求償が制限される場合がある</li>
 </ul>
-<h3 id="03-民法債権-28">6. 保証 ★★</h3>
+<h3 id="03-民法債権-28">6. 保証 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="03-民法債権-29">保証契約の成立</h4>
 <ul>
 <li>保証契約は<strong>債権者と保証人</strong>の間の契約（主たる債務者の委託や同意は不要。主たる債務者の意思に反しても可）</li>
@@ -2957,7 +3001,7 @@ mark.search-hit.is-current {
 </tr>
 </tbody>
 </table>
-<h4 id="03-民法債権-32">連帯保証 ★★</h4>
+<h4 id="03-民法債権-32">連帯保証 <span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li><strong>催告の抗弁権なし</strong>・<strong>検索の抗弁権なし</strong></li>
 <li><strong>分別の利益なし</strong>（保証人が複数いても、各連帯保証人が全額の責任を負う。通常の保証人は頭数で分割された額のみ負担）</li>
@@ -3025,7 +3069,7 @@ mark.search-hit.is-current {
 <li><strong>弁済の供託</strong>: 債権者が受領を拒んだ、受領できない、債権者を確知できない場合 → 供託所に供託して債務を免れる</li>
 <li><strong>弁済による代位</strong>: 弁済をした第三者・保証人は、債権者が有していた権利（抵当権等）を行使できる</li>
 </ul>
-<h3 id="03-民法債権-37">8. 相殺 ★</h3>
+<h3 id="03-民法債権-37">8. 相殺 <span class="stars" data-n="1">★</span></h3>
 <ul>
 <li><strong>要件</strong>（相殺適状）: ①同一当事者間に対立する債権 ②双方の債権が<strong>同種</strong>の目的 ③<strong>自働債権</strong>（相殺する側の債権）が<strong>弁済期</strong>にある ④債務の性質が相殺を許す<ul>
 <li><strong>受働債権</strong>（相殺される側の債権）は弁済期前でも、期限の利益を放棄して相殺できる</li>
@@ -3046,7 +3090,7 @@ mark.search-hit.is-current {
 <li>原則として自由に譲渡可能。<strong>将来</strong>発生する債権も譲渡できる</li>
 <li><strong>譲渡制限特約</strong>: 特約があっても譲渡は<strong>有効</strong>（2020年改正）<ul>
 <li>譲受人が特約について<strong>悪意・重過失</strong>の場合、債務者は履行を拒絶でき、譲渡人への弁済等を譲受人に対抗できる</li>
-<li>⚠ <strong>預貯金債権</strong>の譲渡制限特約は、悪意・重過失の譲受人に対して譲渡自体を<strong>無効</strong>とできる</li>
+<li class="caution">⚠ <strong>預貯金債権</strong>の譲渡制限特約は、悪意・重過失の譲受人に対して譲渡自体を<strong>無効</strong>とできる</li>
 </ul>
 </li>
 <li><strong>対抗要件</strong>:</li>
@@ -3070,7 +3114,7 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ 通知は<strong>譲渡人</strong>から行う（譲受人からの通知は無効。譲受人が譲渡人に代位して通知することもできない）</li>
+<li class="caution">⚠ 通知は<strong>譲渡人</strong>から行う（譲受人からの通知は無効。譲受人が譲渡人に代位して通知することもできない）</li>
 <li><strong>二重譲渡</strong>: 確定日付のある通知が債務者に<strong>到達した日時</strong>（又は確定日付ある承諾の日時）の先後で優劣を決める（確定日付の日付の先後ではない）<ul>
 <li>同時に到達した場合 → 各譲受人は債務者に<strong>全額</strong>を請求できる</li>
 </ul>
@@ -3083,7 +3127,7 @@ mark.search-hit.is-current {
 <li>請負人が仕事の完成を約し、注文者がその結果に対して報酬を支払う契約</li>
 <li>報酬は、仕事の目的物の<strong>引渡しと同時</strong>に支払う（引渡しを要しない場合は仕事完成後）</li>
 <li>請負人の契約不適合責任: 売買の規定を準用（注文者が不適合を知った時から<strong>1年以内</strong>に通知）<ul>
-<li>⚠ 注文者の提供した材料や注文者の指図によって生じた不適合 → 原則として責任を負わない</li>
+<li class="caution">⚠ 注文者の提供した材料や注文者の指図によって生じた不適合 → 原則として責任を負わない</li>
 </ul>
 </li>
 <li>注文者は、仕事を完成しない間は、いつでも<strong>損害を賠償して</strong>契約を解除できる</li>
@@ -3094,11 +3138,11 @@ mark.search-hit.is-current {
 <li>特約がなければ<strong>無報酬</strong></li>
 <li>各当事者は、<strong>いつでも</strong>契約を解除できる（相手方に不利な時期の解除等は、やむを得ない事由がなければ損害賠償が必要）</li>
 <li>委任の終了事由: 委任者・受任者の<strong>死亡</strong>、<strong>破産</strong>手続開始、受任者の<strong>後見開始</strong>の審判<ul>
-<li>⚠ 委任者の後見開始は終了事由ではない</li>
+<li class="caution">⚠ 委任者の後見開始は終了事由ではない</li>
 </ul>
 </li>
 </ul>
-<h3 id="03-民法債権-42">11. 不法行為 ★</h3>
+<h3 id="03-民法債権-42">11. 不法行為 <span class="stars" data-n="1">★</span></h3>
 <h4 id="03-民法債権-43">一般不法行為（709条）</h4>
 <ul>
 <li><strong>要件</strong>: ①故意又は過失 ②権利・法律上保護される利益の侵害 ③損害の発生 ④因果関係</li>
@@ -3167,7 +3211,7 @@ mark.search-hit.is-current {
 <li>夫婦の一方が<strong>日常の家事</strong>に関して第三者と法律行為をした → 他方も<strong>連帯</strong>して責任を負う</li>
 <li>養子: 養子は縁組の日から養親の<strong>嫡出子</strong>の身分を取得（実親との親子関係も存続。特別養子を除く）</li>
 </ul>
-<h3 id="04-民法親族相続-3">1. 相続 ★★★</h3>
+<h3 id="04-民法親族相続-3">1. 相続 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="04-民法親族相続-4">相続人と法定相続分</h4>
 <table>
 <thead>
@@ -3209,7 +3253,7 @@ mark.search-hit.is-current {
 <h4 id="04-民法親族相続-5">重要ポイント</h4>
 <ul>
 <li><strong>代襲相続</strong>: 相続人（子・兄弟姉妹）が相続開始<strong>前に死亡</strong>、<strong>相続欠格</strong>、<strong>廃除</strong>により相続権を失った場合、その者の子が代わって相続<ul>
-<li>⚠ <strong>相続放棄</strong>は代襲原因にならない</li>
+<li class="caution">⚠ <strong>相続放棄</strong>は代襲原因にならない</li>
 <li>代襲相続人の相続分は、被代襲者が受けるべきだった相続分と同じ（代襲相続人が複数なら均等に分ける）</li>
 </ul>
 </li>
@@ -3244,10 +3288,10 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ 廃除の対象は遺留分を有する推定相続人のみ → <strong>兄弟姉妹</strong>は廃除できない（遺言で相続させなければ足りる）</li>
+<li class="caution">⚠ 廃除の対象は遺留分を有する推定相続人のみ → <strong>兄弟姉妹</strong>は廃除できない（遺言で相続させなければ足りる）</li>
 <li>欠格・廃除の効果は本人のみ → その子は<strong>代襲相続</strong>できる</li>
 </ul>
-<h4 id="04-民法親族相続-7">相続の承認・放棄 ★★</h4>
+<h4 id="04-民法親族相続-7">相続の承認・放棄 <span class="stars" data-n="2">★★</span></h4>
 <table>
 <thead>
 <tr>
@@ -3282,13 +3326,13 @@ mark.search-hit.is-current {
 <li>限定承認・放棄の後に、相続財産を<strong>隠匿</strong>・<strong>消費</strong>した</li>
 </ul>
 </li>
-<li>⚠ 相続開始<strong>前</strong>の相続放棄は<strong>できない</strong>（家庭裁判所の許可を得ても不可）</li>
+<li class="caution">⚠ 相続開始<strong>前</strong>の相続放棄は<strong>できない</strong>（家庭裁判所の許可を得ても不可）</li>
 <li>一度した承認・放棄は、熟慮期間内でも<strong>撤回できない</strong>（詐欺・強迫等による取消しは可）</li>
 <li>相続放棄の効果: <strong>遡及的</strong>に相続人とならなかったものとみなす → 他の相続人の相続分が増える／次順位の者が相続人になる</li>
 <li>相続放棄をしても代襲相続は発生しない</li>
 <li>相続放棄をした者は、放棄時に相続財産を<strong>現に占有</strong>しているときは、他の相続人等に引き渡すまで<strong>保存</strong>義務を負う</li>
 </ul>
-<h4 id="04-民法親族相続-8">遺産分割 ★</h4>
+<h4 id="04-民法親族相続-8">遺産分割 <span class="stars" data-n="1">★</span></h4>
 <ul>
 <li>相続開始から遺産分割までは、相続財産は共同相続人の<strong>共有</strong></li>
 <li>共同相続人の<strong>協議</strong>で分割（<strong>全員</strong>の参加・合意が必要。法定相続分と異なる分割も可）。協議が整わないときは家庭裁判所に請求</li>
@@ -3312,7 +3356,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 </ul>
-<h3 id="04-民法親族相続-10">2. 遺言 ★★</h3>
+<h3 id="04-民法親族相続-10">2. 遺言 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="04-民法親族相続-11">遺言の基本</h4>
 <ul>
 <li><strong>15歳</strong>以上であれば遺言できる（法定代理人の同意不要。制限行為能力者も単独で可）</li>
@@ -3351,7 +3395,7 @@ mark.search-hit.is-current {
 <li>自筆証書の日付は特定できることが必要（「令和○年○月吉日」は<strong>無効</strong>）</li>
 <li>自筆証書の加除・変更: 場所を指示し、変更した旨を付記して署名し、変更の場所に押印</li>
 <li><strong>検認</strong>: 遺言書の保管者・発見した相続人は、相続開始を知った後、遅滞なく家庭裁判所に提出して検認を請求<ul>
-<li>⚠ 検認は遺言書の状態を確認する手続きにすぎず、検認を経なくても遺言は<strong>無効にならない</strong>（過料の制裁あり）</li>
+<li class="caution">⚠ 検認は遺言書の状態を確認する手続きにすぎず、検認を経なくても遺言は<strong>無効にならない</strong>（過料の制裁あり）</li>
 <li>封印のある遺言書は、家庭裁判所で相続人等の立会いがなければ開封できない</li>
 </ul>
 </li>
@@ -3381,7 +3425,7 @@ mark.search-hit.is-current {
 <li><strong>特定遺贈</strong>（特定の財産を遺贈）: 受遺者は遺言者の死亡後<strong>いつでも</strong>放棄できる</li>
 <li>受遺者が遺言者より<strong>先に死亡</strong> → 遺贈は効力を生じない（受遺者の相続人は承継しない。代襲なし）</li>
 </ul>
-<h3 id="04-民法親族相続-17">3. 遺留分 ★★</h3>
+<h3 id="04-民法親族相続-17">3. 遺留分 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="04-民法親族相続-18">遺留分の割合</h4>
 <table>
 <thead>
@@ -3424,7 +3468,7 @@ mark.search-hit.is-current {
 </li>
 <li>遺留分算定の基礎となる財産には、相続開始前<strong>1年間</strong>の贈与（相続人への贈与は<strong>10年間</strong>の特別受益）が加算される（当事者双方が遺留分権利者に損害を加えることを知っていた贈与は期間制限なし）</li>
 </ul>
-<h4 id="04-民法親族相続-19">遺留分侵害額請求権（1046条）★★</h4>
+<h4 id="04-民法親族相続-19">遺留分侵害額請求権（1046条）<span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li>2019年改正: <strong>金銭請求</strong>に一本化（従来の遺留分減殺請求のような物権的効力はない → 遺贈・贈与自体は有効）</li>
 <li>遺留分を侵害する遺言も<strong>無効ではない</strong>（侵害された者が金銭を請求できるだけ）</li>
@@ -3440,14 +3484,14 @@ mark.search-hit.is-current {
 <ul>
 <li>相続開始<strong>前</strong>の遺留分の放棄 → <strong>家庭裁判所の許可</strong>を受けたときに限り有効</li>
 <li>相続開始<strong>後</strong>の放棄 → 自由にできる</li>
-<li>⚠ 共同相続人の一人が遺留分を放棄しても、<strong>他の共同相続人の遺留分は増えない</strong></li>
-<li>⚠ 遺留分を放棄しても<strong>相続人の地位は失わない</strong>（相続放棄とは別。相続開始後に相続できる）</li>
+<li class="caution">⚠ 共同相続人の一人が遺留分を放棄しても、<strong>他の共同相続人の遺留分は増えない</strong></li>
+<li class="caution">⚠ 遺留分を放棄しても<strong>相続人の地位は失わない</strong>（相続放棄とは別。相続開始後に相続できる）</li>
 </ul>
-<h3 id="04-民法親族相続-21">4. 配偶者居住権（2020年施行）★</h3>
+<h3 id="04-民法親族相続-21">4. 配偶者居住権（2020年施行）<span class="stars" data-n="1">★</span></h3>
 <h4 id="04-民法親族相続-22">配偶者居住権（1028条）</h4>
 <ul>
 <li><strong>要件</strong>: 被相続人の配偶者が、被相続人の財産に属した建物に<strong>相続開始時に居住</strong>していたこと<ul>
-<li>⚠ 被相続人が相続開始時に居住建物を<strong>配偶者以外の者と共有</strong>していた場合は成立しない</li>
+<li class="caution">⚠ 被相続人が相続開始時に居住建物を<strong>配偶者以外の者と共有</strong>していた場合は成立しない</li>
 </ul>
 </li>
 <li><strong>内容</strong>: 居住建物の<strong>全部</strong>について<strong>無償</strong>で使用収益できる</li>
@@ -3478,11 +3522,11 @@ mark.search-hit.is-current {
 <blockquote>
 <p>毎年1問出題（借地1問・借家1問）。借地権・借家権の存続期間と更新、対抗要件の違いが頻出。</p>
 </blockquote>
-<h3 id="05-借地借家法-2">1. 借地権 ★★★</h3>
+<h3 id="05-借地借家法-2">1. 借地権 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="05-借地借家法-3">借地権の定義</h4>
 <ul>
 <li><strong>建物の所有を目的</strong>とする<strong>地上権</strong>又は<strong>土地の賃借権</strong></li>
-<li>⚠ 建物所有目的でない土地の賃貸借（青空駐車場・資材置場・ゴルフ練習場等）には借地借家法は適用されない（民法のみ）</li>
+<li class="caution">⚠ 建物所有目的でない土地の賃貸借（青空駐車場・資材置場・ゴルフ練習場等）には借地借家法は適用されない（民法のみ）</li>
 <li><strong>一時使用</strong>のために借地権を設定したことが明らかな場合 → 存続期間・更新・建物買取請求権・定期借地権等の規定は適用されない</li>
 </ul>
 <h4 id="05-借地借家法-4">存続期間</h4>
@@ -3509,7 +3553,7 @@ mark.search-hit.is-current {
 <li>30年より短い期間を定めた場合 → <strong>30年</strong>（30年より長い期間を定めればその期間）</li>
 <li>更新後の期間も、定めがない・短い場合は上記の期間（20年・10年）</li>
 </ul>
-<h4 id="05-借地借家法-5">更新 ★★</h4>
+<h4 id="05-借地借家法-5">更新 <span class="stars" data-n="2">★★</span></h4>
 <table>
 <thead>
 <tr>
@@ -3538,14 +3582,14 @@ mark.search-hit.is-current {
 </ul>
 </li>
 <li><strong>正当事由</strong>: 借地権設定者・借地権者（転借地権者を含む）が土地の使用を必要とする事情のほか、借地に関する従前の経過、土地の利用状況、借地権設定者が土地の明渡しの条件として又は明渡しと引換えに借地権者に対して財産上の給付をする旨の申出（<strong>立退料</strong>）を考慮</li>
-<li>⚠ 期間満了時に<strong>建物がない</strong>場合は、請求・使用継続による更新はない（合意更新のみ）</li>
+<li class="caution">⚠ 期間満了時に<strong>建物がない</strong>場合は、請求・使用継続による更新はない（合意更新のみ）</li>
 </ul>
-<h4 id="05-借地借家法-6">対抗要件 ★★</h4>
+<h4 id="05-借地借家法-6">対抗要件 <span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li><strong>原則</strong>: 借地権の<strong>登記</strong>（地上権は登記請求権あり、賃借権は特約がなければ登記請求権なし）</li>
 <li><strong>特例</strong>: 借地上に<strong>借地権者名義</strong>の<strong>登記された建物</strong>があればよい（借地借家法10条）<ul>
 <li>建物の登記は<strong>表示の登記</strong>（表題登記）でもよい（判例）</li>
-<li>⚠ <strong>家族名義</strong>（妻・長男等）の建物登記では対抗力なし（判例）</li>
+<li class="caution">⚠ <strong>家族名義</strong>（妻・長男等）の建物登記では対抗力なし（判例）</li>
 <li>建物の登記の所在地番が実際と多少異なっていても、建物の同一性が認識できれば対抗力あり（判例）</li>
 <li>借地が2筆にわたり、一方の筆にのみ登記された建物がある → 建物のない筆には対抗力は及ばない（判例）</li>
 </ul>
@@ -3583,7 +3627,7 @@ mark.search-hit.is-current {
 <ul>
 <li>借地権が<strong>賃借権</strong>の場合: 借地権設定者の<strong>承諾</strong>が必要（地上権なら承諾不要）</li>
 <li>借地上の建物を譲渡すると、借地権も<strong>従たる権利</strong>として譲渡される → 承諾が必要</li>
-<li>⚠ 借地上の建物を<strong>賃貸</strong>することは、借地の転貸にはあたらない（承諾不要）</li>
+<li class="caution">⚠ 借地上の建物を<strong>賃貸</strong>することは、借地の転貸にはあたらない（承諾不要）</li>
 <li>借地権設定者が承諾しない場合:<ul>
 <li>借地権者は、裁判所に借地権設定者の承諾に代わる<strong>許可</strong>を求めることができる（借地権設定者に不利となるおそれがないとき）</li>
 <li>借地権設定者が、自ら建物の譲渡を受ける旨を申し立てたとき → 裁判所は相当の対価等で譲渡を命ずることができる（<strong>介入権</strong>）</li>
@@ -3595,7 +3639,7 @@ mark.search-hit.is-current {
 <h4 id="05-借地借家法-9">建物買取請求権</h4>
 <ul>
 <li>借地権の<strong>存続期間が満了</strong>し、契約の<strong>更新がない</strong>とき → 借地権者は借地権設定者に、建物その他借地権者が権原により附属させた物を<strong>時価</strong>で買い取るよう請求できる</li>
-<li>⚠ 借地権者の<strong>債務不履行</strong>（地代不払い等）により契約が<strong>解除</strong>された場合は、建物買取請求権は<strong>認められない</strong>（判例）</li>
+<li class="caution">⚠ 借地権者の<strong>債務不履行</strong>（地代不払い等）により契約が<strong>解除</strong>された場合は、建物買取請求権は<strong>認められない</strong>（判例）</li>
 <li>建物買取請求権を行使した借地権者は、代金の支払いを受けるまで建物の引渡しを拒める（同時履行・留置権）。ただし、その間の<strong>地代相当額</strong>は支払う</li>
 <li>建物買取請求権を排除する特約は<strong>無効</strong>（定期借地権を除く）</li>
 </ul>
@@ -3603,7 +3647,7 @@ mark.search-hit.is-current {
 <ul>
 <li>地代等が経済事情の変動等により不相当となった → 当事者は将来に向かって増減を請求できる</li>
 <li><strong>一定期間増額しない</strong>特約 → <strong>有効</strong></li>
-<li>⚠ <strong>減額しない</strong>特約 → <strong>無効</strong>（借地権者に不利）</li>
+<li class="caution">⚠ <strong>減額しない</strong>特約 → <strong>無効</strong>（借地権者に不利）</li>
 <li>増額請求で協議が調わない → 借地権者は、裁判確定までは<strong>相当と認める額</strong>を支払えば足りる（不足額は裁判確定後に年1割の利息を付して支払う）</li>
 <li>減額請求で協議が調わない → 借地権設定者は、裁判確定までは相当と認める額の支払いを請求できる（超過額は年1割の利息を付して返還）</li>
 </ul>
@@ -3611,7 +3655,7 @@ mark.search-hit.is-current {
 <ul>
 <li>借地権設定者が自ら借地権者となることは原則としてできないが、<strong>他の者と共に</strong>有することとなるときは設定できる（例: 地主が建てたマンションの敷地に、自己と分譲購入者の準共有の借地権を設定）</li>
 </ul>
-<h3 id="05-借地借家法-12">2. 定期借地権 ★★</h3>
+<h3 id="05-借地借家法-12">2. 定期借地権 <span class="stars" data-n="2">★★</span></h3>
 <table>
 <thead>
 <tr>
@@ -3654,22 +3698,22 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ <strong>事業用</strong>定期借地権は<strong>公正証書</strong>に限る（一般の書面では不可）／<strong>一般</strong>定期借地権は公正証書以外の書面でもよい</li>
-<li>⚠ 事業用でも、<strong>社宅</strong>・<strong>賃貸マンション</strong>など居住用建物の所有を目的とする場合は不可</li>
+<li class="caution">⚠ <strong>事業用</strong>定期借地権は<strong>公正証書</strong>に限る（一般の書面では不可）／<strong>一般</strong>定期借地権は公正証書以外の書面でもよい</li>
+<li class="caution">⚠ 事業用でも、<strong>社宅</strong>・<strong>賃貸マンション</strong>など居住用建物の所有を目的とする場合は不可</li>
 <li>建物譲渡特約付借地権で借地権が消滅した後、建物の使用を継続している借地権者・建物賃借人が請求 → <strong>期間の定めのない建物賃貸借</strong>がされたものとみなす</li>
 </ul>
-<h3 id="05-借地借家法-13">3. 借家権 ★★★</h3>
+<h3 id="05-借地借家法-13">3. 借家権 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="05-借地借家法-14">適用範囲</h4>
 <ul>
 <li><strong>建物</strong>の賃貸借に適用（居住用・事業用を問わない）</li>
-<li>⚠ <strong>使用貸借</strong>（無償）、<strong>一時使用</strong>のための建物賃貸借が明らかな場合には適用されない</li>
+<li class="caution">⚠ <strong>使用貸借</strong>（無償）、<strong>一時使用</strong>のための建物賃貸借が明らかな場合には適用されない</li>
 </ul>
 <h4 id="05-借地借家法-15">存続期間</h4>
 <ul>
 <li><strong>1年以上</strong>（上限なし。民法の50年制限も適用されない）</li>
 <li><strong>1年未満</strong>の期間を定めた場合 → <strong>期間の定めのない</strong>賃貸借とみなす（定期建物賃貸借を除く）</li>
 </ul>
-<h4 id="05-借地借家法-16">更新 ★★</h4>
+<h4 id="05-借地借家法-16">更新 <span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li><strong>期間の定めのある場合</strong>:<ul>
 <li>当事者が期間満了の<strong>1年前から6か月前</strong>までに、相手方に<strong>更新をしない旨の通知</strong>（又は条件を変更しなければ更新しない旨の通知）をしなければ → 従前と同一条件で<strong>更新</strong>したものとみなす（法定更新）</li>
@@ -3705,7 +3749,7 @@ mark.search-hit.is-current {
 <li>賃貸人の解約申入れ後も、6か月経過後に賃借人が使用を継続し、賃貸人が遅滞なく異議を述べなかった → 更新</li>
 <li>正当事由の考慮要素: 賃貸人・賃借人（転借人を含む）が建物の使用を必要とする事情、従前の経過、建物の利用状況・現況、<strong>立退料</strong>の申出</li>
 </ul>
-<h4 id="05-借地借家法-17">対抗要件 ★★</h4>
+<h4 id="05-借地借家法-17">対抗要件 <span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li>賃借権の<strong>登記</strong>、又は<strong>建物の引渡し</strong>を受けていれば、その後にその建物について物権を取得した第三者に対抗可能（借地借家法31条）</li>
 <li>登記がなくても引渡しで足りる</li>
@@ -3713,30 +3757,30 @@ mark.search-hit.is-current {
 <h4 id="05-借地借家法-18">借賃増減請求権</h4>
 <ul>
 <li>借地の地代等と同様（一定期間<strong>増額しない</strong>特約は<strong>有効</strong>、<strong>減額しない</strong>特約は<strong>無効</strong>）</li>
-<li>⚠ 定期建物賃貸借で借賃の改定に係る特約がある場合は、借賃増減請求権の規定は適用されない（減額しない特約も有効）</li>
+<li class="caution">⚠ 定期建物賃貸借で借賃の改定に係る特約がある場合は、借賃増減請求権の規定は適用されない（減額しない特約も有効）</li>
 </ul>
 <h4 id="05-借地借家法-19">造作買取請求権</h4>
 <ul>
 <li>賃貸人の<strong>同意</strong>を得て付加した造作（畳・建具・エアコン等）、賃貸人から買い受けた造作 → 賃貸借が<strong>期間満了</strong>又は<strong>解約申入れ</strong>で終了するときに、賃貸人に<strong>時価</strong>で買取請求可能</li>
 <li><strong>特約で排除可能</strong>（強行規定ではない）</li>
-<li>⚠ 賃借人の<strong>債務不履行</strong>による解除で終了した場合は請求できない（判例）</li>
-<li>⚠ 造作代金の支払いを受けるまで建物を<strong>留置することはできない</strong>（同時履行も否定・判例）</li>
+<li class="caution">⚠ 賃借人の<strong>債務不履行</strong>による解除で終了した場合は請求できない（判例）</li>
+<li class="caution">⚠ 造作代金の支払いを受けるまで建物を<strong>留置することはできない</strong>（同時履行も否定・判例）</li>
 <li>転借人も、賃貸人に対して造作買取請求ができる</li>
 </ul>
 <h4 id="05-借地借家法-20">転貸借の保護</h4>
 <ul>
 <li>建物の賃貸借が<strong>期間満了</strong>又は<strong>解約申入れ</strong>で終了する場合 → 賃貸人は<strong>転借人に通知</strong>しなければ、その終了を転借人に<strong>対抗できない</strong></li>
 <li>通知をしたとき → 転貸借は通知の日から<strong>6か月</strong>を経過することで終了</li>
-<li>⚠ 賃借人の<strong>債務不履行</strong>で解除された場合 → 転借人に通知・催告をしなくても対抗できる（判例）</li>
+<li class="caution">⚠ 賃借人の<strong>債務不履行</strong>で解除された場合 → 転借人に通知・催告をしなくても対抗できる（判例）</li>
 <li>合意解除の場合 → 原則として転借人に対抗できない（民法613条）</li>
 </ul>
 <h4 id="05-借地借家法-21">居住用建物の賃貸借の承継</h4>
 <ul>
 <li>居住用建物の賃借人が<strong>相続人なしに死亡</strong> → 事実上の夫婦・養親子と同様の関係にあった<strong>同居者</strong>（内縁の配偶者等）が賃借人の権利義務を<strong>承継</strong></li>
 <li>同居者が相続人なしに死亡したことを知った後<strong>1か月以内</strong>に賃貸人に<strong>反対の意思</strong>を表示すれば承継しない</li>
-<li>⚠ 相続人がいる場合は、相続人が賃借権を相続する（内縁の配偶者は相続人の賃借権を援用して居住できる・判例）</li>
+<li class="caution">⚠ 相続人がいる場合は、相続人が賃借権を相続する（内縁の配偶者は相続人の賃借権を援用して居住できる・判例）</li>
 </ul>
-<h3 id="05-借地借家法-22">4. 定期建物賃貸借（定期借家）★★</h3>
+<h3 id="05-借地借家法-22">4. 定期建物賃貸借（定期借家）<span class="stars" data-n="2">★★</span></h3>
 <table>
 <thead>
 <tr>
@@ -3782,7 +3826,7 @@ mark.search-hit.is-current {
 <li>法令又は契約により一定期間経過後に建物を取り壊すべきことが明らかな場合 → 建物を取り壊すこととなる時に賃貸借が終了する旨を定められる</li>
 <li>特約は、取り壊すべき事由を記載した<strong>書面</strong>（電磁的記録も可）でしなければならない</li>
 </ul>
-<h3 id="05-借地借家法-24">5. 借地借家法の強行規定 ★</h3>
+<h3 id="05-借地借家法-24">5. 借地借家法の強行規定 <span class="stars" data-n="1">★</span></h3>
 <h4 id="05-借地借家法-25">借地</h4>
 <ul>
 <li>借地権者に不利な特約は無効（9条、16条、21条等）</li>
@@ -3848,7 +3892,7 @@ mark.search-hit.is-current {
 <p>毎年1問出題。集会の決議要件（普通決議・特別決議・建替え決議）が最頻出。<br />
 ⚠️ <strong>2026年4月1日施行の大改正（令和7年法律第47号）</strong>: 決議の<strong>出席者ベース化</strong>、建替え決議の<strong>3/4緩和類型</strong>、<strong>所在等不明区分所有者の除外</strong>、新決議類型・管理命令制度の新設。2026年度試験の最重要改正論点。</p>
 </blockquote>
-<h3 id="06-区分所有法-2">1. 区分所有建物の基本 ★</h3>
+<h3 id="06-区分所有法-2">1. 区分所有建物の基本 <span class="stars" data-n="1">★</span></h3>
 <h4 id="06-区分所有法-3">専有部分と共用部分</h4>
 <table>
 <thead>
@@ -3899,7 +3943,7 @@ mark.search-hit.is-current {
 <ul>
 <li>区分所有者は、共用部分等について他の区分所有者に対して有する債権（<strong>管理費</strong>・<strong>修繕積立金</strong>等）、規約・集会の決議に基づく債権について、債務者の<strong>区分所有権</strong>（共用部分の持分・敷地利用権を含む）及び建物に備え付けた<strong>動産</strong>の上に<strong>先取特権</strong>を有する（管理者・管理組合法人の債権も同様）</li>
 <li>これらの債権は、債務者たる区分所有者の<strong>特定承継人</strong>（中古マンションの買主・競売の買受人等）に対しても請求できる<ul>
-<li>⚠ 滞納管理費は買主にも請求できる（前の所有者も債務を免れない）</li>
+<li class="caution">⚠ 滞納管理費は買主にも請求できる（前の所有者も債務を免れない）</li>
 </ul>
 </li>
 </ul>
@@ -3908,7 +3952,7 @@ mark.search-hit.is-current {
 <li><strong>区分所有者の責務</strong>（5条の2）: 区分所有者は、管理が適正かつ円滑に行われるよう<strong>相互に協力</strong>しなければならない</li>
 <li><strong>国内管理人</strong>（6条の2）: 国内に住所・居所を有しない区分所有者は、国内に住所等を有する者から<strong>管理人を選任できる</strong>（保存行為、集会招集通知の受領、議決権行使等の権限）</li>
 </ul>
-<h3 id="06-区分所有法-7">2. 管理組合と管理者 ★</h3>
+<h3 id="06-区分所有法-7">2. 管理組合と管理者 <span class="stars" data-n="1">★</span></h3>
 <h4 id="06-区分所有法-8">管理組合</h4>
 <ul>
 <li>区分所有者は当然に管理組合の構成員（全員で構成）</li>
@@ -3937,7 +3981,7 @@ mark.search-hit.is-current {
 <li>管理組合法人が成立すると、<strong>管理者</strong>に関する規定は適用されない（理事が代わりに職務を行う）</li>
 <li>管理組合法人の財産で債務を完済できない → 区分所有者は共用部分の持分割合に応じて弁済の責任を負う</li>
 </ul>
-<h3 id="06-区分所有法-11">3. 集会 ★★★</h3>
+<h3 id="06-区分所有法-11">3. 集会 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="06-区分所有法-12">招集</h4>
 <ul>
 <li>管理者が少なくとも毎年1回招集</li>
@@ -3949,7 +3993,7 @@ mark.search-hit.is-current {
 <li>区分所有者<strong>全員の同意</strong>があれば、<strong>招集手続を省略</strong>して集会を開ける</li>
 <li>招集通知: 会日より少なくとも<strong>1週間前</strong>に、会議の目的たる事項<strong>及び議案の要領</strong>を示して発する（2026改正: 議案の要領は全決議事項で必須に。期間は規約で<strong>伸長のみ可</strong>〔従来の「伸縮」から変更 — 短縮不可〕。建替え決議等は2ヶ月前）</li>
 </ul>
-<h4 id="06-区分所有法-13">決議要件 ★★★（2026改正: 出席者ベースへ変更）</h4>
+<h4 id="06-区分所有法-13">決議要件 <span class="stars" data-n="3">★★★</span>（2026改正: 出席者ベースへ変更）</h4>
 <p>普通決議・特別決議は「<strong>出席した</strong>区分所有者及びその議決権」ベースに変更。書面・電磁的方法・代理人による議決権行使も<strong>出席扱い</strong>。</p>
 <table>
 <thead>
@@ -4007,7 +4051,7 @@ mark.search-hit.is-current {
 <li>共用部分の軽微変更（形状又は効用の<strong>著しい変更を伴わない</strong>もの）</li>
 <li>共用部分についての<strong>損害保険契約</strong>の締結（管理に関する事項とみなされる）</li>
 <li>小規模滅失の復旧</li>
-<li>⚠ 普通決議事項は、規約で別段の定め（理事会決議で足りる等）が可能</li>
+<li class="caution">⚠ 普通決議事項は、規約で別段の定め（理事会決議で足りる等）が可能</li>
 </ul>
 <h4 id="06-区分所有法-18">特別決議事項（出席者の3/4以上）</h4>
 <ul>
@@ -4021,7 +4065,7 @@ mark.search-hit.is-current {
 <li>管理組合法人の設立・解散</li>
 <li>管理組合法人による区分所有権等の取得（2026改正で新設）</li>
 </ul>
-<h4 id="06-区分所有法-19">所在等不明区分所有者の除外（2026改正で新設）★</h4>
+<h4 id="06-区分所有法-19">所在等不明区分所有者の除外（2026改正で新設）<span class="stars" data-n="1">★</span></h4>
 <ul>
 <li><strong>裁判所の裁判</strong>により、所在等不明の区分所有者を集会の決議から<strong>除外</strong>できる（38条の2）</li>
 <li>除外された者は<strong>議決権を有しない</strong> → 決議の母数から外れる</li>
@@ -4035,7 +4079,7 @@ mark.search-hit.is-current {
 <li>建物の価格の<strong>1/2以下</strong>の滅失 → <strong>各区分所有者が単独</strong>で復旧可能</li>
 <li>集会の決議でも可能（普通決議）</li>
 </ul>
-<h3 id="06-区分所有法-22">4. 規約 ★★</h3>
+<h3 id="06-区分所有法-22">4. 規約 <span class="stars" data-n="2">★★</span></h3>
 <ul>
 <li>設定・変更・廃止: <strong>特別決議</strong>（過半数出席＋出席者の3/4以上）</li>
 <li>一部の区分所有者の権利に特別の影響を及ぼすとき → その者の<strong>承諾</strong>が必要</li>
@@ -4047,7 +4091,7 @@ mark.search-hit.is-current {
 <li>規約の<strong>保管場所</strong>は、建物内の見やすい場所に<strong>掲示</strong>しなければならない</li>
 <li>利害関係人の閲覧請求: 正当な理由がある場合を除き拒否不可（電磁的記録の規約は、承諾を得て<strong>電磁的方法による提供</strong>も可 — 2026改正）</li>
 </ul>
-<h3 id="06-区分所有法-23">5. 義務違反者への措置 ★</h3>
+<h3 id="06-区分所有法-23">5. 義務違反者への措置 <span class="stars" data-n="1">★</span></h3>
 <table>
 <thead>
 <tr>
@@ -4108,7 +4152,7 @@ mark.search-hit.is-current {
 <li>大規模滅失の日から<strong>6か月以内</strong>に復旧決議・建替え決議等がない → 各区分所有者は、他の区分所有者に対し、建物・敷地に関する権利の<strong>買取りを請求</strong>できる<br />
 | 建替え | 区分所有者及び議決権の各<strong>4/5以上</strong>（緩和事由あれば<strong>3/4以上</strong>） |</li>
 </ul>
-<h4 id="06-区分所有法-25">建替え決議（4/5以上 → 緩和事由ありは3/4以上）★★</h4>
+<h4 id="06-区分所有法-25">建替え決議（4/5以上 → 緩和事由ありは3/4以上）<span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li>招集通知は会日の<strong>2ヶ月前</strong>までに発する（規約で伸長のみ可）</li>
 <li>通知に加え、建替えに関する<strong>説明会</strong>を1ヶ月前までに開催</li>
@@ -4122,7 +4166,7 @@ mark.search-hit.is-current {
 </ol>
 </li>
 </ul>
-<h4 id="06-区分所有法-26">新設された決議類型（2026改正）★</h4>
+<h4 id="06-区分所有法-26">新設された決議類型（2026改正）<span class="stars" data-n="1">★</span></h4>
 <p>いずれも区分所有者及び議決権（敷地売却系は敷地利用権の持分価格も）の各<strong>4/5以上</strong>。建替え決議と同じ<strong>3/4緩和</strong>あり。</p>
 <table>
 <thead>
@@ -4150,7 +4194,7 @@ mark.search-hit.is-current {
 </tr>
 </tbody>
 </table>
-<h3 id="06-区分所有法-27">7. 専有部分の管理に関する裁判所の命令（2026改正で新設）★</h3>
+<h3 id="06-区分所有法-27">7. 専有部分の管理に関する裁判所の命令（2026改正で新設）<span class="stars" data-n="1">★</span></h3>
 <table>
 <thead>
 <tr>
@@ -4182,7 +4226,7 @@ mark.search-hit.is-current {
 <blockquote>
 <p>毎年1問出題。登記の申請手続き、仮登記、登記できる権利の知識が問われる。</p>
 </blockquote>
-<h3 id="07-不動産登記法-2">1. 不動産登記制度の基本 ★</h3>
+<h3 id="07-不動産登記法-2">1. 不動産登記制度の基本 <span class="stars" data-n="1">★</span></h3>
 <h4 id="07-不動産登記法-3">登記の目的</h4>
 <ul>
 <li>不動産の物理的状況（表示に関する登記）と権利関係（権利に関する登記）を公示する</li>
@@ -4253,7 +4297,7 @@ mark.search-hit.is-current {
 </table>
 <ul>
 <li>申請を怠ると<strong>10万円以下の過料</strong></li>
-<li>⚠ <strong>分筆</strong>・<strong>合筆</strong>の登記は義務ではない（表題部所有者又は所有権の登記名義人が申請した場合に行う）</li>
+<li class="caution">⚠ <strong>分筆</strong>・<strong>合筆</strong>の登記は義務ではない（表題部所有者又は所有権の登記名義人が申請した場合に行う）</li>
 <li>建物の<strong>分割</strong>・<strong>合併</strong>の登記も、所有者の申請による（義務なし）</li>
 </ul>
 <h4 id="07-不動産登記法-6">登記記録の構成</h4>
@@ -4289,7 +4333,7 @@ mark.search-hit.is-current {
 <li>地図・建物所在図・地図に準ずる図面の写しの交付も、何人も請求できる</li>
 <li>登記簿の<strong>附属書類</strong>（申請書・添付書類）の閲覧 → 請求人が<strong>利害関係</strong>を有する部分等に限られる（正当な理由が必要）</li>
 </ul>
-<h3 id="07-不動産登記法-8">2. 登記の申請 ★★</h3>
+<h3 id="07-不動産登記法-8">2. 登記の申請 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="07-不動産登記法-9">申請主義</h4>
 <ul>
 <li>登記は、法令に別段の定めがある場合を除き、<strong>当事者の申請</strong>又は官公署の<strong>嘱託</strong>がなければすることができない</li>
@@ -4303,7 +4347,7 @@ mark.search-hit.is-current {
 </li>
 <li>共同申請の理由: 登記義務者を関与させることで、登記の<strong>真正</strong>を確保するため</li>
 </ul>
-<h4 id="07-不動産登記法-11">単独申請が認められる場合 ★★</h4>
+<h4 id="07-不動産登記法-11">単独申請が認められる場合 <span class="stars" data-n="2">★★</span></h4>
 <table>
 <thead>
 <tr>
@@ -4347,8 +4391,8 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ <strong>相続人以外</strong>の者に対する遺贈 → 共同申請（受遺者と遺言執行者又は相続人全員）</li>
-<li>⚠ <strong>売買</strong>・<strong>贈与</strong>・<strong>時効取得</strong>による所有権移転 → 共同申請</li>
+<li class="caution">⚠ <strong>相続人以外</strong>の者に対する遺贈 → 共同申請（受遺者と遺言執行者又は相続人全員）</li>
+<li class="caution">⚠ <strong>売買</strong>・<strong>贈与</strong>・<strong>時効取得</strong>による所有権移転 → 共同申請</li>
 <li><strong>一般承継人による申請</strong>: 登記権利者・登記義務者が申請前に死亡 → その<strong>相続人</strong>が申請できる（例: 売主が登記前に死亡 → 売主の相続人が登記義務者として買主と共同申請）</li>
 </ul>
 <h4 id="07-不動産登記法-12">代理人による申請</h4>
@@ -4371,7 +4415,7 @@ mark.search-hit.is-current {
 <li><strong>公証人</strong>の認証</li>
 </ul>
 </li>
-<li>⚠ 登記識別情報は<strong>再通知</strong>されない（失念しても再発行なし）</li>
+<li class="caution">⚠ 登記識別情報は<strong>再通知</strong>されない（失念しても再発行なし）</li>
 </ul>
 <h4 id="07-不動産登記法-14">登記の申請方法</h4>
 <ul>
@@ -4384,7 +4428,7 @@ mark.search-hit.is-current {
 <li>同一の不動産について登記した権利の順位は、法令に別段の定めがある場合を除き、登記の<strong>前後</strong>による</li>
 <li>同一の不動産に関し同時に2以上の申請がされた場合 → <strong>同時</strong>にされたものとみなす</li>
 </ul>
-<h3 id="07-不動産登記法-16">3. 所有権に関する登記 ★★</h3>
+<h3 id="07-不動産登記法-16">3. 所有権に関する登記 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="07-不動産登記法-17">所有権保存登記</h4>
 <ul>
 <li>所有権の登記がない不動産について、初めてする所有権の登記</li>
@@ -4398,14 +4442,14 @@ mark.search-hit.is-current {
 </li>
 </ul>
 </li>
-<li>⚠ 表題部所有者から所有権を取得した者（区分建物以外）は、所有権保存登記を申請できない → 表題部所有者が保存登記をした後に、所有権移転登記をする</li>
+<li class="caution">⚠ 表題部所有者から所有権を取得した者（区分建物以外）は、所有権保存登記を申請できない → 表題部所有者が保存登記をした後に、所有権移転登記をする</li>
 </ul>
 <h4 id="07-不動産登記法-18">所有権移転登記</h4>
 <ul>
 <li>売買、贈与、相続、時効取得等の原因で申請（相続・合併・相続人への遺贈以外は<strong>共同申請</strong>）</li>
 <li>時効取得 → 「時効取得」を原因とする<strong>所有権移転</strong>登記（保存登記ではない）</li>
 </ul>
-<h4 id="07-不動産登記法-19">相続登記の義務化（2024年4月施行）★</h4>
+<h4 id="07-不動産登記法-19">相続登記の義務化（2024年4月施行）<span class="stars" data-n="1">★</span></h4>
 <ul>
 <li>相続（<strong>相続人に対する遺贈</strong>を含む）により所有権を取得した者は、自己のために相続の開始があったことを<strong>知り</strong>、かつ、所有権を取得したことを<strong>知った日</strong>から<strong>3年以内</strong>に、所有権移転登記を申請しなければならない</li>
 <li>法定相続分で登記した後に<strong>遺産分割</strong>があった → 法定相続分を超えて取得した者は、遺産分割の日から<strong>3年以内</strong>に登記を申請</li>
@@ -4416,7 +4460,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 </ul>
-<h4 id="07-不動産登記法-20">住所等変更登記の義務化（2026年4月施行）★</h4>
+<h4 id="07-不動産登記法-20">住所等変更登記の義務化（2026年4月施行）<span class="stars" data-n="1">★</span></h4>
 <ul>
 <li>所有権の登記名義人の<strong>氏名・名称・住所</strong>に変更があったときは、変更日から<strong>2年以内</strong>に変更登記の申請義務（76条の5）</li>
 <li>正当な理由なく怠ると<strong>5万円以下の過料</strong></li>
@@ -4439,7 +4483,7 @@ mark.search-hit.is-current {
 <li>買戻し期間: <strong>10年</strong>以内（定めがなければ5年）</li>
 <li>売買契約の日から<strong>10年</strong>を経過した場合 → 登記権利者（売買の買主側）は<strong>単独</strong>で買戻しの特約の登記の抹消を申請できる</li>
 </ul>
-<h3 id="07-不動産登記法-24">4. 登記できる権利 ★</h3>
+<h3 id="07-不動産登記法-24">4. 登記できる権利 <span class="stars" data-n="1">★</span></h3>
 <ul>
 <li>所有権、地上権、永小作権、地役権、先取特権、質権、抵当権（根抵当権を含む）、<strong>賃借権</strong>、<strong>配偶者居住権</strong>、採石権</li>
 </ul>
@@ -4448,8 +4492,8 @@ mark.search-hit.is-current {
 <li><strong>占有権</strong></li>
 <li><strong>留置権</strong></li>
 <li>入会権</li>
-<li>⚠ <strong>使用借権</strong>（使用貸借による権利）も登記できない</li>
-<li>⚠ <strong>配偶者短期居住権</strong>も登記できない</li>
+<li class="caution">⚠ <strong>使用借権</strong>（使用貸借による権利）も登記できない</li>
+<li class="caution">⚠ <strong>配偶者短期居住権</strong>も登記できない</li>
 </ul>
 <h4 id="07-不動産登記法-26">主な登記のルール</h4>
 <ul>
@@ -4461,7 +4505,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 </ul>
-<h3 id="07-不動産登記法-27">5. 仮登記 ★★</h3>
+<h3 id="07-不動産登記法-27">5. 仮登記 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="07-不動産登記法-28">仮登記の種類</h4>
 <table>
 <thead>
@@ -4512,7 +4556,7 @@ mark.search-hit.is-current {
 <h3 id="07-不動産登記法-31">6. 区分建物の登記</h3>
 <ul>
 <li>区分建物の表題登記: 区分建物を新築した<strong>原始取得者</strong>（分譲業者等）が申請<ul>
-<li>⚠ 原始取得者から区分建物を取得した者は表題登記を申請できない（原始取得者が申請し、取得者は所有権保存登記を申請）</li>
+<li class="caution">⚠ 原始取得者から区分建物を取得した者は表題登記を申請できない（原始取得者が申請し、取得者は所有権保存登記を申請）</li>
 <li>原始取得者が死亡した場合 → その<strong>相続人</strong>も、被相続人を表題部所有者とする表題登記を申請できる</li>
 </ul>
 </li>
@@ -4561,7 +4605,7 @@ mark.search-hit.is-current {
 <blockquote>
 <p>宅建業法は全20問（問26〜45）。最も配点が大きく、18問以上正解を目指す科目。</p>
 </blockquote>
-<h3 id="08-宅建業法①総則・免許-2">1. 宅地建物取引業の定義 ★★★</h3>
+<h3 id="08-宅建業法①総則・免許-2">1. 宅地建物取引業の定義 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="08-宅建業法①総則・免許-3">「宅地」の定義</h4>
 <table>
 <thead>
@@ -4643,7 +4687,7 @@ mark.search-hit.is-current {
 <ul>
 <li>自ら賃貸（自ら貸主・転貸主）</li>
 <li><strong>国・地方公共団体</strong>（都市再生機構・地方住宅供給公社等を含む）には宅建業法が適用されない<ul>
-<li>⚠ 国・地方公共団体から依頼を受けて代理・媒介する者は、免許が<strong>必要</strong></li>
+<li class="caution">⚠ 国・地方公共団体から依頼を受けて代理・媒介する者は、免許が<strong>必要</strong></li>
 </ul>
 </li>
 <li><strong>信託会社・信託銀行</strong>: 免許に関する規定が適用されない<ul>
@@ -4661,7 +4705,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 </ul>
-<h3 id="08-宅建業法①総則・免許-8">2. 免許制度 ★★★</h3>
+<h3 id="08-宅建業法①総則・免許-8">2. 免許制度 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="08-宅建業法①総則・免許-9">免許の区分</h4>
 <table>
 <thead>
@@ -4724,7 +4768,7 @@ mark.search-hit.is-current {
 <li>新たな免許を受けると従前の免許は<strong>効力を失う</strong></li>
 <li>免許換え後の免許の有効期間は、新たに<strong>5年</strong>（従前の残存期間を引き継がない）</li>
 <li>免許換えの申請中に従前の免許の有効期間が満了 → 処分があるまで従前の免許は有効</li>
-<li>⚠ 同一都道府県内での事務所移転・増設は免許換え不要（変更の届出で足りる）</li>
+<li class="caution">⚠ 同一都道府県内での事務所移転・増設は免許換え不要（変更の届出で足りる）</li>
 </ul>
 <h4 id="08-宅建業法①総則・免許-12">免許の有効期間と更新</h4>
 <ul>
@@ -4750,7 +4794,7 @@ mark.search-hit.is-current {
 <li>事務所ごとに置かれる<strong>専任の宅建士</strong>の氏名</li>
 </ul>
 </li>
-<li>⚠ 役員・専任宅建士の<strong>住所</strong>、代表者の住所は届出事項ではない（宅建士の変更の登録とのひっかけ）</li>
+<li class="caution">⚠ 役員・専任宅建士の<strong>住所</strong>、代表者の住所は届出事項ではない（宅建士の変更の登録とのひっかけ）</li>
 </ul>
 <h4 id="08-宅建業法①総則・免許-15">廃業等の届出</h4>
 <table>
@@ -4797,10 +4841,10 @@ mark.search-hit.is-current {
 </table>
 <ul>
 <li>届出先は免許権者</li>
-<li>⚠ 合併の届出は「消滅した」法人の代表役員が行う（存続会社の代表役員ではない）</li>
+<li class="caution">⚠ 合併の届出は「消滅した」法人の代表役員が行う（存続会社の代表役員ではない）</li>
 <li>相続人は、被相続人が締結した契約に基づく取引を結了する目的の範囲内で宅建業者とみなされる</li>
 </ul>
-<h3 id="08-宅建業法①総則・免許-16">3. 欠格事由 ★★★</h3>
+<h3 id="08-宅建業法①総則・免許-16">3. 欠格事由 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="08-宅建業法①総則・免許-17">免許を受けられない者</h4>
 <table>
 <thead>
@@ -4874,7 +4918,7 @@ mark.search-hit.is-current {
 <li><strong>執行猶予</strong>付きの判決 → 猶予期間中は欠格。猶予期間が<strong>満了すれば直ちに</strong>免許を受けられる（5年待つ必要はない）</li>
 <li><strong>控訴・上告中</strong>は刑が確定していない → 欠格事由に該当しない</li>
 <li>罰金刑で欠格になるのは、<strong>宅建業法違反</strong>・暴力団対策法違反、<strong>傷害・現場助勢・暴行・凶器準備集合・脅迫・背任</strong>等に限られる<ul>
-<li>⚠ 過失傷害罪・道路交通法違反・詐欺罪・窃盗罪の<strong>罰金</strong>刑では欠格にならない（詐欺・窃盗でも<strong>拘禁刑</strong>なら欠格）</li>
+<li class="caution">⚠ 過失傷害罪・道路交通法違反・詐欺罪・窃盗罪の<strong>罰金</strong>刑では欠格にならない（詐欺・窃盗でも<strong>拘禁刑</strong>なら欠格）</li>
 </ul>
 </li>
 <li>免許取消しで5年欠格となるのは「不正手段による免許取得」「情状が特に重い」「業務停止処分違反」の<strong>3事由のみ</strong><ul>
@@ -4887,14 +4931,14 @@ mark.search-hit.is-current {
 <ul>
 <li><strong>役員</strong>（非常勤含む）に欠格事由のある者がいる場合 → 法人は免許を受けられない</li>
 <li><strong>政令で定める使用人</strong>（支店長等）に欠格事由のある者がいる場合 → 同様</li>
-<li>⚠ 一般の従業員や、役員でない株主に欠格事由があっても法人は免許を受けられる</li>
+<li class="caution">⚠ 一般の従業員や、役員でない株主に欠格事由があっても法人は免許を受けられる</li>
 </ul>
 <h4 id="08-宅建業法①総則・免許-20">未成年者</h4>
 <ul>
 <li>営業に関し成年者と同一の行為能力を<strong>有する</strong>未成年者（法定代理人から営業の許可を受けた者）→ 本人のみで判断</li>
 <li>営業に関し成年者と同一の行為能力を<strong>有しない</strong>未成年者 → <strong>法定代理人</strong>（法人なら役員）に欠格事由があれば免許を受けられない</li>
 </ul>
-<h3 id="08-宅建業法①総則・免許-21">4. 事務所 ★★</h3>
+<h3 id="08-宅建業法①総則・免許-21">4. 事務所 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="08-宅建業法①総則・免許-22">事務所の要件</h4>
 <table>
 <thead>
@@ -4932,7 +4976,7 @@ mark.search-hit.is-current {
 </table>
 <ul>
 <li>専任の宅建士は<strong>成年者</strong>でなければならない<ul>
-<li>⚠ 未成年の宅建士でも、本人が宅建業者（個人）又は法人の<strong>役員</strong>であれば、自ら主として業務に従事する事務所等の「成年者である専任の宅建士」と<strong>みなされる</strong></li>
+<li class="caution">⚠ 未成年の宅建士でも、本人が宅建業者（個人）又は法人の<strong>役員</strong>であれば、自ら主として業務に従事する事務所等の「成年者である専任の宅建士」と<strong>みなされる</strong></li>
 </ul>
 </li>
 <li>専任の宅建士が退職等で不足 → <strong>2週間以内</strong>に補充等の必要な措置をとる</li>
@@ -4948,11 +4992,11 @@ mark.search-hit.is-current {
 <li>届出事項: 所在地・業務内容・業務を行う期間・専任の宅建士の氏名</li>
 </ul>
 </li>
-<li>⚠ 報酬額の掲示・帳簿・従業者名簿は事務所のみ（案内所には不要）</li>
+<li class="caution">⚠ 報酬額の掲示・帳簿・従業者名簿は事務所のみ（案内所には不要）</li>
 </ul>
 </li>
 </ul>
-<h3 id="08-宅建業法①総則・免許-24">5. 営業保証金 ★★</h3>
+<h3 id="08-宅建業法①総則・免許-24">5. 営業保証金 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="08-宅建業法①総則・免許-25">供託</h4>
 <table>
 <thead>
@@ -4975,7 +5019,7 @@ mark.search-hit.is-current {
 <ul>
 <li>供託所: <strong>主たる事務所</strong>の<strong>最寄りの供託所</strong>（支店分もまとめて本店最寄りに供託。支店の最寄りではない）</li>
 <li>金銭のほか<strong>有価証券</strong>による供託も可能、金銭と有価証券の併用も可（国債: 額面100%、地方債・政府保証債: 額面90%、その他: 額面80%）<ul>
-<li>⚠ 株券では供託できない</li>
+<li class="caution">⚠ 株券では供託できない</li>
 </ul>
 </li>
 </ul>
@@ -4999,7 +5043,7 @@ mark.search-hit.is-current {
 <ul>
 <li>還付を受けられる者: 宅建業者と<strong>宅建業に関する取引</strong>をした者（<strong>宅建業者を除く</strong>）<ul>
 <li>宅建業に関する取引により生じた債権に限る</li>
-<li>⚠ 広告業者の広告代金債権、内装業者の工事代金債権、従業員の給与債権は還付の対象外</li>
+<li class="caution">⚠ 広告業者の広告代金債権、内装業者の工事代金債権、従業員の給与債権は還付の対象外</li>
 </ul>
 </li>
 <li>還付を受けられる額: その宅建業者が供託した営業保証金の額の範囲内</li>
@@ -5016,7 +5060,7 @@ mark.search-hit.is-current {
 <li>主たる事務所を移転し、最寄りの供託所が変わった場合（遅滞なく行う）:<ul>
 <li><strong>金銭のみ</strong>で供託 → 従前の供託所に対し、新たな最寄りの供託所への<strong>保管替え</strong>を請求（費用は予納）</li>
 <li>有価証券を含む（金銭＋有価証券を含む）→ 新たな最寄りの供託所に<strong>新たに供託</strong>（二重供託）してから、旧供託所の営業保証金を取戻し</li>
-<li>⚠ 有価証券が含まれると保管替えはできない</li>
+<li class="caution">⚠ 有価証券が含まれると保管替えはできない</li>
 </ul>
 </li>
 </ul>
@@ -5055,7 +5099,7 @@ mark.search-hit.is-current {
 <li>公告: 還付請求権者に対し、<strong>6か月以上</strong>の期間を定めて申し出るべき旨を公告</li>
 <li>公告期間内に申出がなかった場合でなければ取り戻せない</li>
 </ul>
-<h3 id="08-宅建業法①総則・免許-31">6. 保証協会 ★★</h3>
+<h3 id="08-宅建業法①総則・免許-31">6. 保証協会 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="08-宅建業法①総則・免許-32">保証協会の基本</h4>
 <ul>
 <li>保証協会は国土交通大臣が指定する一般社団法人（宅建業者のみを社員とする）</li>
@@ -5111,7 +5155,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 <li>還付限度額: その社員が社員でないとしたら供託すべき<strong>営業保証金に相当する額</strong>（主1,000万円 + 従500万円ベース）<ul>
-<li>⚠ 納付した分担金の額（60万円等）が限度ではない</li>
+<li class="caution">⚠ 納付した分担金の額（60万円等）が限度ではない</li>
 </ul>
 </li>
 <li>還付の手続き:<ol>
@@ -5119,7 +5163,7 @@ mark.search-hit.is-current {
 <li>認証を受けた上で、弁済業務保証金が供託されている<strong>供託所に還付請求</strong></li>
 </ol>
 </li>
-<li>⚠ 認証を受けずに直接供託所へ請求することはできない／保証協会へ還付請求するのではない</li>
+<li class="caution">⚠ 認証を受けずに直接供託所へ請求することはできない／保証協会へ還付請求するのではない</li>
 <li>還付後の補充の流れ:<ol>
 <li>保証協会は、国土交通大臣から還付の<strong>通知</strong>を受けた日から<strong>2週間以内</strong>に還付額相当の弁済業務保証金を<strong>供託所に供託</strong></li>
 <li>保証協会は、還付に係る社員（社員であった者）に対し、還付額相当の<strong>還付充当金</strong>を保証協会に納付するよう<strong>通知</strong></li>
@@ -5157,7 +5201,7 @@ mark.search-hit.is-current {
 </table>
 <ul>
 <li>取戻しは<strong>保証協会</strong>が供託所から行い、取り戻した額に相当する分担金を社員（社員であった者）に<strong>返還</strong></li>
-<li>⚠ 公告をするのは<strong>保証協会</strong>（社員であった宅建業者ではない）</li>
+<li class="caution">⚠ 公告をするのは<strong>保証協会</strong>（社員であった宅建業者ではない）</li>
 <li>公告期間内に申出のなかった債権については、保証協会は認証できない</li>
 </ul>
 <h4 id="08-宅建業法①総則・免許-37">比較表</h4>
@@ -5223,7 +5267,7 @@ mark.search-hit.is-current {
 <blockquote>
 <p>重要事項説明（35条）と37条書面は毎年複数問出題。最頻出分野。</p>
 </blockquote>
-<h3 id="09-宅建業法②業務規制-2">1. 宅地建物取引士 ★★★</h3>
+<h3 id="09-宅建業法②業務規制-2">1. 宅地建物取引士 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="09-宅建業法②業務規制-3">宅建士になるまでの流れ</h4>
 <ol>
 <li>宅建試験に合格（合格は一生有効）</li>
@@ -5234,7 +5278,7 @@ mark.search-hit.is-current {
 </li>
 <li>登録をしている知事に<strong>宅建士証の交付</strong>を申請<ul>
 <li>交付申請前<strong>6か月以内</strong>に行われる、登録知事が指定する講習（法定講習）を受講</li>
-<li>⚠ 試験合格の日から<strong>1年以内</strong>に交付を受ける場合は講習が免除</li>
+<li class="caution">⚠ 試験合格の日から<strong>1年以内</strong>に交付を受ける場合は講習が免除</li>
 </ul>
 </li>
 <li>宅建士証の交付を受けて初めて「宅地建物取引士」となる（登録だけでは宅建士の事務はできない）</li>
@@ -5242,7 +5286,7 @@ mark.search-hit.is-current {
 <h4 id="09-宅建業法②業務規制-4">登録の欠格事由</h4>
 <ul>
 <li>宅建業に係る営業に関し成年者と同一の行為能力を有しない<strong>未成年者</strong><ul>
-<li>⚠ 免許と違い、法定代理人が欠格かどうかに関係なく登録できない</li>
+<li class="caution">⚠ 免許と違い、法定代理人が欠格かどうかに関係なく登録できない</li>
 </ul>
 </li>
 <li>破産者で復権を得ない者、拘禁刑以上・一定の罰金刑から5年、暴力団員等 など（免許の欠格事由と概ね同じ）</li>
@@ -5255,7 +5299,7 @@ mark.search-hit.is-current {
 <ul>
 <li>登録事項（<strong>氏名・住所・本籍</strong>、勤務先の宅建業者の<strong>商号・免許番号</strong>等）に変更 → <strong>遅滞なく</strong>、登録知事に<strong>変更の登録</strong>を申請<ul>
 <li>氏名・住所が変わった場合は、あわせて宅建士証の<strong>書換え交付</strong>を申請</li>
-<li>⚠ 宅建業者の変更の届出（30日以内・住所は対象外）とのひっかけに注意</li>
+<li class="caution">⚠ 宅建業者の変更の届出（30日以内・住所は対象外）とのひっかけに注意</li>
 </ul>
 </li>
 <li>死亡等の届出（登録知事へ、<strong>30日以内</strong>）</li>
@@ -5290,8 +5334,8 @@ mark.search-hit.is-current {
 <ul>
 <li>登録知事の管轄外の都道府県にある宅建業者の<strong>事務所で業務に従事</strong>し、又は従事しようとするとき → 申請<strong>できる</strong>（任意）</li>
 <li>申請先: 移転先の知事に対し、<strong>現在の登録知事を経由</strong>して申請</li>
-<li>⚠ <strong>住所を移転しただけ</strong>では登録の移転はできない（勤務地が変わることが必要）</li>
-<li>⚠ <strong>事務禁止処分の期間中</strong>は登録の移転を申請できない</li>
+<li class="caution">⚠ <strong>住所を移転しただけ</strong>では登録の移転はできない（勤務地が変わることが必要）</li>
+<li class="caution">⚠ <strong>事務禁止処分の期間中</strong>は登録の移転を申請できない</li>
 <li>移転すると、従前の宅建士証は<strong>効力を失う</strong><ul>
 <li>移転の申請とともに宅建士証の交付を申請すると、移転先の知事は<strong>従前の宅建士証の残りの有効期間</strong>を有効期間とする宅建士証を交付（講習不要。新たに5年ではない）</li>
 <li>新しい宅建士証は、従前の宅建士証と<strong>引換え</strong>に交付</li>
@@ -5305,7 +5349,7 @@ mark.search-hit.is-current {
 <li>提示義務:<ul>
 <li><strong>重要事項説明</strong>をするとき → 相手方から請求がなくても<strong>必ず</strong>提示</li>
 <li><strong>取引の関係者から請求</strong>があったとき → 提示</li>
-<li>⚠ 37条書面の交付時は、請求がなければ提示義務なし</li>
+<li class="caution">⚠ 37条書面の交付時は、請求がなければ提示義務なし</li>
 </ul>
 </li>
 <li>宅建士証の住所欄にシールを貼って提示しても差し支えない（個人情報保護への配慮）</li>
@@ -5338,7 +5382,7 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ 事務禁止期間が満了しても、<strong>返還請求をしなければ</strong>自動的には返還されない</li>
+<li class="caution">⚠ 事務禁止期間が満了しても、<strong>返還請求をしなければ</strong>自動的には返還されない</li>
 </ul>
 <h4 id="09-宅建業法②業務規制-9">宅建士に対する監督処分</h4>
 <table>
@@ -5373,7 +5417,7 @@ mark.search-hit.is-current {
 <li>宅建士証の交付を受けていない登録者が<strong>宅建士としてすべき事務を行い情状が特に重い</strong> → 登録消除</li>
 <li>行為地の知事が処分したとき → 遅滞なく<strong>登録知事に通知</strong></li>
 </ul>
-<h3 id="09-宅建業法②業務規制-10">2. 媒介契約 ★★★</h3>
+<h3 id="09-宅建業法②業務規制-10">2. 媒介契約 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="09-宅建業法②業務規制-11">3種類の媒介契約</h4>
 <table>
 <thead>
@@ -5419,7 +5463,7 @@ mark.search-hit.is-current {
 </table>
 <ul>
 <li>媒介契約規制（34条の2）の対象は<strong>売買・交換</strong>の媒介・代理のみ（<strong>貸借</strong>の媒介には適用なし → 書面不要）</li>
-<li>⚠ <strong>一般媒介</strong>でも媒介契約書面の交付は<strong>必要</strong></li>
+<li class="caution">⚠ <strong>一般媒介</strong>でも媒介契約書面の交付は<strong>必要</strong></li>
 <li>レインズ登録期間は<strong>休業日を除いて</strong>数える（契約締結の日の翌日から起算）</li>
 <li>一般媒介には、他に依頼した業者を明示する義務のある「<strong>明示型</strong>」と、明示義務のない「非明示型」がある</li>
 </ul>
@@ -5435,7 +5479,7 @@ mark.search-hit.is-current {
 <h4 id="09-宅建業法②業務規制-13">媒介契約書面</h4>
 <ul>
 <li>宅建業者は、媒介契約を締結したときは<strong>遅滞なく</strong>書面を作成し、<strong>宅建業者が記名押印</strong>して依頼者に交付<ul>
-<li>⚠ <strong>宅建士</strong>の記名は不要（35条・37条書面との違い）</li>
+<li class="caution">⚠ <strong>宅建士</strong>の記名は不要（35条・37条書面との違い）</li>
 <li>依頼者の承諾があれば<strong>電磁的方法</strong>による提供も可</li>
 </ul>
 </li>
@@ -5459,7 +5503,7 @@ mark.search-hit.is-current {
 <li>登録物件の契約が成立 → <strong>遅滞なく</strong>レインズ（指定流通機構）に<strong>通知</strong></li>
 <li>レインズへの登録事項: 所在・規模・形質・売買すべき価額・法令上の制限・専属専任媒介である場合はその旨 など（⚠ 依頼者の氏名・住所は登録事項ではない）</li>
 </ul>
-<h3 id="09-宅建業法②業務規制-16">3. 重要事項説明（35条書面）★★★</h3>
+<h3 id="09-宅建業法②業務規制-16">3. 重要事項説明（35条書面）<span class="stars" data-n="3">★★★</span></h3>
 <h4 id="09-宅建業法②業務規制-17">基本ルール</h4>
 <ul>
 <li><strong>契約成立前</strong>に行う</li>
@@ -5503,13 +5547,13 @@ mark.search-hit.is-current {
 <li>保証協会の社員 → 社員である旨、<strong>保証協会の名称・住所・事務所の所在地</strong>、保証協会が弁済業務保証金を供託した<strong>供託所</strong>とその所在地</li>
 </ul>
 </li>
-<li>⚠ 供託している<strong>金額</strong>は説明事項ではない</li>
-<li>⚠ 書面の交付は不要（<strong>口頭</strong>で可）、<strong>宅建士</strong>が説明する必要もない</li>
+<li class="caution">⚠ 供託している<strong>金額</strong>は説明事項ではない</li>
+<li class="caution">⚠ 書面の交付は不要（<strong>口頭</strong>で可）、<strong>宅建士</strong>が説明する必要もない</li>
 </ul>
-<h4 id="09-宅建業法②業務規制-20">共通の説明事項（売買・貸借共通）★★★</h4>
+<h4 id="09-宅建業法②業務規制-20">共通の説明事項（売買・貸借共通）<span class="stars" data-n="3">★★★</span></h4>
 <ul>
 <li>登記された権利の種類・内容・登記名義人（又は表題部の所有者）<ul>
-<li>⚠ 引渡しまでに抵当権を抹消する予定でも、現に登記されていれば説明が必要</li>
+<li class="caution">⚠ 引渡しまでに抵当権を抹消する予定でも、現に登記されていれば説明が必要</li>
 </ul>
 </li>
 <li>法令に基づく制限の概要（貸借は売買より範囲が狭い）</li>
@@ -5535,7 +5579,7 @@ mark.search-hit.is-current {
 <li><strong>契約不適合責任</strong>の履行に関する措置（保証保険契約の締結等）を講ずるかどうか・その概要</li>
 <li>住宅性能評価を受けた<strong>新築住宅</strong>であるときはその旨</li>
 <li>割賦販売の場合: 現金販売価格、割賦販売価格、引渡しまでに支払う金銭の額・賦払金の額・支払時期・方法</li>
-<li>⚠ 代金の額・支払時期、引渡時期、移転登記の申請時期は35条の説明事項ではない（37条書面の記載事項）</li>
+<li class="caution">⚠ 代金の額・支払時期、引渡時期、移転登記の申請時期は35条の説明事項ではない（37条書面の記載事項）</li>
 </ul>
 <h4 id="09-宅建業法②業務規制-22">貸借のみの説明事項</h4>
 <ul>
@@ -5546,7 +5590,7 @@ mark.search-hit.is-current {
 <li><strong>敷金</strong>その他契約終了時に精算する金銭の精算に関する事項</li>
 <li><strong>管理の委託先</strong>（氏名・住所。管理業者の登録番号）</li>
 <li>宅地の貸借: 契約終了時における宅地上の<strong>建物の取壊し</strong>に関する事項</li>
-<li>⚠ 借賃の額・支払時期は35条の説明事項ではない（37条書面の記載事項）</li>
+<li class="caution">⚠ 借賃の額・支払時期は35条の説明事項ではない（37条書面の記載事項）</li>
 </ul>
 <h4 id="09-宅建業法②業務規制-23">区分所有建物（マンション）の追加事項</h4>
 <table>
@@ -5601,14 +5645,14 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ 貸借で説明が必要なのは「<strong>専有部分の用途制限</strong>」と「<strong>管理の委託先</strong>」の2つのみ</li>
+<li class="caution">⚠ 貸借で説明が必要なのは「<strong>専有部分の用途制限</strong>」と「<strong>管理の委託先</strong>」の2つのみ</li>
 </ul>
-<h3 id="09-宅建業法②業務規制-24">4. 37条書面 ★★★</h3>
+<h3 id="09-宅建業法②業務規制-24">4. 37条書面 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="09-宅建業法②業務規制-25">基本ルール</h4>
 <ul>
 <li><strong>契約成立後、遅滞なく</strong>交付</li>
 <li><strong>宅建士</strong>が記名した書面を交付（<strong>専任</strong>の宅建士でなくてもよい）</li>
-<li>⚠ 書面の<strong>交付</strong>自体は宅建士でなくてもよい（記名が宅建士であればよい）</li>
+<li class="caution">⚠ 書面の<strong>交付</strong>自体は宅建士でなくてもよい（記名が宅建士であればよい）</li>
 <li>説明義務はない（交付のみ）</li>
 <li>相手方の承諾を得て電磁的方法も可能</li>
 <li>相手方が<strong>宅建業者</strong>でも省略できない（交付・宅建士の記名ともに必要）</li>
@@ -5767,11 +5811,11 @@ mark.search-hit.is-current {
 </tr>
 </tbody>
 </table>
-<h3 id="09-宅建業法②業務規制-30">5. 業務上の規制 ★★</h3>
+<h3 id="09-宅建業法②業務規制-30">5. 業務上の規制 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="09-宅建業法②業務規制-31">誇大広告等の禁止（32条）</h4>
 <ul>
 <li>所在・規模・形質、利用の制限、環境・交通、代金・借賃・支払方法、ローンのあっせん について、著しく事実に相違する表示、実際よりも著しく優良・有利であると誤認させる表示は禁止</li>
-<li>⚠ 実際に誤認した人や損害がなくても、<strong>表示した時点で違反</strong></li>
+<li class="caution">⚠ 実際に誤認した人や損害がなくても、<strong>表示した時点で違反</strong></li>
 <li>売る意思のない物件・存在しない物件の広告（<strong>おとり広告</strong>）も誇大広告にあたる</li>
 <li>インターネット広告で、成約済み物件を掲載し続けることも誇大広告にあたる</li>
 </ul>
@@ -5798,7 +5842,7 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ <strong>貸借</strong>の代理・媒介は、建築確認前でも<strong>契約は可能</strong>（広告は不可）</li>
+<li class="caution">⚠ <strong>貸借</strong>の代理・媒介は、建築確認前でも<strong>契約は可能</strong>（広告は不可）</li>
 <li>建築確認の<strong>申請中</strong>である旨を表示しても広告はできない</li>
 </ul>
 <h4 id="09-宅建業法②業務規制-33">取引態様の明示（34条）</h4>
@@ -5808,7 +5852,7 @@ mark.search-hit.is-current {
 <li><strong>注文を受けた</strong>とき（遅滞なく。<strong>口頭</strong>でも可）</li>
 </ul>
 </li>
-<li>⚠ 広告で明示していても、注文を受けたときに改めて明示が必要</li>
+<li class="caution">⚠ 広告で明示していても、注文を受けたときに改めて明示が必要</li>
 </ul>
 <h4 id="09-宅建業法②業務規制-34">業務に関する禁止事項（47条・47条の2）</h4>
 <ul>
@@ -5816,7 +5860,7 @@ mark.search-hit.is-current {
 <li><strong>不当に高額の報酬を要求</strong>する行為（⚠ 実際に受領しなくても要求した時点で違反）</li>
 <li><strong>手付について貸付けその他信用の供与</strong>をして契約締結を誘引する行為<ul>
 <li>禁止: 手付の<strong>貸付け</strong>・<strong>分割払い</strong>・<strong>後払い</strong></li>
-<li>⚠ 手付の<strong>減額</strong>、ローンのあっせんは信用の供与ではない → 可</li>
+<li class="caution">⚠ 手付の<strong>減額</strong>、ローンのあっせんは信用の供与ではない → 可</li>
 </ul>
 </li>
 <li>利益を生ずることが確実であると誤解させる<strong>断定的判断</strong>の提供</li>
@@ -5840,9 +5884,9 @@ mark.search-hit.is-current {
 <h4 id="09-宅建業法②業務規制-36">不当な履行遅延の禁止（44条）</h4>
 <ul>
 <li>登記、引渡し、代金の支払いを不当に遅延する行為は禁止</li>
-<li>⚠ 対象は<strong>登記・引渡し・取引に係る対価の支払</strong>の3つ</li>
+<li class="caution">⚠ 対象は<strong>登記・引渡し・取引に係る対価の支払</strong>の3つ</li>
 </ul>
-<h4 id="09-宅建業法②業務規制-37">クーリング・オフ（37条の2）★★★</h4>
+<h4 id="09-宅建業法②業務規制-37">クーリング・オフ（37条の2）<span class="stars" data-n="3">★★★</span></h4>
 <ul>
 <li><strong>適用</strong>: 宅建業者が<strong>自ら売主</strong>となる売買（買主が宅建業者でない場合）</li>
 <li><strong>事務所等以外の場所</strong>で買受けの申込み又は契約をした買主が対象</li>
@@ -5914,11 +5958,11 @@ mark.search-hit.is-current {
 <blockquote>
 <p>8種制限と報酬計算は毎年出題。数字の暗記が合否を分ける。</p>
 </blockquote>
-<h3 id="10-宅建業法③報酬・監督-2">1. 8種制限（自ら売主制限）★★★</h3>
+<h3 id="10-宅建業法③報酬・監督-2">1. 8種制限（自ら売主制限）<span class="stars" data-n="3">★★★</span></h3>
 <p>宅建業者が<strong>自ら売主</strong>となり、<strong>買主が宅建業者でない</strong>場合に適用される8つの制限。</p>
 <ul>
-<li>⚠ 宅建業者<strong>間</strong>の取引（買主も業者）には適用されない</li>
-<li>⚠ 業者が<strong>媒介・代理</strong>をするだけの取引や、売主が業者でない取引には適用されない</li>
+<li class="caution">⚠ 宅建業者<strong>間</strong>の取引（買主も業者）には適用されない</li>
+<li class="caution">⚠ 業者が<strong>媒介・代理</strong>をするだけの取引や、売主が業者でない取引には適用されない</li>
 <li>買主が業者でなければ、売主業者が媒介業者を通して契約しても適用される</li>
 </ul>
 <h4 id="10-宅建業法③報酬・監督-3">① クーリング・オフ（37条の2）</h4>
@@ -5929,7 +5973,7 @@ mark.search-hit.is-current {
 <li>超える特約 → <strong>20%を超える部分のみ無効</strong>（特約全体が無効になるのではない）</li>
 <li>損害賠償額の予定を<strong>定めなかった</strong>場合 → 実際の損害額を立証して請求でき、<strong>20%の上限はない</strong></li>
 </ul>
-<h4 id="10-宅建業法③報酬・監督-5">③ 手付の額等の制限（39条）★★</h4>
+<h4 id="10-宅建業法③報酬・監督-5">③ 手付の額等の制限（39条）<span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li>手付の額は代金の<strong>20%</strong>以下（20%を超える額の手付を受領できない）</li>
 <li>受領した手付は、どのような性質のものでも<strong>解約手付</strong>とみなされる<ul>
@@ -5944,7 +5988,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 </ul>
-<h4 id="10-宅建業法③報酬・監督-6">④ 手付金等の保全措置（41条・41条の2）★★★</h4>
+<h4 id="10-宅建業法③報酬・監督-6">④ 手付金等の保全措置（41条・41条の2）<span class="stars" data-n="3">★★★</span></h4>
 <ul>
 <li>「手付金等」: 契約締結日以後、<strong>引渡し前</strong>に支払われる金銭で、代金に充当されるもの（手付金・<strong>中間金</strong>・内金を含む）</li>
 <li>保全措置を講じた<strong>後</strong>でなければ手付金等を<strong>受領できない</strong></li>
@@ -6005,7 +6049,7 @@ mark.search-hit.is-current {
 <ul>
 <li><strong>他人物</strong>売買: 原則として契約（予約を含む）<strong>不可</strong><ul>
 <li>例外: 業者が物件を<strong>取得する契約</strong>（予約を含む）を締結している場合は可</li>
-<li>⚠ 取得契約が<strong>停止条件付き</strong>（農地法の許可を条件とする等）の場合は<strong>不可</strong></li>
+<li class="caution">⚠ 取得契約が<strong>停止条件付き</strong>（農地法の許可を条件とする等）の場合は<strong>不可</strong></li>
 </ul>
 </li>
 <li><strong>未完成物件</strong>: 原則として契約不可<ul>
@@ -6013,7 +6057,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 </ul>
-<h4 id="10-宅建業法③報酬・監督-8">⑥ 契約不適合責任の特約の制限（40条）★★</h4>
+<h4 id="10-宅建業法③報酬・監督-8">⑥ 契約不適合責任の特約の制限（40条）<span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li>原則: 民法の規定より<strong>買主に不利な特約は無効</strong></li>
 <li>例外: 買主が不適合を売主に<strong>通知すべき期間</strong>を「<strong>引渡しの日から2年以上</strong>」とする特約は有効</li>
@@ -6027,7 +6071,7 @@ mark.search-hit.is-current {
 <li><strong>残りの賦払金全額</strong>の支払いを請求できない</li>
 </ul>
 </li>
-<li>⚠ 口頭の催告や、30日未満の期間を定めた催告では解除不可</li>
+<li class="caution">⚠ 口頭の催告や、30日未満の期間を定めた催告では解除不可</li>
 <li>これに反する特約は無効</li>
 </ul>
 <h4 id="10-宅建業法③報酬・監督-10">⑧ 所有権留保等の禁止（43条）</h4>
@@ -6041,12 +6085,12 @@ mark.search-hit.is-current {
 <li>引渡し＋30%超を受領した後は、担保目的で物件を<strong>譲り受けてはならない</strong>（譲渡担保の禁止）</li>
 <li>提携ローン付き売買でも同様</li>
 </ul>
-<h3 id="10-宅建業法③報酬・監督-11">2. 報酬 ★★★</h3>
+<h3 id="10-宅建業法③報酬・監督-11">2. 報酬 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="10-宅建業法③報酬・監督-12">基本ルール</h4>
 <ul>
 <li>報酬の上限は<strong>国土交通大臣</strong>が定める（告示）</li>
 <li>上限を超えて報酬を受領してはならない<ul>
-<li>⚠ 依頼者が承諾しても上限を超えて受領できない</li>
+<li class="caution">⚠ 依頼者が承諾しても上限を超えて受領できない</li>
 </ul>
 </li>
 <li><strong>不当に高額の報酬を要求</strong>する行為も禁止（実際に受領しなくても違反）</li>
@@ -6135,9 +6179,9 @@ mark.search-hit.is-current {
 <ul>
 <li>依頼者の<strong>依頼</strong>による広告の料金（依頼のない通常の広告費は請求不可）</li>
 <li>依頼者の<strong>特別の依頼</strong>による支出を要する特別の費用で、事前に依頼者の<strong>承諾</strong>があるもの（遠隔地への現地調査の費用等）</li>
-<li>⚠ 「重要事項説明の費用」「契約書作成費用」等の名目で報酬とは別に受領することは不可</li>
+<li class="caution">⚠ 「重要事項説明の費用」「契約書作成費用」等の名目で報酬とは別に受領することは不可</li>
 </ul>
-<h3 id="10-宅建業法③報酬・監督-20">3. 監督処分 ★★</h3>
+<h3 id="10-宅建業法③報酬・監督-20">3. 監督処分 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="10-宅建業法③報酬・監督-21">処分の種類と処分権者</h4>
 <table>
 <thead>
@@ -6198,7 +6242,7 @@ mark.search-hit.is-current {
 <li>指示・業務停止・免許取消のいずれも、事前に<strong>聴聞</strong>を行う<ul>
 <li>聴聞の期日の<strong>1週間前</strong>までに通知し、期日・場所を公示</li>
 <li>聴聞の審理は<strong>公開</strong>で行う</li>
-<li>⚠ 指示処分でも聴聞が必要（行政手続法上の弁明の機会の付与では足りない）</li>
+<li class="caution">⚠ 指示処分でも聴聞が必要（行政手続法上の弁明の機会の付与では足りない）</li>
 </ul>
 </li>
 <li><strong>業務停止処分</strong>・<strong>免許取消処分</strong>をしたとき → その旨を<strong>公告</strong>（⚠ 指示処分は公告不要）</li>
@@ -6210,12 +6254,12 @@ mark.search-hit.is-current {
 <li>都道府県知事: その都道府県の区域内で宅建業を営む業者に対して</li>
 <li>宅建業の適正な運営を確保するため、<strong>報告</strong>を求め、<strong>立入検査</strong>を行うことができる</li>
 </ul>
-<h3 id="10-宅建業法③報酬・監督-27">4. 住宅瑕疵担保履行法 ★★</h3>
+<h3 id="10-宅建業法③報酬・監督-27">4. 住宅瑕疵担保履行法 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="10-宅建業法③報酬・監督-28">資力確保措置</h4>
 <ul>
 <li><strong>新築住宅の売主</strong>である宅建業者に義務付け</li>
 <li>買主が宅建業者の場合は不要</li>
-<li>⚠ 新築住宅の<strong>媒介・代理</strong>をした業者には義務なし</li>
+<li class="caution">⚠ 新築住宅の<strong>媒介・代理</strong>をした業者には義務なし</li>
 <li>「新築住宅」: 新たに建設された住宅で、まだ人の居住の用に供したことのないもの（建設工事完了から<strong>1年以内</strong>のもの）</li>
 </ul>
 <h4 id="10-宅建業法③報酬・監督-29">措置の方法</h4>
@@ -6260,7 +6304,7 @@ mark.search-hit.is-current {
 <h4 id="10-宅建業法③報酬・監督-31">供託所の所在地等の説明</h4>
 <ul>
 <li>保証金を供託している業者 → 新築住宅の<strong>売買契約を締結するまで</strong>に、買主に対し、供託所の所在地等を記載した<strong>書面を交付して説明</strong>（承諾があれば電磁的方法も可）</li>
-<li>⚠ 説明は宅建士でなくてもよい</li>
+<li class="caution">⚠ 説明は宅建士でなくてもよい</li>
 </ul>
 <h4 id="10-宅建業法③報酬・監督-32">保険の対象</h4>
 <ul>
@@ -6319,7 +6363,7 @@ mark.search-hit.is-current {
 <blockquote>
 <p>法令上の制限から毎年2問出題。開発許可制度が最頻出。</p>
 </blockquote>
-<h3 id="11-都市計画法-2">1. 都市計画区域 ★★</h3>
+<h3 id="11-都市計画法-2">1. 都市計画区域 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="11-都市計画法-3">区域の構造</h4>
 <pre><code>都市計画区域
 ├── 市街化区域（すでに市街地 or 概ね10年以内に市街化を図る区域）
@@ -6386,14 +6430,14 @@ mark.search-hit.is-current {
 </table>
 <ul>
 <li>区域区分（線引き）は<strong>都道府県</strong>が定める。定めるかどうかは原則として<strong>任意</strong>（三大都市圏の一定区域等は必ず定める）</li>
-<li>⚠ <strong>準都市計画区域</strong>には区域区分を定めることは<strong>できない</strong></li>
+<li class="caution">⚠ <strong>準都市計画区域</strong>には区域区分を定めることは<strong>できない</strong></li>
 </ul>
 <h4 id="11-都市計画法-6">準都市計画区域で定められる都市計画</h4>
 <ul>
 <li>定めることができる: <strong>用途地域</strong>、特別用途地区、特定用途制限地域、高度地区（最高限度のみ）、景観地区、風致地区、緑地保全地域、伝統的建造物群保存地区</li>
-<li>⚠ 定めることができない: <strong>区域区分</strong>、<strong>高度利用地区</strong>、<strong>特定街区</strong>、<strong>防火地域・準防火地域</strong>、高層住居誘導地区、<strong>市街地開発事業</strong>、地区計画（都市施設は定めることができる）</li>
+<li class="caution">⚠ 定めることができない: <strong>区域区分</strong>、<strong>高度利用地区</strong>、<strong>特定街区</strong>、<strong>防火地域・準防火地域</strong>、高層住居誘導地区、<strong>市街地開発事業</strong>、地区計画（都市施設は定めることができる）</li>
 </ul>
-<h3 id="11-都市計画法-7">2. 用途地域・地域地区 ★★</h3>
+<h3 id="11-都市計画法-7">2. 用途地域・地域地区 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="11-都市計画法-8">13種類の用途地域</h4>
 <table>
 <thead>
@@ -6460,7 +6504,7 @@ mark.search-hit.is-current {
 <ul>
 <li><strong>住宅が建てられない</strong>: 工業専用地域のみ</li>
 <li><strong>すべての用途地域で建てられる</strong>: 神社・寺院・教会、巡査派出所、公衆電話所、<strong>診療所</strong>、<strong>保育所</strong>、公衆浴場<ul>
-<li>⚠ 老人ホーム・住宅・図書館は工業専用地域では建てられない／病院は診療所と異なり低層住居専用地域等では不可</li>
+<li class="caution">⚠ 老人ホーム・住宅・図書館は工業専用地域では建てられない／病院は診療所と異なり低層住居専用地域等では不可</li>
 </ul>
 </li>
 <li>用途地域で必ず定める事項: <strong>容積率</strong>、建蔽率（商業地域を除く）、敷地面積の最低限度（必要な場合）</li>
@@ -6510,8 +6554,8 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ 「高度<strong>地区</strong>」は高さ、「高度<strong>利用</strong>地区」は容積率等（混同注意）</li>
-<li>⚠ 特定用途制限地域は<strong>用途地域が定められていない</strong>土地に定める（市街化調整区域には定められない）</li>
+<li class="caution">⚠ 「高度<strong>地区</strong>」は高さ、「高度<strong>利用</strong>地区」は容積率等（混同注意）</li>
+<li class="caution">⚠ 特定用途制限地域は<strong>用途地域が定められていない</strong>土地に定める（市街化調整区域には定められない）</li>
 </ul>
 <h4 id="11-都市計画法-10">都市施設</h4>
 <ul>
@@ -6519,7 +6563,7 @@ mark.search-hit.is-current {
 <li><strong>住居系の用途地域</strong>: さらに<strong>義務教育施設</strong>を定める</li>
 <li>都市計画区域外でも、特に必要があるときは都市施設を定めることができる</li>
 </ul>
-<h3 id="11-都市計画法-11">3. 開発許可制度 ★★★</h3>
+<h3 id="11-都市計画法-11">3. 開発許可制度 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="11-都市計画法-12">開発行為の定義</h4>
 <ul>
 <li>主として<strong>建築物の建築</strong>又は<strong>特定工作物の建設</strong>の用に供する目的で行う<strong>土地の区画形質の変更</strong></li>
@@ -6528,7 +6572,7 @@ mark.search-hit.is-current {
 <li>第二種特定工作物: <strong>ゴルフコース</strong>（規模を問わない）、<strong>1ha以上</strong>の野球場・庭球場・陸上競技場・遊園地・動物園・墓園</li>
 </ul>
 </li>
-<li>⚠ 1ha未満の野球場・墓園等の建設のための造成、建築目的のない青空駐車場の造成は開発行為ではない</li>
+<li class="caution">⚠ 1ha未満の野球場・墓園等の建設のための造成、建築目的のない青空駐車場の造成は開発行為ではない</li>
 </ul>
 <h4 id="11-都市計画法-13">許可が必要な面積</h4>
 <table>
@@ -6565,7 +6609,7 @@ mark.search-hit.is-current {
 <li>許可権者: <strong>都道府県知事</strong>（指定都市・中核市等ではその長）</li>
 <li>市街化区域の1,000㎡は、三大都市圏の一定区域等では条例で<strong>300㎡</strong>まで引き下げられる</li>
 </ul>
-<h4 id="11-都市計画法-14">許可不要の開発行為 ★★</h4>
+<h4 id="11-都市計画法-14">許可不要の開発行為 <span class="stars" data-n="2">★★</span></h4>
 <table>
 <thead>
 <tr>
@@ -6606,9 +6650,9 @@ mark.search-hit.is-current {
 </table>
 <ul>
 <li>※ 農林漁業の例外は<strong>市街化区域には適用されない</strong>（市街化区域で1,000㎡以上なら許可必要）</li>
-<li>⚠ <strong>学校</strong>・<strong>病院</strong>・<strong>社会福祉施設</strong>・<strong>庁舎</strong>は公益上必要な建築物の例外に<strong>あたらない</strong> → 許可が必要</li>
-<li>⚠ 農産物の<strong>加工・貯蔵</strong>施設は農林漁業用建築物にあたらない</li>
-<li>⚠ 「<strong>土地区画整理事業の施行</strong>として行う」場合は不要だが、土地区画整理事業の施行区域内で<strong>事業としてでなく</strong>行う開発行為は許可が必要</li>
+<li class="caution">⚠ <strong>学校</strong>・<strong>病院</strong>・<strong>社会福祉施設</strong>・<strong>庁舎</strong>は公益上必要な建築物の例外に<strong>あたらない</strong> → 許可が必要</li>
+<li class="caution">⚠ 農産物の<strong>加工・貯蔵</strong>施設は農林漁業用建築物にあたらない</li>
+<li class="caution">⚠ 「<strong>土地区画整理事業の施行</strong>として行う」場合は不要だが、土地区画整理事業の施行区域内で<strong>事業としてでなく</strong>行う開発行為は許可が必要</li>
 </ul>
 <h4 id="11-都市計画法-15">開発許可の手続き</h4>
 <ol>
@@ -6731,7 +6775,7 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ 「都市計画区域の指定」は都市計画の決定ではなく、都道府県（又は国土交通大臣）が行う<strong>区域の指定</strong></li>
+<li class="caution">⚠ 「都市計画区域の指定」は都市計画の決定ではなく、都道府県（又は国土交通大臣）が行う<strong>区域の指定</strong></li>
 <li>市町村が定めた都市計画が都道府県の都市計画と抵触 → <strong>都道府県</strong>の都市計画が優先</li>
 </ul>
 <h4 id="11-都市計画法-22">手続きの流れ</h4>
@@ -6760,7 +6804,7 @@ mark.search-hit.is-current {
 <li>建築物の<strong>建築</strong> → <strong>知事等の許可</strong>が必要</li>
 <li>許可不要: 政令で定める<strong>軽易な行為</strong>（階数2以下かつ地階を有しない木造建築物の改築・移転）、<strong>非常災害</strong>の応急措置、都市計画事業の施行として行う行為</li>
 <li>許可基準（満たせば許可<strong>しなければならない</strong>）: <strong>階数が2以下</strong>かつ<strong>地階を有しない</strong>、主要構造部が<strong>木造・鉄骨造・コンクリートブロック造</strong>等で、容易に移転・除却できるもの</li>
-<li>⚠ 対象は「建築物の建築」のみ（土地の形質変更は許可不要）</li>
+<li class="caution">⚠ 対象は「建築物の建築」のみ（土地の形質変更は許可不要）</li>
 </ul>
 <h4 id="11-都市計画法-26">市街地開発事業等予定区域内（52条の2）</h4>
 <ul>
@@ -6774,7 +6818,7 @@ mark.search-hit.is-current {
 <li>重量が<strong>5トン</strong>を超える移動の容易でない物件の設置・堆積</li>
 </ul>
 </li>
-<li>⚠ <strong>軽易な行為</strong>・<strong>非常災害の応急措置</strong>でも許可が必要（例外なし。53条との違い）</li>
+<li class="caution">⚠ <strong>軽易な行為</strong>・<strong>非常災害の応急措置</strong>でも許可が必要（例外なし。53条との違い）</li>
 <li>知事等は許可をしようとするときは、あらかじめ<strong>施行者の意見</strong>を聴く</li>
 </ul>
 <h4 id="11-都市計画法-28">事業地内の土地建物等の先買い（67条）</h4>
@@ -6790,7 +6834,7 @@ mark.search-hit.is-current {
 <li>届出事項を変更する場合も、変更に係る行為に着手する日の30日前までに届出</li>
 </ul>
 </li>
-<li>⚠ <strong>許可</strong>ではなく<strong>届出</strong>（知事ではなく<strong>市町村長</strong>）</li>
+<li class="caution">⚠ <strong>許可</strong>ではなく<strong>届出</strong>（知事ではなく<strong>市町村長</strong>）</li>
 <li>届出に係る行為が地区計画に適合しない → 市町村長は設計の変更等を<strong>勧告</strong>できる</li>
 <li>届出不要: 通常の管理行為・軽易な行為、非常災害の応急措置、<strong>国・地方公共団体</strong>が行う行為、開発許可を要する行為 等</li>
 <li>地区計画は、用途地域が定められている土地の区域のほか、用途地域が定められていない一定の土地の区域にも定められる</li>
@@ -6801,7 +6845,7 @@ mark.search-hit.is-current {
 <blockquote>
 <p>毎年2問出題。建蔽率・容積率の計算、用途制限、単体規定・集団規定が頻出。</p>
 </blockquote>
-<h3 id="12-建築基準法-2">1. 建築確認 ★★</h3>
+<h3 id="12-建築基準法-2">1. 建築確認 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="12-建築基準法-3">建築確認が必要な建築物（2025年4月1日施行の改正法ベース）</h4>
 <table>
 <thead>
@@ -6847,11 +6891,11 @@ mark.search-hit.is-current {
 <li><strong>防火・準防火地域外</strong>で、増築・改築・移転に係る部分の床面積が<strong>10㎡以内</strong> → 建築確認<strong>不要</strong></li>
 <li><strong>防火・準防火地域内</strong>: 増築・改築・移転は面積にかかわらず建築確認必要</li>
 <li><strong>用途変更</strong>: 用途を変更して<strong>200㎡超の特殊建築物</strong>にする場合に確認が必要<ul>
-<li>⚠ <strong>類似の用途</strong>相互間の変更（例: 劇場→映画館、ホテル→旅館）は確認不要</li>
+<li class="caution">⚠ <strong>類似の用途</strong>相互間の変更（例: 劇場→映画館、ホテル→旅館）は確認不要</li>
 <li>用途変更の工事完了時は、完了検査の申請ではなく建築主事等への<strong>届出</strong></li>
 </ul>
 </li>
-<li>⚠ 建築物の<strong>除却</strong>（取壊し）は建築確認不要（床面積10㎡超なら都道府県知事への届出）</li>
+<li class="caution">⚠ 建築物の<strong>除却</strong>（取壊し）は建築確認不要（床面積10㎡超なら都道府県知事への届出）</li>
 </ul>
 <blockquote>
 <p>※<strong>2025年4月1日施行の改正建築基準法</strong>により、建築確認の対象区分が再編されました。旧法の「木造大規模（高さ13m超 or 軒高9m超）」「非木造大規模（2階以上 or 200㎡超）」の区分は廃止され、構造種別を問わず<strong>新2号建築物</strong>（2階以上 又は 200㎡超）に統合されました。</p>
@@ -6879,9 +6923,9 @@ mark.search-hit.is-current {
 <li>完了検査の申請が受理された日から<strong>7日</strong>を経過したとき</li>
 </ul>
 </li>
-<li>⚠ 新3号建築物は、検査済証の交付前でも使用できる</li>
+<li class="caution">⚠ 新3号建築物は、検査済証の交付前でも使用できる</li>
 </ul>
-<h3 id="12-建築基準法-6">2. 単体規定（全国適用）★</h3>
+<h3 id="12-建築基準法-6">2. 単体規定（全国適用）<span class="stars" data-n="1">★</span></h3>
 <h4 id="12-建築基準法-7">主な単体規定</h4>
 <table>
 <thead>
@@ -6934,7 +6978,7 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ 採光の規定は<strong>住宅・学校・病院等の居室</strong>に適用（事務所・店舗の居室には採光規定なし）</li>
+<li class="caution">⚠ 採光の規定は<strong>住宅・学校・病院等の居室</strong>に適用（事務所・店舗の居室には採光規定なし）</li>
 <li>共同住宅の共用階段: 幅120cm以上（直上階の居室の床面積の合計が200㎡超の場合 等）</li>
 </ul>
 <h4 id="12-建築基準法-8">既存不適格建築物</h4>
@@ -6942,8 +6986,8 @@ mark.search-hit.is-current {
 <li>法令の改正前から存在し、改正後の規定に適合しなくなった建築物 → 違反建築物ではなく、そのまま使用できる</li>
 <li>増改築・大規模修繕等を行う場合は、原則として現行の規定に適合させる必要がある</li>
 </ul>
-<h3 id="12-建築基準法-9">3. 集団規定（都市計画区域・準都市計画区域内で適用）★★★</h3>
-<h4 id="12-建築基準法-10">道路の定義 ★★</h4>
+<h3 id="12-建築基準法-9">3. 集団規定（都市計画区域・準都市計画区域内で適用）<span class="stars" data-n="3">★★★</span></h3>
+<h4 id="12-建築基準法-10">道路の定義 <span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li><strong>道路</strong>: 幅員<strong>4m以上</strong>（特定行政庁が指定する区域では6m以上）の次のもの<ul>
 <li>道路法による道路（国道・県道・市町村道）</li>
@@ -6965,7 +7009,7 @@ mark.search-hit.is-current {
 <h4 id="12-建築基準法-11">接道義務</h4>
 <ul>
 <li>建築物の敷地は、道路に<strong>2m以上</strong>接しなければならない<ul>
-<li>⚠ <strong>自動車専用道路</strong>（高速道路等）に接していても接道したことにならない</li>
+<li class="caution">⚠ <strong>自動車専用道路</strong>（高速道路等）に接していても接道したことにならない</li>
 </ul>
 </li>
 <li>接道義務の例外:<ul>
@@ -6974,7 +7018,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 <li>地方公共団体は、特殊建築物・3階以上の建築物・延べ面積1,000㎡超の建築物等について、<strong>条例</strong>で接道義務を<strong>付加</strong>（強化）できる<ul>
-<li>⚠ 条例で接道義務を<strong>緩和</strong>することはできない</li>
+<li class="caution">⚠ 条例で接道義務を<strong>緩和</strong>することはできない</li>
 </ul>
 </li>
 </ul>
@@ -7027,7 +7071,7 @@ mark.search-hit.is-current {
 <li>特定行政庁が<strong>許可</strong>した場合は、本来建築できない用途地域でも建築できる（利害関係者の公開による意見聴取・建築審査会の同意が必要）</li>
 <li>敷地が2つの用途地域にまたがる → 敷地の<strong>過半</strong>が属する地域の用途制限を<strong>敷地全体</strong>に適用</li>
 </ul>
-<h4 id="12-建築基準法-14">建蔽率 ★★★</h4>
+<h4 id="12-建築基準法-14">建蔽率 <span class="stars" data-n="3">★★★</span></h4>
 <ul>
 <li>建蔽率 = 建築面積 ÷ 敷地面積</li>
 </ul>
@@ -7107,7 +7151,7 @@ mark.search-hit.is-current {
 <li>最低限度を定める場合は<strong>200㎡</strong>を超えてはならない</li>
 <li>適用除外: 建蔽率制限のない防火地域内の耐火建築物等、公衆便所・巡査派出所等</li>
 </ul>
-<h4 id="12-建築基準法-18">容積率 ★★★</h4>
+<h4 id="12-建築基準法-18">容積率 <span class="stars" data-n="3">★★★</span></h4>
 <ul>
 <li>容積率 = 延べ面積 ÷ 敷地面積</li>
 <li>商業地域は20〜130%（200%〜1300%）など、用途地域ごとに都市計画で定める</li>
@@ -7158,7 +7202,7 @@ mark.search-hit.is-current {
 </tr>
 </tbody>
 </table>
-<h4 id="12-建築基準法-22">高さ制限 ★</h4>
+<h4 id="12-建築基準法-22">高さ制限 <span class="stars" data-n="1">★</span></h4>
 <table>
 <thead>
 <tr>
@@ -7196,10 +7240,10 @@ mark.search-hit.is-current {
 <li>その他の区域 → 高さ<strong>10m超</strong></li>
 </ul>
 </li>
-<li>⚠ 日影規制の対象区域<strong>外</strong>にある高さ10m超の建築物でも、冬至日に対象区域内に日影を生じさせる場合は規制を受ける</li>
+<li class="caution">⚠ 日影規制の対象区域<strong>外</strong>にある高さ10m超の建築物でも、冬至日に対象区域内に日影を生じさせる場合は規制を受ける</li>
 <li>絶対高さ10mの地域でも、一定の空地・敷地規模を有し、特定行政庁が認めたものは12mまで可</li>
 </ul>
-<h4 id="12-建築基準法-23">防火地域・準防火地域 ★★</h4>
+<h4 id="12-建築基準法-23">防火地域・準防火地域 <span class="stars" data-n="2">★★</span></h4>
 <table>
 <thead>
 <tr>
@@ -7238,7 +7282,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 <li>認可の<strong>公告</strong>の日以後に土地の所有者等となった者にも効力が及ぶ<ul>
-<li>⚠ 協定に合意しなかった者の土地を承継した者には効力が及ばない</li>
+<li class="caution">⚠ 協定に合意しなかった者の土地を承継した者には効力が及ばない</li>
 </ul>
 </li>
 <li>変更・廃止</li>
@@ -7281,7 +7325,7 @@ mark.search-hit.is-current {
 <blockquote>
 <p>毎年1問出題。届出制（事後届出）の対象面積と届出期間が頻出。</p>
 </blockquote>
-<h3 id="13-国土利用計画法-2">1. 土地取引の届出制度 ★★★</h3>
+<h3 id="13-国土利用計画法-2">1. 土地取引の届出制度 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="13-国土利用計画法-3">3つの届出制</h4>
 <table>
 <thead>
@@ -7326,11 +7370,11 @@ mark.search-hit.is-current {
 <li>勧告に基づき利用目的が変更された → 知事は、必要に応じて土地に関する権利の処分についての<strong>あっせん</strong>等に努める</li>
 </ol>
 <ul>
-<li>⚠ 届出は「契約<strong>前</strong>」ではなく「契約<strong>後</strong>」。売主は届出義務を負わない</li>
-<li>⚠ 届出をしなくても、勧告に従わなくても、<strong>契約自体は有効</strong></li>
+<li class="caution">⚠ 届出は「契約<strong>前</strong>」ではなく「契約<strong>後</strong>」。売主は届出義務を負わない</li>
+<li class="caution">⚠ 届出をしなくても、勧告に従わなくても、<strong>契約自体は有効</strong></li>
 <li>勧告のほか、利用目的について必要な<strong>助言</strong>をすることもできる</li>
 </ul>
-<h4 id="13-国土利用計画法-5">事後届出の対象面積 ★★★</h4>
+<h4 id="13-国土利用計画法-5">事後届出の対象面積 <span class="stars" data-n="3">★★★</span></h4>
 <table>
 <thead>
 <tr>
@@ -7380,8 +7424,8 @@ mark.search-hit.is-current {
 <li>権利の性質が違う: <strong>抵当権</strong>・質権の設定、<strong>使用貸借</strong></li>
 </ul>
 </li>
-<li>⚠ <strong>予約</strong>の段階で届出をした場合、その後の予約完結権の行使時には届出不要</li>
-<li>⚠ 停止条件付き契約は、<strong>契約締結時</strong>に届出（条件成就時ではない）</li>
+<li class="caution">⚠ <strong>予約</strong>の段階で届出をした場合、その後の予約完結権の行使時には届出不要</li>
+<li class="caution">⚠ 停止条件付き契約は、<strong>契約締結時</strong>に届出（条件成就時ではない）</li>
 </ul>
 <h4 id="13-国土利用計画法-8">届出義務者</h4>
 <ul>
@@ -7427,7 +7471,7 @@ mark.search-hit.is-current {
 <blockquote>
 <p>※2025年6月1日施行の改正刑法により、従来の「懲役」と「禁錮」は「拘禁刑」に一本化されました。</p>
 </blockquote>
-<h4 id="13-国土利用計画法-11">届出不要の場合 ★</h4>
+<h4 id="13-国土利用計画法-11">届出不要の場合 <span class="stars" data-n="1">★</span></h4>
 <ul>
 <li>当事者の一方又は双方が<strong>国・地方公共団体</strong>等の場合</li>
 <li>民事調停法による<strong>調停</strong>に基づく場合</li>
@@ -7463,12 +7507,12 @@ mark.search-hit.is-current {
 <li><strong>農地</strong>: 耕作の目的に供される土地（登記簿上の地目に関わらず、<strong>現況</strong>で判断）<ul>
 <li>登記簿上の地目が「山林」「原野」でも、現に耕作されていれば農地</li>
 <li>現在耕作されていない<strong>休耕地</strong>・耕作放棄地も、いつでも耕作できる状態なら農地</li>
-<li>⚠ 住宅の庭先の<strong>家庭菜園</strong>は農地ではない</li>
+<li class="caution">⚠ 住宅の庭先の<strong>家庭菜園</strong>は農地ではない</li>
 </ul>
 </li>
 <li><strong>採草放牧地</strong>: 農地以外の土地で、主として耕作又は養畜の事業のための採草又は家畜の放牧の目的に供される土地</li>
 </ul>
-<h3 id="14-農地法-4">3. 3条許可（権利移動）★★★</h3>
+<h3 id="14-農地法-4">3. 3条許可（権利移動）<span class="stars" data-n="3">★★★</span></h3>
 <h4 id="14-農地法-5">概要</h4>
 <ul>
 <li>農地又は採草放牧地について<strong>権利の移転・設定</strong>をする場合</li>
@@ -7483,7 +7527,7 @@ mark.search-hit.is-current {
 <ul>
 <li><strong>所有権</strong>の移転（売買、<strong>贈与</strong>、交換、<strong>競売</strong>による取得、<strong>相続人以外への特定遺贈</strong>等）</li>
 <li><strong>賃借権</strong>・<strong>使用貸借</strong>による権利・地上権・永小作権・質権の設定・移転</li>
-<li>⚠ 相続人に対する特定遺贈・包括遺贈は許可不要</li>
+<li class="caution">⚠ 相続人に対する特定遺贈・包括遺贈は許可不要</li>
 </ul>
 <h4 id="14-農地法-8">許可不要の場合</h4>
 <ul>
@@ -7500,7 +7544,7 @@ mark.search-hit.is-current {
 <ul>
 <li>権利を取得しようとする者又はその世帯員等が、取得後の農地の<strong>全部を効率的に耕作</strong>すると認められない</li>
 <li>農地所有適格法人以外の<strong>法人</strong>が権利を取得しようとする場合（所有権の取得は不可）<ul>
-<li>⚠ ただし、<strong>賃借権・使用貸借</strong>による権利の設定で、地域の他の農業者と適切に役割分担する等の要件を満たすときは、一般法人でも許可を受けられる（解除条件付き）</li>
+<li class="caution">⚠ ただし、<strong>賃借権・使用貸借</strong>による権利の設定で、地域の他の農業者と適切に役割分担する等の要件を満たすときは、一般法人でも許可を受けられる（解除条件付き）</li>
 </ul>
 </li>
 <li>取得者又はその世帯員等が農作業に<strong>常時従事</strong>すると認められない（個人の場合）</li>
@@ -7519,12 +7563,12 @@ mark.search-hit.is-current {
 <li>抵当権の設定には3条許可は不要</li>
 <li>3条許可を受けた土地取引は、国土利用計画法の事後届出が<strong>不要</strong></li>
 </ul>
-<h3 id="14-農地法-12">4. 4条許可（転用）★★★</h3>
+<h3 id="14-農地法-12">4. 4条許可（転用）<span class="stars" data-n="3">★★★</span></h3>
 <h4 id="14-農地法-13">概要</h4>
 <ul>
 <li><strong>農地を農地以外</strong>のものに転用する場合（自己の農地を転用）</li>
 <li>権利移動を伴わない</li>
-<li>⚠ 採草放牧地の転用は4条の対象外（許可不要）</li>
+<li class="caution">⚠ 採草放牧地の転用は4条の対象外（許可不要）</li>
 <li><strong>一時的</strong>な転用（工事の資材置場・駐車場として一時的に使用し、後で農地に戻す）でも許可が必要</li>
 </ul>
 <h4 id="14-農地法-14">許可権者と申請の流れ</h4>
@@ -7536,15 +7580,15 @@ mark.search-hit.is-current {
 </li>
 <li>※4haを超える場合でも知事等の許可に一元化（2016年4月施行。従前は農林水産大臣の許可）</li>
 </ul>
-<h4 id="14-農地法-15">市街化区域の特例 ★★</h4>
+<h4 id="14-農地法-15">市街化区域の特例 <span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li>市街化区域内の農地 → あらかじめ<strong>農業委員会に届出</strong>をすれば許可不要</li>
-<li>⚠ 届出先は知事ではなく<strong>農業委員会</strong></li>
+<li class="caution">⚠ 届出先は知事ではなく<strong>農業委員会</strong></li>
 </ul>
 <h4 id="14-農地法-16">許可不要の場合</h4>
 <ul>
 <li><strong>国・都道府県等</strong>が、道路・農業用用排水施設等の地域振興上・農業振興上必要性の高い施設の用に供するため転用する場合<ul>
-<li>⚠ 国・都道府県等が<strong>学校・病院・庁舎</strong>等のために転用する場合は、知事等との<strong>協議</strong>が成立すれば許可があったものとみなされる（協議は必要）</li>
+<li class="caution">⚠ 国・都道府県等が<strong>学校・病院・庁舎</strong>等のために転用する場合は、知事等との<strong>協議</strong>が成立すれば許可があったものとみなされる（協議は必要）</li>
 </ul>
 </li>
 <li>土地収用法等により収用・使用した農地をその目的に供する場合</li>
@@ -7556,20 +7600,20 @@ mark.search-hit.is-current {
 <li><strong>原状回復命令</strong>・工事の停止命令等の対象（知事等）</li>
 <li>罰則の対象</li>
 </ul>
-<h3 id="14-農地法-18">5. 5条許可（転用目的の権利移動）★★★</h3>
+<h3 id="14-農地法-18">5. 5条許可（転用目的の権利移動）<span class="stars" data-n="3">★★★</span></h3>
 <h4 id="14-農地法-19">概要</h4>
 <ul>
 <li><strong>農地を農地以外</strong>のもの、又は<strong>採草放牧地を採草放牧地以外</strong>のもの（農地を除く）にするため、権利の移転・設定をする場合</li>
 <li>転用＋権利移動の両方を含む</li>
 <li>例: 住宅を建てる目的で農地を購入する、駐車場にする目的で農地を借りる</li>
-<li>⚠ 採草放牧地を<strong>農地</strong>にするための権利移動は5条ではなく<strong>3条</strong></li>
+<li class="caution">⚠ 採草放牧地を<strong>農地</strong>にするための権利移動は5条ではなく<strong>3条</strong></li>
 </ul>
 <h4 id="14-農地法-20">許可権者</h4>
 <ul>
 <li><strong>都道府県知事</strong>（指定市町村は市町村長）</li>
 <li>申請は当事者（売主・買主）が<strong>連署</strong>して、<strong>農業委員会を経由</strong>して提出</li>
 </ul>
-<h4 id="14-農地法-21">市街化区域の特例 ★★</h4>
+<h4 id="14-農地法-21">市街化区域の特例 <span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li>市街化区域内の農地 → あらかじめ<strong>農業委員会に届出</strong>をすれば許可不要</li>
 </ul>
@@ -7584,7 +7628,7 @@ mark.search-hit.is-current {
 <li><strong>無効</strong>（権利移動としての効力が生じない）+ 原状回復命令等</li>
 <li>罰則の対象</li>
 </ul>
-<h3 id="14-農地法-24">6. 3条・4条・5条の比較表 ★★★</h3>
+<h3 id="14-農地法-24">6. 3条・4条・5条の比較表 <span class="stars" data-n="3">★★★</span></h3>
 <table>
 <thead>
 <tr>
@@ -7720,13 +7764,13 @@ mark.search-hit.is-current {
 </li>
 <li><strong>都道府県知事</strong>の<strong>認可</strong>が必要（認可で組合が成立し法人となる）</li>
 <li>組合員: 施行地区内の宅地の所有者及び借地権者は、設立に同意しなかった者も含めて<strong>全員当然に組合員</strong><ul>
-<li>⚠ <strong>未登記の借地権</strong>は、市町村長に<strong>申告</strong>しなければ組合員として扱われない</li>
+<li class="caution">⚠ <strong>未登記の借地権</strong>は、市町村長に<strong>申告</strong>しなければ組合員として扱われない</li>
 </ul>
 </li>
 <li>組合は、事業に要する費用に充てるため、組合員に<strong>賦課金</strong>を課すことができる</li>
 <li>施行地区内の宅地の所有権・借地権を承継した者も、組合員としての権利義務を承継する</li>
 </ul>
-<h3 id="15-土地区画整理法-6">2. 換地計画 ★</h3>
+<h3 id="15-土地区画整理法-6">2. 換地計画 <span class="stars" data-n="1">★</span></h3>
 <h4 id="15-土地区画整理法-7">換地計画の決定・認可</h4>
 <ul>
 <li>施行者は、施行地区内の宅地について<strong>換地計画</strong>を定める</li>
@@ -7750,9 +7794,9 @@ mark.search-hit.is-current {
 <ul>
 <li>換地として定めない土地</li>
 <li>換地処分の公告の<strong>翌日</strong>に施行者が取得し、売却して事業費に充てる</li>
-<li>⚠ 公的施行の場合、保留地を定められるのは、事業施行後の宅地価額の総額が施行前の総額を超える場合の<strong>差額の範囲内</strong>に限られる</li>
+<li class="caution">⚠ 公的施行の場合、保留地を定められるのは、事業施行後の宅地価額の総額が施行前の総額を超える場合の<strong>差額の範囲内</strong>に限られる</li>
 </ul>
-<h3 id="15-土地区画整理法-11">3. 仮換地 ★★★</h3>
+<h3 id="15-土地区画整理法-11">3. 仮換地 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="15-土地区画整理法-12">仮換地の指定</h4>
 <ul>
 <li>施行者は、換地処分を行う前に、工事のため又は換地処分を行うため必要がある場合、従前の宅地に代えて<strong>仮換地</strong>を指定できる</li>
@@ -7803,7 +7847,7 @@ mark.search-hit.is-current {
 </ul>
 <h4 id="15-土地区画整理法-14">仮換地の所有権</h4>
 <ul>
-<li>⚠ 仮換地の<strong>所有権</strong>は、その土地の<strong>元の所有者</strong>（仮換地となった土地の従前の所有者）に残ったまま（施行者や仮換地の指定を受けた者に移るのではない）</li>
+<li class="caution">⚠ 仮換地の<strong>所有権</strong>は、その土地の<strong>元の所有者</strong>（仮換地となった土地の従前の所有者）に残ったまま（施行者や仮換地の指定を受けた者に移るのではない）</li>
 <li>仮換地の元の所有者は、仮換地の指定の効力発生日から換地処分の公告の日まで、その土地を<strong>使用収益できない</strong></li>
 <li>仮換地の指定により使用収益する者がいなくなった<strong>従前の宅地</strong>は、<strong>施行者が管理</strong>する</li>
 </ul>
@@ -7811,7 +7855,7 @@ mark.search-hit.is-current {
 <ul>
 <li>施行者は、仮換地を指定しないで、従前の宅地の使用収益を<strong>停止</strong>させることもできる（損失は補償）</li>
 </ul>
-<h3 id="15-土地区画整理法-16">4. 換地処分 ★★★</h3>
+<h3 id="15-土地区画整理法-16">4. 換地処分 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="15-土地区画整理法-17">手続き</h4>
 <ol>
 <li>換地計画に係る区域の<strong>全部</strong>について工事が<strong>完了した後</strong>、遅滞なく換地処分を行う<ul>
@@ -7826,7 +7870,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 </ol>
-<h4 id="15-土地区画整理法-18">換地処分の効果 ★★</h4>
+<h4 id="15-土地区画整理法-18">換地処分の効果 <span class="stars" data-n="2">★★</span></h4>
 <table>
 <thead>
 <tr>
@@ -7858,7 +7902,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 </ul>
-<h3 id="15-土地区画整理法-20">5. 建築等の制限 ★★</h3>
+<h3 id="15-土地区画整理法-20">5. 建築等の制限 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="15-土地区画整理法-21">施行地区内の制限（76条）</h4>
 <ul>
 <li>事業の施行の障害となるおそれがある以下の行為 → <strong>許可</strong>が必要:<ul>
@@ -7870,7 +7914,7 @@ mark.search-hit.is-current {
 <li>許可権者:<ul>
 <li>国土交通大臣が施行 → <strong>国土交通大臣</strong></li>
 <li>その他 → <strong>都道府県知事</strong>（市の区域内で個人施行者・組合・区画整理会社・市が施行する場合は<strong>市長</strong>）</li>
-<li>⚠ 施行者（組合等）の許可ではない。知事等は許可をしようとするときは<strong>施行者の意見</strong>を聴く</li>
+<li class="caution">⚠ 施行者（組合等）の許可ではない。知事等は許可をしようとするときは<strong>施行者の意見</strong>を聴く</li>
 </ul>
 </li>
 <li>制限の期間:<ul>
@@ -8004,10 +8048,10 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ 「宅地において行う」盛土等は、新法では「宅地造成」ではなく「<strong>特定盛土等</strong>」に分類される</li>
-<li>⚠ 宅地を宅地以外（農地等）にするための盛土は「宅地造成」にあたらない</li>
+<li class="caution">⚠ 「宅地において行う」盛土等は、新法では「宅地造成」ではなく「<strong>特定盛土等</strong>」に分類される</li>
+<li class="caution">⚠ 宅地を宅地以外（農地等）にするための盛土は「宅地造成」にあたらない</li>
 </ul>
-<h3 id="16-盛土規制法-5">2. 規制区域 ★★</h3>
+<h3 id="16-盛土規制法-5">2. 規制区域 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="16-盛土規制法-6">宅地造成等工事規制区域</h4>
 <ul>
 <li>宅地造成等に伴い災害が生ずるおそれが大きい<strong>市街地・集落</strong>、その周辺の区域等で、相当数の居住者等に危害を生ずるおそれがある区域</li>
@@ -8024,7 +8068,7 @@ mark.search-hit.is-current {
 <li>市街地から離れた山間部等も対象</li>
 <li><strong>都道府県知事</strong>（指定都市・中核市ではその長）が指定</li>
 </ul>
-<h3 id="16-盛土規制法-8">3. 宅地造成等工事規制区域内の規制 ★★★</h3>
+<h3 id="16-盛土規制法-8">3. 宅地造成等工事規制区域内の規制 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="16-盛土規制法-9">許可が必要な行為</h4>
 <table>
 <thead>
@@ -8089,7 +8133,7 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ 「盛土1m・切土2m」の数字の取り違えに注意（盛土の方が危険なので基準が厳しい）</li>
+<li class="caution">⚠ 「盛土1m・切土2m」の数字の取り違えに注意（盛土の方が危険なので基準が厳しい）</li>
 </ul>
 <h4 id="16-盛土規制法-11">土石の堆積の規模要件</h4>
 <ul>
@@ -8163,7 +8207,7 @@ mark.search-hit.is-current {
 </ul>
 </li>
 </ul>
-<h3 id="16-盛土規制法-15">4. 特定盛土等規制区域内の規制 ★</h3>
+<h3 id="16-盛土規制法-15">4. 特定盛土等規制区域内の規制 <span class="stars" data-n="1">★</span></h3>
 <h4 id="16-盛土規制法-16">届出制</h4>
 <ul>
 <li>一定規模以上の特定盛土等又は土石の堆積 → 工事主が工事着手の日の<strong>30日前</strong>までに、工事の計画を<strong>都道府県知事に届出</strong><ul>
@@ -8183,7 +8227,7 @@ mark.search-hit.is-current {
 </li>
 <li>許可を受けた工事は、届出不要</li>
 </ul>
-<h3 id="16-盛土規制法-18">5. 工事の技術的基準 ★</h3>
+<h3 id="16-盛土規制法-18">5. 工事の技術的基準 <span class="stars" data-n="1">★</span></h3>
 <h4 id="16-盛土規制法-19">主な技術基準</h4>
 <table>
 <thead>
@@ -8218,7 +8262,7 @@ mark.search-hit.is-current {
 <ul>
 <li>許可を受けた宅地造成等の工事は、技術基準に適合するよう施行</li>
 </ul>
-<h3 id="16-盛土規制法-21">6. 監督処分 ★</h3>
+<h3 id="16-盛土規制法-21">6. 監督処分 <span class="stars" data-n="1">★</span></h3>
 <h4 id="16-盛土規制法-22">知事の権限</h4>
 <table>
 <thead>
@@ -8254,7 +8298,7 @@ mark.search-hit.is-current {
 <ul>
 <li>宅地造成又は特定盛土等（宅地において行うもの）に伴う災害で相当数の居住者等に危害を生ずるおそれが大きい<strong>一団の造成宅地</strong>の区域</li>
 <li><strong>都道府県知事</strong>（指定都市・中核市ではその長）が指定<ul>
-<li>⚠ <strong>宅地造成等工事規制区域内</strong>の土地には指定できない（区域外の既存造成宅地が対象）</li>
+<li class="caution">⚠ <strong>宅地造成等工事規制区域内</strong>の土地には指定できない（区域外の既存造成宅地が対象）</li>
 <li>擁壁等の設置等により指定の事由がなくなった → 指定を<strong>解除</strong></li>
 </ul>
 </li>
@@ -8322,7 +8366,7 @@ mark.search-hit.is-current {
 <blockquote>
 <p>毎年2〜3問出題。不動産取得税・固定資産税・譲渡所得は頻出。数字の正確な暗記が必要。</p>
 </blockquote>
-<h3 id="17-税・価格-2">1. 不動産取得税 ★★★</h3>
+<h3 id="17-税・価格-2">1. 不動産取得税 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="17-税・価格-3">基本</h4>
 <table>
 <thead>
@@ -8375,9 +8419,9 @@ mark.search-hit.is-current {
 <li><strong>共有物の分割</strong>による取得（分割前の<strong>持分を超えない</strong>部分に限る）</li>
 <li><strong>包括遺贈</strong>・相続人に対する特定遺贈による取得</li>
 <li>国・地方公共団体等による取得</li>
-<li>⚠ <strong>贈与</strong>・<strong>交換</strong>・相続人以外への特定遺贈・<strong>売買</strong>は課税される</li>
+<li class="caution">⚠ <strong>贈与</strong>・<strong>交換</strong>・相続人以外への特定遺贈・<strong>売買</strong>は課税される</li>
 </ul>
-<h4 id="17-税・価格-6">免税点（2026年4月改正で引上げ）★</h4>
+<h4 id="17-税・価格-6">免税点（2026年4月改正で引上げ）<span class="stars" data-n="1">★</span></h4>
 <table>
 <thead>
 <tr>
@@ -8404,7 +8448,7 @@ mark.search-hit.is-current {
 <li>2026年4月1日以後の取得に適用（旧: 土地10万円・建築23万円・その他12万円）。改正初年度のため要注意</li>
 <li>免税点は課税標準額で判定</li>
 </ul>
-<h4 id="17-税・価格-7">新築住宅の課税標準の特例 ★★</h4>
+<h4 id="17-税・価格-7">新築住宅の課税標準の特例 <span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li>床面積<strong>40㎡以上240㎡以下</strong> → 課税標準から<strong>1,200万円</strong>を控除（2026年4月改正: 下限50㎡→40㎡に緩和。貸家は従来から40㎡以上）</li>
 <li>認定長期優良住宅: <strong>1,300万円</strong>を控除（適用期限は2031年3月31日まで延長）</li>
@@ -8418,9 +8462,9 @@ mark.search-hit.is-current {
 <h4 id="17-税・価格-9">中古住宅の特例</h4>
 <ul>
 <li>自己居住用で床面積<strong>40㎡以上240㎡以下</strong>（2026年4月改正: 下限50㎡→40㎡） → 新築時期に応じた額を控除</li>
-<li>⚠ 中古住宅の特例は<strong>個人</strong>が<strong>自己の居住用</strong>として取得した場合に限られる（法人・賃貸用は適用なし）</li>
+<li class="caution">⚠ 中古住宅の特例は<strong>個人</strong>が<strong>自己の居住用</strong>として取得した場合に限られる（法人・賃貸用は適用なし）</li>
 </ul>
-<h3 id="17-税・価格-10">2. 固定資産税 ★★★</h3>
+<h3 id="17-税・価格-10">2. 固定資産税 <span class="stars" data-n="3">★★★</span></h3>
 <h4 id="17-税・価格-11">基本</h4>
 <table>
 <thead>
@@ -8458,7 +8502,7 @@ mark.search-hit.is-current {
 </table>
 <ul>
 <li>年の途中で売却しても、その年度の固定資産税は<strong>1月1日現在の所有者</strong>が<strong>全額</strong>納付する義務を負う（売主・買主間の日割り精算は契約上の問題）</li>
-<li>⚠ <strong>質権者</strong>・<strong>100年より長い存続期間の地上権者</strong>は、所有者ではなくこれらの者が納税義務者</li>
+<li class="caution">⚠ <strong>質権者</strong>・<strong>100年より長い存続期間の地上権者</strong>は、所有者ではなくこれらの者が納税義務者</li>
 <li>所有者として登記されている個人が1月1日前に死亡している → 1月1日に現に所有している者（相続人等）が納税義務者</li>
 <li>市町村は、一定の要件のもとで<strong>使用者</strong>を所有者とみなして課税できる（所有者不明の場合）</li>
 </ul>
@@ -8490,7 +8534,7 @@ mark.search-hit.is-current {
 <li>免税点は、同一の市町村内で同一の者が所有する土地・家屋それぞれの課税標準の<strong>合計額</strong>で判定</li>
 <li>市町村は、財政上等の特別の必要がある場合、条例で免税点未満でも課税できる</li>
 </ul>
-<h4 id="17-税・価格-13">住宅用地の課税標準の特例 ★★</h4>
+<h4 id="17-税・価格-13">住宅用地の課税標準の特例 <span class="stars" data-n="2">★★</span></h4>
 <table>
 <thead>
 <tr>
@@ -8519,7 +8563,7 @@ mark.search-hit.is-current {
 <li>床面積<strong>40㎡以上240㎡以下</strong>（2026年4月改正: 下限50㎡→40㎡に緩和、上限280㎡→240㎡に縮小）</li>
 <li><strong>120㎡以下</strong>の部分について税額<strong>1/2</strong>に減額（120㎡を超える住宅は120㎡分のみ減額）</li>
 <li>期間: 一般住宅<strong>3年間</strong>、3階建て以上の耐火・準耐火建築物<strong>5年間</strong>、認定長期優良住宅<strong>5年間</strong>（マンションは7年間）</li>
-<li>⚠ 「課税標準」ではなく「<strong>税額</strong>」の1/2（住宅用地の特例＝課税標準との違い）</li>
+<li class="caution">⚠ 「課税標準」ではなく「<strong>税額</strong>」の1/2（住宅用地の特例＝課税標準との違い）</li>
 </ul>
 <h4 id="17-税・価格-15">固定資産課税台帳の閲覧・縦覧・審査</h4>
 <ul>
@@ -8529,7 +8573,7 @@ mark.search-hit.is-current {
 <li>価格の据置（原則<strong>3年</strong>に1度の<strong>評価替え</strong>。基準年度の価格を第2年度・第3年度も据え置く）</li>
 <li>市町村長は、固定資産評価員の評価に基づいて価格を決定し、毎年<strong>3月31日</strong>までに固定資産課税台帳に登録</li>
 </ul>
-<h3 id="17-税・価格-16">3. 所得税（譲渡所得）★★</h3>
+<h3 id="17-税・価格-16">3. 所得税（譲渡所得）<span class="stars" data-n="2">★★</span></h3>
 <h4 id="17-税・価格-17">不動産の譲渡所得</h4>
 <ul>
 <li><strong>分離課税</strong>（他の所得と合算しない）</li>
@@ -8567,7 +8611,7 @@ mark.search-hit.is-current {
 </li>
 <li>相続・贈与で取得した場合は、被相続人・贈与者の取得日を<strong>引き継ぐ</strong></li>
 </ul>
-<h4 id="17-税・価格-19">居住用財産の3,000万円特別控除 ★★</h4>
+<h4 id="17-税・価格-19">居住用財産の3,000万円特別控除 <span class="stars" data-n="2">★★</span></h4>
 <ul>
 <li>居住用財産（マイホーム）を譲渡した場合 → 譲渡所得から<strong>3,000万円</strong>を控除</li>
 <li><strong>所有期間の長短を問わない</strong>（短期譲渡でも適用可）</li>
@@ -8605,7 +8649,7 @@ mark.search-hit.is-current {
 <ul>
 <li>同一年中に複数の特別控除の適用がある場合、控除額の合計は年間<strong>5,000万円</strong>が限度</li>
 </ul>
-<h3 id="17-税・価格-24">4. 登録免許税 ★</h3>
+<h3 id="17-税・価格-24">4. 登録免許税 <span class="stars" data-n="1">★</span></h3>
 <h4 id="17-税・価格-25">基本</h4>
 <table>
 <thead>
@@ -8638,7 +8682,7 @@ mark.search-hit.is-current {
 </tbody>
 </table>
 <ul>
-<li>⚠ 抵当権設定登記の課税標準は、不動産の価額ではなく<strong>債権金額</strong>（根抵当権は<strong>極度額</strong>）</li>
+<li class="caution">⚠ 抵当権設定登記の課税標準は、不動産の価額ではなく<strong>債権金額</strong>（根抵当権は<strong>極度額</strong>）</li>
 <li>固定資産課税台帳に価格が登録されていない不動産 → 登記官が認定した価額</li>
 </ul>
 <h4 id="17-税・価格-26">主な税率</h4>
@@ -8687,12 +8731,12 @@ mark.search-hit.is-current {
 <li><strong>新築</strong>又は<strong>取得後1年以内</strong>に登記を受けること</li>
 <li>中古住宅は、新耐震基準に適合していること（1982年1月1日以後の建築等）</li>
 <li>所有権移転の軽減税率は<strong>売買</strong>・<strong>競落</strong>による取得に限る（贈与・交換・相続は対象外）</li>
-<li>⚠ 住宅特例は、過去に適用を受けていても<strong>何度でも</strong>適用可能</li>
+<li class="caution">⚠ 住宅特例は、過去に適用を受けていても<strong>何度でも</strong>適用可能</li>
 </ul>
 </li>
-<li>⚠ 住宅特例は<strong>家屋</strong>のみが対象（敷地＝土地の登記には適用されない）</li>
+<li class="caution">⚠ 住宅特例は<strong>家屋</strong>のみが対象（敷地＝土地の登記には適用されない）</li>
 </ul>
-<h3 id="17-税・価格-27">5. 印紙税 ★</h3>
+<h3 id="17-税・価格-27">5. 印紙税 <span class="stars" data-n="1">★</span></h3>
 <h4 id="17-税・価格-28">基本</h4>
 <ul>
 <li>課税文書の<strong>作成者</strong>が納税義務者（共同作成した場合は<strong>連帯</strong>して納税義務）</li>
@@ -8768,7 +8812,7 @@ mark.search-hit.is-current {
 <li>印紙を貼り忘れた場合: 過怠税（印紙税額の<strong>3倍</strong>。自己申告の場合は<strong>1.1倍</strong>）</li>
 <li>印紙に<strong>消印</strong>をしなかった場合: 消印されていない印紙の額面に相当する過怠税</li>
 </ul>
-<h3 id="17-税・価格-34">6. 地価公示法 ★</h3>
+<h3 id="17-税・価格-34">6. 地価公示法 <span class="stars" data-n="1">★</span></h3>
 <h4 id="17-税・価格-35">基本</h4>
 <table>
 <thead>
@@ -8893,7 +8937,7 @@ mark.search-hit.is-current {
 <blockquote>
 <p>問46〜50の5問。住宅金融支援機構、景品表示法、統計、土地・建物の知識。登録講習修了者は免除。</p>
 </blockquote>
-<h3 id="18-免除科目-2">1. 住宅金融支援機構 ★★</h3>
+<h3 id="18-免除科目-2">1. 住宅金融支援機構 <span class="stars" data-n="2">★★</span></h3>
 <h4 id="18-免除科目-3">機構の目的</h4>
 <ul>
 <li>一般の金融機関による住宅の建設等に必要な資金の融通を<strong>支援</strong>する（証券化支援が中心）</li>
@@ -8946,7 +8990,7 @@ mark.search-hit.is-current {
 <ul>
 <li>機構は、業務の一部（貸付けの審査・回収等）を<strong>金融機関</strong>・<strong>債権回収会社</strong>・<strong>地方公共団体</strong>等に委託できる</li>
 </ul>
-<h4 id="18-免除科目-7">フラット35（証券化支援業務・買取型）★★</h4>
+<h4 id="18-免除科目-7">フラット35（証券化支援業務・買取型）<span class="stars" data-n="2">★★</span></h4>
 <table>
 <thead>
 <tr>
@@ -9002,7 +9046,7 @@ mark.search-hit.is-current {
 <ul>
 <li>一般的な住宅建設・購入のための直接融資（これは民間金融機関が行う）</li>
 </ul>
-<h3 id="18-免除科目-9">2. 景品表示法（不当景品類及び不当表示防止法）★★</h3>
+<h3 id="18-免除科目-9">2. 景品表示法（不当景品類及び不当表示防止法）<span class="stars" data-n="2">★★</span></h3>
 <h4 id="18-免除科目-10">景品類の制限</h4>
 <ul>
 <li>不動産業における景品類の提供の制限（公正競争規約）: 懸賞により提供する景品類 → 取引価額の<strong>20倍</strong>又は<strong>10万円</strong>のいずれか低い額、かつ懸賞に係る取引予定総額の<strong>2%</strong>以内</li>
@@ -9023,7 +9067,7 @@ mark.search-hit.is-current {
 <li>面積</li>
 <li>建築条件付き土地の場合は、建築条件の内容</li>
 </ul>
-<h5 id="18-免除科目-14">表示基準 ★</h5>
+<h5 id="18-免除科目-14">表示基準 <span class="stars" data-n="1">★</span></h5>
 <table>
 <thead>
 <tr>
@@ -9077,7 +9121,7 @@ mark.search-hit.is-current {
 <li>「完全」「完璧」「絶対」「万全」、「日本一」「業界一」「超」「最高」「最高級」「特選」「厳選」、「格安」「堀出」「土地値」等 → <strong>合理的な根拠</strong>を示す資料がない限り使用できない</li>
 <li>「新発売」: 新たに造成・建築された物件について、一般消費者に対し<strong>初めて</strong>購入の申込みの勧誘を行うこと（一定期間に限る）</li>
 </ul>
-<h5 id="18-免除科目-16">不当表示の禁止 ★</h5>
+<h5 id="18-免除科目-16">不当表示の禁止 <span class="stars" data-n="1">★</span></h5>
 <table>
 <thead>
 <tr>
@@ -9116,7 +9160,7 @@ mark.search-hit.is-current {
 <li>不当表示 → <strong>内閣総理大臣</strong>（消費者庁長官に委任）・<strong>都道府県知事</strong>は、違反行為の差止め等の<strong>措置命令</strong>を出せる（違反行為が既になくなっている場合も可）</li>
 <li>優良誤認表示・有利誤認表示 → <strong>課徴金</strong>納付命令の対象</li>
 </ul>
-<h3 id="18-免除科目-18">3. 統計問題 ★</h3>
+<h3 id="18-免除科目-18">3. 統計問題 <span class="stars" data-n="1">★</span></h3>
 <h4 id="18-免除科目-19">出題される統計</h4>
 <table>
 <thead>
@@ -9164,7 +9208,7 @@ mark.search-hit.is-current {
 <li>問われる内容: 「増加したか減少したか」「何年連続か」「全用途平均・住宅地・商業地の上昇・下落」等の傾向</li>
 <li>宅建業者数・新設住宅着工戸数（総数・持家・貸家・分譲）・地価の変動率（三大都市圏・地方圏）は特に頻出</li>
 </ul>
-<h3 id="18-免除科目-20">4. 土地の知識 ★</h3>
+<h3 id="18-免除科目-20">4. 土地の知識 <span class="stars" data-n="1">★</span></h3>
 <h4 id="18-免除科目-21">地形と宅地としての適否</h4>
 <table>
 <thead>
@@ -9235,7 +9279,7 @@ mark.search-hit.is-current {
 <li><strong>砂質</strong>の緩い地盤 + <strong>地下水位が高い</strong> → 地震時に液状化しやすい</li>
 <li>埋立地、旧河道、三角州、後背湿地、砂丘間の低地等でリスクが高い</li>
 </ul>
-<h3 id="18-免除科目-24">5. 建物の知識 ★</h3>
+<h3 id="18-免除科目-24">5. 建物の知識 <span class="stars" data-n="1">★</span></h3>
 <h4 id="18-免除科目-25">建築構造</h4>
 <table>
 <thead>
@@ -9760,7 +9804,7 @@ mark.search-hit.is-current {
 <hr />
 <h3 id="19-過去問-権利関係-37">9. 区分所有法</h3>
 <blockquote>
-<p>⚠️ <strong>2026年4月1日施行の区分所有法大改正（令和7年法律第47号）に注意</strong>: 以下の過去問は出題当時の法令に基づく。改正後は、普通決議・特別決議が「<strong>出席した</strong>区分所有者及びその議決権」ベースに変更（建替え決議は全体の4/5のまま、ただし耐震性不足等の場合は<strong>3/4に緩和</strong>）。招集通知期間は規約で<strong>伸長のみ</strong>可（短縮不可）に変更。詳細は教材「06-区分所有法」参照。</p>
+<p class="caution">⚠️ <strong>2026年4月1日施行の区分所有法大改正（令和7年法律第47号）に注意</strong>: 以下の過去問は出題当時の法令に基づく。改正後は、普通決議・特別決議が「<strong>出席した</strong>区分所有者及びその議決権」ベースに変更（建替え決議は全体の4/5のまま、ただし耐震性不足等の場合は<strong>3/4に緩和</strong>）。招集通知期間は規約で<strong>伸長のみ</strong>可（短縮不可）に変更。詳細は教材「06-区分所有法」参照。</p>
 </blockquote>
 <h4 id="19-過去問-権利関係-38">問題9-1（共用部分と管理組合）</h4>
 <p>建物の区分所有等に関する法律に関する次の記述のうち、誤っているものはどれか。</p>

@@ -188,6 +188,31 @@ def add_ids_to_headings(html: str, prefix: str) -> str:
     return re.sub(r"<(h[2-6])(\s[^>]*)?>(.*?)</\1>", replacer, html)
 
 
+HEADING_RE = re.compile(r"<(h[2-6])(\s[^>]*)?>(.*?)</\1>", re.DOTALL)
+STARS_RE = re.compile(r"★+")
+CAUTION_RE = re.compile(r"<(li|p)>(?=⚠)")
+
+
+def decorate_html(html: str) -> str:
+    """見出しの★（頻出度）と ⚠ で始まる注意書きに装飾用クラスを付与
+
+    教材MDは素のテキストで ★ / ⚠ を書いているため、CSS で拾えるようにする。
+    文中の ⚠ は対象外（行頭のみ）。
+    """
+
+    def heading_replacer(m):
+        tag = m.group(1)
+        attrs = m.group(2) or ""
+        text = STARS_RE.sub(
+            lambda s: f'<span class="stars{" stars-lead" if s.start() == 0 else ""}" data-n="{len(s.group(0))}">{s.group(0)}</span>',
+            m.group(3),
+        )
+        return f"<{tag}{attrs}>{text}</{tag}>"
+
+    html = HEADING_RE.sub(heading_replacer, html)
+    return CAUTION_RE.sub(r'<\1 class="caution">', html)
+
+
 def build_toc(sections: dict) -> str:
     """目次HTMLを生成"""
     toc = '<nav id="toc" class="toc">\n<h2>目次</h2>\n'
@@ -247,6 +272,7 @@ def build_body(sections: dict) -> str:
             html = convert_md_to_html(md)
             html = shift_headings(html, 1)
             html = add_ids_to_headings(html, chap_id)
+            html = decorate_html(html)
             body += f'<article class="chapter" id="{chap_id}">\n'
             body += html
             body += "\n</article>\n"

@@ -7,6 +7,10 @@
   --border: #e5e5e5;
   --card-bg: #ffffff;
   --toc-bg: #f8fafc;
+  --em: #be123c;
+  --star: #d97706;
+  --warn-bg: #fffbeb;
+  --warn-border: #f59e0b;
   --sidebar-w: 280px;
   --right-sidebar-w: 260px;
   --header-h: 56px;
@@ -23,6 +27,10 @@
     --border: #334155;
     --card-bg: #1e293b;
     --toc-bg: #1e293b;
+    --em: #fb7185;
+    --star: #fbbf24;
+    --warn-bg: rgba(245,158,11,.12);
+    --warn-border: #d97706;
   }
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -258,20 +266,43 @@ body {
 }
 
 /* ========== Headings ========== */
+/* 階層: h2（章・青字）> h3（節・薄青帯）> h4（項・左マーカー）> h5（小見出し・淡色） */
 h3 {
-  font-size: clamp(15px, 1.2vw + 8px, 18px);
-  font-weight: 700;
-  margin: 24px 0 12px;
-  padding-bottom: 4px;
-  border-bottom: 2px solid var(--border);
+  font-size: clamp(16px, 1.2vw + 8px, 19px);
+  font-weight: 800;
+  margin: 40px 0 14px;
+  padding: 8px 14px;
+  background: var(--accent-light);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  line-height: 1.5;
 }
 h4 {
   font-size: clamp(14px, 1vw + 8px, 16px);
   font-weight: 700;
-  margin: 20px 0 8px;
-  color: var(--accent);
+  margin: 22px 0 8px;
+  padding-left: 10px;
+  border-left: 3px solid var(--accent);
+  line-height: 1.5;
 }
-h5 { font-size: 15px; font-weight: 700; margin: 16px 0 8px; }
+h5 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 16px 0 6px;
+  color: var(--fg-muted);
+}
+/* 見出し内の頻出度（build_takken_textbook.py の decorate_html が付与） */
+.stars {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: .78em;
+  font-weight: 400;
+  letter-spacing: .08em;
+  color: var(--star);
+  vertical-align: .08em;
+  white-space: nowrap;
+}
+.stars-lead { margin-left: 0; margin-right: 6px; }
 h6 { font-size: 14px; font-weight: 700; margin: 12px 0 6px; }
 
 /* ========== Text ========== */
@@ -284,12 +315,22 @@ blockquote {
   border-radius: 0 8px 8px 0;
   font-size: 0.9em;
 }
-strong { color: var(--accent); font-weight: 700; }
+/* 強調は見出し・リンクの青と区別するため別色 */
+strong { color: var(--em); font-weight: 700; }
 
 /* ========== Lists ========== */
 ul, ol { margin: 8px 0 8px 24px; }
 li { margin: 4px 0; }
 li > ul, li > ol { margin: 4px 0 4px 20px; }
+/* ⚠ で始まる注意書き（decorate_html が付与）。⚠ 自体がマーカー代わり */
+li.caution,
+p.caution {
+  background: var(--warn-bg);
+  border-left: 3px solid var(--warn-border);
+  border-radius: 0 6px 6px 0;
+  padding: 4px 10px;
+}
+li.caution { list-style: none; margin-left: -22px; }
 
 /* ========== Tables ========== */
 .table-wrap {
@@ -321,12 +362,14 @@ table {
   margin: 12px 0;
   font-size: clamp(12px, 0.8vw + 8px, 14px);
 }
-thead { background: var(--accent); color: #fff; }
+thead { background: var(--accent-light); color: var(--fg); }
+thead strong { color: inherit; }
 th {
   padding: 10px 12px;
   text-align: left;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
+  border-bottom: 2px solid var(--accent);
 }
 td {
   padding: 8px 12px;
@@ -1270,4 +1313,5 @@ mark.search-hit.is-current {
   .part { break-before: page; }
   body { font-size: 11pt; line-height: 1.6; }
   table { font-size: 10pt; }
+  h3, thead, li.caution, p.caution { background: none; }
 }
