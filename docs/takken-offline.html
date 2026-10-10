@@ -1312,10 +1312,97 @@ mark.search-hit.is-current {
   mark.search-hit.is-current { background: #c2620d; outline-color: #fdba74; }
 }
 
+/* ========== 読み上げ ========== */
+/* ▶ は script.js が h2 / h3 へ挿入。文字は ::before で描き、見出しの textContent を汚さない */
+.tts-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-left: 8px;
+  padding: 0;
+  vertical-align: middle;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  background: var(--card-bg);
+  color: var(--accent);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+.tts-btn::before { content: "▶"; margin-left: 1px; }
+.tts-btn:hover, .tts-btn.is-playing { background: var(--accent); color: #fff; }
+.tts-reading {
+  background: var(--accent-light);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.chapter tbody tr.tts-reading { outline: none; }
+.chapter tbody tr.tts-reading > td { background: var(--accent-light); }
+.tts-bar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 850;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: calc(100vw - 24px);
+  padding: 8px 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.18);
+}
+.tts-bar[hidden] { display: none; }
+.tts-bar-btn {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--fg);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.tts-bar-btn:hover { background: var(--accent-light); }
+.tts-bar-toggle, .tts-bar-toggle:hover { background: var(--accent); color: #fff; }
+.tts-rate {
+  flex: none;
+  padding: 4px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--fg);
+}
+.tts-title {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+body.tts-active .back-top { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+@media (max-width: 768px) {
+  .tts-btn { width: 32px; height: 32px; font-size: 12px; }
+}
+@media (max-width: 480px) {
+  .tts-bar { gap: 2px; padding: 6px 10px; }
+  .tts-title { max-width: 72px; }
+}
+
 /* ========== Print ========== */
 @media print {
-  .header, .sidebar, .right-sidebar, .back-top, .menu-toggle, .sidebar-overlay { display: none !important; }
+  .header, .sidebar, .right-sidebar, .back-top, .menu-toggle, .sidebar-overlay, .tts-btn, .tts-bar { display: none !important; }
   mark.search-hit, mark.search-hit.is-current { background: none; outline: none; }
+  .tts-reading, .chapter tbody tr.tts-reading > td { background: none; outline: none; }
   .main { margin: 0; padding: 0; max-width: 100%; }
   .chapter { break-inside: avoid; border: none; box-shadow: none; padding: 0; margin-bottom: 16px; }
   .part { break-before: page; }
@@ -13942,6 +14029,275 @@ mark.search-hit.is-current {
     fillinOverlay.classList.remove('visible');
     document.body.style.overflow = '';
   };
+
+  // --- 読み上げ（Web Speech API / 本文 00-18 章のみ）---
+  const ttsSynth = window.speechSynthesis;
+  if (ttsSynth && typeof SpeechSynthesisUtterance === 'function') {
+    const TTS_RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
+    const TTS_RATE_KEY = 'takken-tts-rate';
+    const TTS_CHUNK_MAX = 70;         // 1発話の上限文字数（Chrome は長い発話が約15秒で黙るため文単位に刻む）
+    let ttsQueue = [];                // { el, chunks, head }（head = h2/h3 = 節の先頭）
+    let ttsPos = 0;
+    let ttsChunk = 0;
+    let ttsState = 'idle';            // idle | playing | paused
+    let ttsToken = 0;                 // cancel() 後に届く古い onend / onerror を捨てるための世代番号
+    let ttsUtter = null;              // 参照を保持しないと GC され onend が発火しないことがある
+    let ttsVoice = null;
+    let ttsMarked = null;
+    let ttsRate = parseFloat(localStorage.getItem(TTS_RATE_KEY));
+    if (TTS_RATES.indexOf(ttsRate) === -1) ttsRate = 1;
+
+    // \p{...} 非対応ブラウザでスクリプト全体が構文エラーにならないよう実行時に組み立てる
+    let ttsEmojiRe = null;
+    try { ttsEmojiRe = new RegExp('\\p{Extended_Pictographic}\\uFE0F?', 'gu'); } catch (e) { /* 絵文字は除去しない */ }
+
+    const isTtsChapter = (ch) => {
+      const n = parseInt(ch.id, 10);
+      return n >= 0 && n <= 18;       // 19-22 は演習問題、99 は用語索引
+    };
+
+    function ttsClean(text) {
+      let t = text.replace(/★+/g, '').replace(/⚠️?/g, '注意、').replace(/[→⇒➡]️?/g, '、');
+      if (ttsEmojiRe) t = t.replace(ttsEmojiRe, '');
+      return t.replace(/\s+/g, ' ').trim();
+    }
+
+    // 要素自身の文言（読み上げボタン・★バッジ・入れ子のリストは除く）
+    function ttsOwnText(el) {
+      const clone = el.cloneNode(true);
+      clone.querySelectorAll('.tts-btn, .stars, ul, ol').forEach(n => n.remove());
+      return ttsClean(clone.textContent);
+    }
+
+    function ttsCellText(cell) {
+      const t = ttsClean(cell.textContent)
+        .replace(/[○◯]/g, 'まる').replace(/×/g, 'ばつ').replace(/△/g, 'さんかく').replace(/◎/g, 'にじゅうまる');
+      return (!t || /^[-−ー—–－]+$/.test(t)) ? 'なし' : t;
+    }
+
+    // 表は1行ずつ「列見出し、値。列見出し、値」の形で読む
+    function ttsRowText(tr) {
+      const table = tr.closest('table');
+      const heads = Array.from(table.querySelectorAll('thead th')).map(th => ttsClean(th.textContent));
+      return Array.from(tr.children)
+        .map((cell, i) => (heads[i] ? heads[i] + '、' : '') + ttsCellText(cell))
+        .join('。');
+    }
+
+    function ttsSplit(text) {
+      const out = [];
+      let buf = '';
+      const push = (piece) => {
+        if (buf && buf.length + piece.length > TTS_CHUNK_MAX) { out.push(buf); buf = ''; }
+        buf += piece;
+      };
+      (text.match(/[^。！？]+[。！？]*/g) || [text]).forEach(s => {
+        if (s.length <= TTS_CHUNK_MAX) { push(s); return; }
+        (s.match(/[^、]+、*/g) || [s]).forEach(push);
+      });
+      if (buf) out.push(buf);
+      return out;
+    }
+
+    function ttsBuildQueue(chapter) {
+      const items = [];
+      chapter.querySelectorAll('h2, h3, h4, h5, p, li, tbody tr').forEach(el => {
+        if (el.tagName === 'P' && el.closest('li')) return;   // li 側でまとめて読む
+        const text = el.tagName === 'TR' ? ttsRowText(el) : ttsOwnText(el);
+        if (!text) return;
+        items.push({ el, chunks: ttsSplit(text), head: el.tagName === 'H2' || el.tagName === 'H3' });
+      });
+      return items;
+    }
+
+    function ttsPickVoice() {
+      const ja = ttsSynth.getVoices().filter(v => /^ja([-_]|$)/i.test(v.lang));
+      ttsVoice = ja.find(v => v.default) || ja.find(v => v.localService) || ja[0] || null;
+    }
+    ttsPickVoice();
+    if (typeof ttsSynth.addEventListener === 'function') ttsSynth.addEventListener('voiceschanged', ttsPickVoice);
+    else ttsSynth.onvoiceschanged = ttsPickVoice;
+
+    // --- 操作バー ---
+    const ttsBar = document.createElement('div');
+    ttsBar.className = 'tts-bar';
+    ttsBar.hidden = true;
+    ttsBar.setAttribute('role', 'region');
+    ttsBar.setAttribute('aria-label', '読み上げ操作');
+    ttsBar.innerHTML =
+      '<button type="button" class="tts-bar-btn" data-act="prev" title="前の節" aria-label="前の節">⏮</button>' +
+      '<button type="button" class="tts-bar-btn tts-bar-toggle" data-act="toggle" title="一時停止" aria-label="一時停止">⏸</button>' +
+      '<button type="button" class="tts-bar-btn" data-act="next" title="次の節" aria-label="次の節">⏭</button>' +
+      '<button type="button" class="tts-bar-btn" data-act="stop" title="停止" aria-label="停止">■</button>' +
+      '<select class="tts-rate" aria-label="読み上げ速度">' +
+      TTS_RATES.map(r => '<option value="' + r + '"' + (r === ttsRate ? ' selected' : '') + '>' + r + 'x</option>').join('') +
+      '</select>' +
+      '<span class="tts-title"></span>';
+    document.body.appendChild(ttsBar);
+    const ttsToggleBtn = ttsBar.querySelector('.tts-bar-toggle');
+    const ttsTitle = ttsBar.querySelector('.tts-title');
+
+    function ttsHeadIndex(pos) {
+      for (let i = Math.min(pos, ttsQueue.length - 1); i >= 0; i--) {
+        if (ttsQueue[i].head) return i;
+      }
+      return -1;
+    }
+
+    function ttsUpdateBar() {
+      const paused = ttsState === 'paused';
+      ttsBar.hidden = ttsState === 'idle';
+      document.body.classList.toggle('tts-active', ttsState !== 'idle');
+      ttsToggleBtn.textContent = paused ? '▶' : '⏸';
+      ttsToggleBtn.title = paused ? '再開' : '一時停止';
+      ttsToggleBtn.setAttribute('aria-label', ttsToggleBtn.title);
+      document.querySelectorAll('.tts-btn.is-playing').forEach(b => b.classList.remove('is-playing'));
+      const hi = ttsState === 'idle' ? -1 : ttsHeadIndex(ttsPos);
+      if (hi === -1) { ttsTitle.textContent = ''; return; }
+      const head = ttsQueue[hi].el;
+      ttsTitle.textContent = ttsOwnText(head);
+      const btn = head.querySelector('.tts-btn');
+      if (btn) btn.classList.add('is-playing');
+    }
+
+    function ttsMark(item) {
+      if (ttsMarked) ttsMarked.classList.remove('tts-reading');
+      ttsMarked = item ? item.el : null;
+      if (!ttsMarked) return;
+      ttsMarked.classList.add('tts-reading');
+      const r = ttsMarked.getBoundingClientRect();
+      if (r.top < 72 || r.bottom > window.innerHeight - 96) {
+        ttsMarked.scrollIntoView({
+          block: r.height > window.innerHeight * 0.6 ? 'start' : 'center',
+          inline: 'nearest',
+          behavior: 'smooth'
+        });
+      }
+    }
+
+    function ttsSpeak() {
+      const item = ttsQueue[ttsPos];
+      if (!item) { ttsStop(); return; }   // 章末
+      const token = ++ttsToken;
+      const u = new SpeechSynthesisUtterance(item.chunks[ttsChunk]);
+      u.lang = 'ja-JP';
+      if (ttsVoice) u.voice = ttsVoice;
+      u.rate = ttsRate;
+      u.onend = () => {
+        if (token !== ttsToken) return;
+        if (ttsChunk + 1 < item.chunks.length) ttsChunk++;
+        else { ttsPos++; ttsChunk = 0; }
+        ttsSpeak();
+      };
+      u.onerror = () => { if (token === ttsToken) ttsStop(); };
+      ttsUtter = u;
+      ttsMark(item);
+      ttsUpdateBar();
+      ttsSynth.speak(u);
+    }
+
+    function ttsSilence() {
+      ttsToken++;
+      ttsSynth.cancel();
+    }
+
+    function ttsStart(heading) {
+      const chapter = heading.closest('.chapter');
+      ttsSilence();
+      ttsQueue = ttsBuildQueue(chapter);
+      ttsPos = Math.max(0, ttsQueue.findIndex(it => it.el === heading));
+      ttsChunk = 0;
+      ttsState = 'playing';
+      ttsSpeak();
+    }
+
+    // pause()/resume() は Android Chrome で効かないため、cancel して同じ発話単位から読み直す
+    function ttsPause() {
+      if (ttsState !== 'playing') return;
+      ttsSilence();
+      ttsState = 'paused';
+      ttsUpdateBar();
+    }
+
+    function ttsResume() {
+      if (ttsState !== 'paused') return;
+      ttsState = 'playing';
+      ttsSpeak();
+    }
+
+    function ttsStop() {
+      ttsSilence();
+      ttsState = 'idle';
+      ttsQueue = [];
+      ttsUtter = null;
+      ttsMark(null);
+      ttsUpdateBar();
+    }
+
+    function ttsJump(dir) {
+      if (ttsState === 'idle') return;
+      let target = -1;
+      if (dir > 0) {
+        target = ttsQueue.findIndex((it, i) => i > ttsPos && it.head);
+        if (target === -1) return;      // 最後の節
+      } else {
+        const cur = ttsHeadIndex(ttsPos);
+        const prev = cur > 0 ? ttsHeadIndex(cur - 1) : -1;
+        target = prev !== -1 ? prev : Math.max(cur, 0);
+      }
+      ttsSilence();
+      ttsPos = target;
+      ttsChunk = 0;
+      if (ttsState === 'playing') { ttsSpeak(); return; }
+      ttsMark(ttsQueue[ttsPos]);
+      ttsUpdateBar();
+    }
+
+    ttsBar.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-act]');
+      if (!btn) return;
+      const act = btn.dataset.act;
+      if (act === 'toggle') { if (ttsState === 'paused') ttsResume(); else ttsPause(); }
+      else if (act === 'stop') ttsStop();
+      else ttsJump(act === 'next' ? 1 : -1);
+    });
+    ttsBar.querySelector('.tts-rate').addEventListener('change', (e) => {
+      ttsRate = parseFloat(e.target.value);
+      localStorage.setItem(TTS_RATE_KEY, String(ttsRate));
+      if (ttsState === 'playing') { ttsSilence(); ttsSpeak(); }
+    });
+
+    // 章見出し（h2）・節見出し（h3）へ ▶ を付ける。textContent を汚さないよう文字は CSS 側で描く
+    document.querySelectorAll('.chapter').forEach(ch => {
+      if (!isTtsChapter(ch)) return;
+      ch.querySelectorAll('h2, h3').forEach(h => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tts-btn';
+        btn.title = 'ここから読み上げ';
+        btn.setAttribute('aria-label', 'ここから読み上げ');
+        h.appendChild(btn);
+      });
+    });
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.tts-btn');
+      if (!btn) return;
+      const heading = btn.parentElement;
+      if (!heading.closest('.chapter') || heading.closest('.quiz-overlay')) return;
+      ttsStart(heading);
+    });
+
+    // 演習モーダルを開いたら一時停止
+    document.querySelectorAll('.quiz-overlay').forEach(ov => {
+      new MutationObserver(() => {
+        if (ov.classList.contains('visible')) ttsPause();
+      }).observe(ov, { attributes: true, attributeFilter: ['class'] });
+    });
+
+    // リロード・離脱後も読み続けるブラウザがあるため明示的に止める
+    ttsSynth.cancel();
+    window.addEventListener('pagehide', () => ttsSynth.cancel());
+  }
 
   // --- Active TOC highlight + Notes sync ---
   // --- ページ内検索（サイドバー常設 / 本文のみ）---

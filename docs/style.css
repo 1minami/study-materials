@@ -1304,10 +1304,97 @@ mark.search-hit.is-current {
   mark.search-hit.is-current { background: #c2620d; outline-color: #fdba74; }
 }
 
+/* ========== 読み上げ ========== */
+/* ▶ は script.js が h2 / h3 へ挿入。文字は ::before で描き、見出しの textContent を汚さない */
+.tts-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-left: 8px;
+  padding: 0;
+  vertical-align: middle;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  background: var(--card-bg);
+  color: var(--accent);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+.tts-btn::before { content: "▶"; margin-left: 1px; }
+.tts-btn:hover, .tts-btn.is-playing { background: var(--accent); color: #fff; }
+.tts-reading {
+  background: var(--accent-light);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.chapter tbody tr.tts-reading { outline: none; }
+.chapter tbody tr.tts-reading > td { background: var(--accent-light); }
+.tts-bar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 850;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: calc(100vw - 24px);
+  padding: 8px 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.18);
+}
+.tts-bar[hidden] { display: none; }
+.tts-bar-btn {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--fg);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.tts-bar-btn:hover { background: var(--accent-light); }
+.tts-bar-toggle, .tts-bar-toggle:hover { background: var(--accent); color: #fff; }
+.tts-rate {
+  flex: none;
+  padding: 4px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--fg);
+}
+.tts-title {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+body.tts-active .back-top { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+@media (max-width: 768px) {
+  .tts-btn { width: 32px; height: 32px; font-size: 12px; }
+}
+@media (max-width: 480px) {
+  .tts-bar { gap: 2px; padding: 6px 10px; }
+  .tts-title { max-width: 72px; }
+}
+
 /* ========== Print ========== */
 @media print {
-  .header, .sidebar, .right-sidebar, .back-top, .menu-toggle, .sidebar-overlay { display: none !important; }
+  .header, .sidebar, .right-sidebar, .back-top, .menu-toggle, .sidebar-overlay, .tts-btn, .tts-bar { display: none !important; }
   mark.search-hit, mark.search-hit.is-current { background: none; outline: none; }
+  .tts-reading, .chapter tbody tr.tts-reading > td { background: none; outline: none; }
   .main { margin: 0; padding: 0; max-width: 100%; }
   .chapter { break-inside: avoid; border: none; box-shadow: none; padding: 0; margin-bottom: 16px; }
   .part { break-before: page; }
