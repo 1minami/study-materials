@@ -42,6 +42,8 @@
     const dx = e.changedTouches[0].clientX - touchStartX;
     const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
     if (dy > 60) return; // vertical swipe, ignore
+    // 一問一答モーダル表示中の横スワイプは回答操作。サイドバーは開閉しない
+    if (mbOverlay && mbOverlay.classList.contains('visible')) return;
     if (dx > 60 && touchStartX < 40 && !sidebar.classList.contains('open')) {
       toggleSidebar();
     } else if (dx < -60 && sidebar.classList.contains('open')) {
@@ -789,6 +791,73 @@
       nextMarubatsu();
     }
   });
+
+  // --- Marubatsu スワイプ回答（タッチ端末のみ。左 = ⭕ / 右 = ❌ / 回答後は左右どちらでも次へ）---
+  const MB_SWIPE_LOCK = 10; // 縦横どちらの操作かを確定する移動量(px)
+  const MB_SWIPE_MAX = 80;  // 回答・次へと判定する移動量の上限(px)。狭い画面では幅の 25%
+  let mbSwipe = null;       // { x, y, dir: null | 'h' | 'v', dx }
+
+  function mbSwipeLimit() {
+    return Math.min(MB_SWIPE_MAX, window.innerWidth * 0.25);
+  }
+
+  function releaseMbCard() {
+    const card = document.getElementById('mb-statement');
+    if (!card) return;
+    card.classList.remove('is-dragging');
+    card.style.transform = '';
+    delete card.dataset.swipe;
+  }
+
+  if (mbBody) {
+    mbBody.addEventListener('touchstart', (e) => {
+      // 2本目の指が触れたらドラッグ中のカードを戻して中断（ピンチ操作を優先）
+      if (mbSwipe) releaseMbCard();
+      mbSwipe = null;
+      if (e.touches.length !== 1) return;
+      // 設定画面・結果画面には問題カードが無い
+      if (!document.getElementById('mb-statement')) return;
+      const t = e.target;
+      if (t && t.closest && t.closest('textarea, input, select, button, a')) return;
+      mbSwipe = { x: e.touches[0].clientX, y: e.touches[0].clientY, dir: null, dx: 0 };
+    }, { passive: true });
+
+    mbBody.addEventListener('touchmove', (e) => {
+      if (!mbSwipe) return;
+      const dx = e.touches[0].clientX - mbSwipe.x;
+      const dy = e.touches[0].clientY - mbSwipe.y;
+      if (!mbSwipe.dir) {
+        if (Math.abs(dx) < MB_SWIPE_LOCK && Math.abs(dy) < MB_SWIPE_LOCK) return;
+        mbSwipe.dir = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+      }
+      if (mbSwipe.dir !== 'h') return; // 縦は解説のスクロールに譲る
+      if (e.cancelable) e.preventDefault();
+      mbSwipe.dx = dx;
+      if (mbAnswered) return; // 回答後は「次へ」の判定のみ。カードは動かさない
+      const card = document.getElementById('mb-statement');
+      if (!card) return;
+      card.classList.add('is-dragging');
+      card.style.transform = `translateX(${dx}px) rotate(${dx * 0.04}deg)`;
+      // 離すと回答が確定する位置まで来たら、どちらの回答になるかを表示
+      if (Math.abs(dx) >= mbSwipeLimit()) card.dataset.swipe = dx < 0 ? 'maru' : 'batsu';
+      else delete card.dataset.swipe;
+    }, { passive: false });
+
+    mbBody.addEventListener('touchend', () => {
+      const s = mbSwipe;
+      mbSwipe = null;
+      if (!s || s.dir !== 'h') return;
+      releaseMbCard();
+      if (Math.abs(s.dx) < mbSwipeLimit()) return;
+      if (!mbAnswered) answerMb(s.dx < 0);
+      else if (!mbNextBtn.hidden) nextMarubatsu();
+    });
+
+    mbBody.addEventListener('touchcancel', () => {
+      if (mbSwipe) releaseMbCard();
+      mbSwipe = null;
+    });
+  }
 
   // --- Fill-in-blank Quiz ---
   const FILLIN_SIZE_DEFAULT = 10;

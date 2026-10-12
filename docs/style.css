@@ -936,6 +936,27 @@ hr {
 .marubatsu-statement.is-correct { border-left-color: #15803d; }
 .marubatsu-statement.is-wrong { border-left-color: #b91c1c; }
 
+/* --- スワイプ回答（タッチ端末。左 = ⭕ / 右 = ❌）--- */
+/* 横方向は JS が扱う。カードが傾いても横スクロールを出さない */
+#marubatsu-body { touch-action: pan-y; overflow-x: hidden; }
+.marubatsu-statement {
+  position: relative;
+  transition: transform .2s ease-out;
+}
+.marubatsu-statement.is-dragging { transition: none; }
+/* 離すと回答が確定する位置で、画面に残る側の角へ回答を表示 */
+.marubatsu-statement[data-swipe]::after {
+  position: absolute;
+  top: 8px;
+  font-size: 44px;
+  line-height: 1;
+  pointer-events: none;
+}
+.marubatsu-statement[data-swipe="maru"]::after { content: "⭕"; right: 12px; }
+.marubatsu-statement[data-swipe="batsu"]::after { content: "❌"; left: 12px; }
+.marubatsu-statement[data-swipe="maru"] { box-shadow: 0 0 0 2px #15803d; }
+.marubatsu-statement[data-swipe="batsu"] { box-shadow: 0 0 0 2px #b91c1c; }
+
 /* --- 回答バー（フッター固定。左 = ⭕ / 右 = ❌ でキー操作と一致）--- */
 .mb-answer-bar {
   display: flex;
