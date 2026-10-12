@@ -548,6 +548,8 @@ hr {
   #marubatsu-overlay .quiz-progress { font-size: 14px; }
   #marubatsu-overlay .quiz-q-num,
   #marubatsu-overlay .quiz-chapter { font-size: 13px; }
+  #marubatsu-overlay .mb-importance { font-size: 13px; }
+  #marubatsu-overlay .mb-stats-line { font-size: 14px; }
   #marubatsu-overlay .marubatsu-statement { font-size: 18px; padding: 20px 22px; }
   #marubatsu-overlay .marubatsu-btn { font-size: 24px; padding: 16px 24px; max-width: 240px; }
   #marubatsu-overlay .quiz-explanation { font-size: 16px; }
@@ -935,6 +937,23 @@ hr {
 /* 回答後は問題文の左罫を正誤で色分け */
 .marubatsu-statement.is-correct { border-left-color: #15803d; }
 .marubatsu-statement.is-wrong { border-left-color: #b91c1c; }
+/* 重要度バッジ（A = 頻出 / B = 標準 / C = 低頻度）と設定画面の重み付け欄 */
+.mb-importance {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid currentColor;
+}
+.mb-importance-A { color: #b91c1c; }
+.mb-importance-B { color: #b45309; }
+.mb-importance-C { color: var(--fg-muted); }
+.mb-weighted-toggle { width: fit-content; }
+.mb-stats-line {
+  font-size: 12px;
+  color: var(--fg-muted);
+}
 
 /* --- スワイプ回答（タッチ端末。左 = ⭕ / 右 = ❌）--- */
 /* 横方向は JS が扱う。カードが傾いても横スクロールを出さない */

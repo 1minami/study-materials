@@ -556,13 +556,80 @@
     return mbPool;
   }
 
+  // --- 重み付き出題（重要度 × 誤答履歴）---
+  // 履歴は { id: { s: 連続正解数, n: 回答数 } }。誤答で s = 0 に戻す
+  const MB_STATS_KEY = 'takken-mb-stats';
+  const MB_WEIGHTED_KEY = 'takken-mb-weighted';
+  const MB_IMPORTANCE_WEIGHT = { A: 3, B: 2, C: 1 };
+  const MB_IMPORTANCE_DEFAULT = 'B';
+
+  // localStorage が使えない環境（プライベートウィンドウ等）でも出題は続ける
+  function loadMbStats() {
+    try {
+      const stats = JSON.parse(localStorage.getItem(MB_STATS_KEY) || '{}');
+      return (stats && typeof stats === 'object' && !Array.isArray(stats)) ? stats : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function recordMbResult(id, isCorrect) {
+    if (!id) return;
+    try {
+      const stats = loadMbStats();
+      const st = stats[id] || { s: 0, n: 0 };
+      stats[id] = { s: isCorrect ? (st.s || 0) + 1 : 0, n: (st.n || 0) + 1 };
+      localStorage.setItem(MB_STATS_KEY, JSON.stringify(stats));
+    } catch (e) { /* 保存できなくても続行 */ }
+  }
+
+  function resetMbStats() {
+    try { localStorage.removeItem(MB_STATS_KEY); } catch (e) { /* noop */ }
+  }
+
+  function isMbWeighted() {
+    try { return localStorage.getItem(MB_WEIGHTED_KEY) !== '0'; } catch (e) { return true; }
+  }
+
+  function setMbWeighted(on) {
+    try { localStorage.setItem(MB_WEIGHTED_KEY, on ? '1' : '0'); } catch (e) { /* noop */ }
+  }
+
+  function mbImportance(q) {
+    return MB_IMPORTANCE_WEIGHT[q.importance] ? q.importance : MB_IMPORTANCE_DEFAULT;
+  }
+
+  // 直近誤答 ×4 / 未回答 ×2 / 正解1回 ×1 / 連続正解2回以上 ×0.5
+  function mbHistoryWeight(st) {
+    if (!st || !st.n) return 2;
+    if (!st.s) return 4;
+    return st.s >= 2 ? 0.5 : 1;
+  }
+
+  function mbWeight(q, stats) {
+    return MB_IMPORTANCE_WEIGHT[mbImportance(q)] * mbHistoryWeight(stats[q.id]);
+  }
+
+  // 非復元の重み付き抽出（Efraimidis–Spirakis）: key = U^(1/w) の上位 n 件
+  function weightedSample(items, weightOf, n) {
+    return items
+      .map(item => ({ item, key: Math.pow(Math.random(), 1 / weightOf(item)) }))
+      .sort((a, b) => b.key - a.key)
+      .slice(0, n)
+      .map(e => e.item);
+  }
+
   function buildMbSet(pool) {
     let filtered = pool;
     if (mbSelectedCats && mbSelectedCats.size > 0) {
       filtered = pool.filter(q => mbSelectedCats.has(q.category || ''));
     }
     if (filtered.length === 0) return [];
-    return shuffle(filtered).slice(0, Math.min(mbSize, filtered.length));
+    const n = Math.min(mbSize, filtered.length);
+    if (!isMbWeighted()) return shuffle(filtered).slice(0, n);
+    const stats = loadMbStats();
+    // 抽出結果は重い順に並びやすいので、出題順は混ぜ直す
+    return shuffle(weightedSample(filtered, q => mbWeight(q, stats), n));
   }
 
   // 回答ボタンはフッター固定（スマホで親指が届く位置）。左 = ⭕ / 右 = ❌ でキー操作と揃える
@@ -591,7 +658,9 @@
     mbProgress.textContent = `${mbIdx + 1} / ${mbSet.length}（正解 ${mbScore}）`;
 
     const path = [q.category, q.section].filter(Boolean).map(escapeHtml).join(' ／ ');
-    const meta = `<div class="quiz-meta"><span class="quiz-q-num">Q${mbIdx + 1}</span><span class="quiz-chapter">${path}</span></div>`;
+    const imp = mbImportance(q);
+    const badge = `<span class="mb-importance mb-importance-${imp}" title="重要度 ${imp}">${imp}</span>`;
+    const meta = `<div class="quiz-meta"><span class="quiz-q-num">Q${mbIdx + 1}</span>${badge}<span class="quiz-chapter">${path}</span></div>`;
     const stmt = `<div class="marubatsu-statement" id="mb-statement">${escapeHtml(q.statement)}</div>`;
     mbBody.innerHTML = meta + stmt + `<div class="quiz-explanation" id="mb-explanation" hidden></div>`;
 
@@ -606,6 +675,7 @@
     const isCorrect = (userAns === q.answer);
     if (isCorrect) mbScore++;
     else mbWrong.push(q);
+    recordMbResult(q.id, isCorrect);
 
     // 回答バーは「次の問題」ボタンに場所を譲る
     hideMbAnswerBar();
@@ -694,6 +764,16 @@
       return `<option value="${n}" ${sel}>${n}問</option>`;
     }).join('');
 
+    const stats = loadMbStats();
+    let wrongCount = 0, answeredCount = 0;
+    pool.forEach(q => {
+      const st = stats[q.id];
+      if (!st || !st.n) return;
+      answeredCount++;
+      if (!st.s) wrongCount++;
+    });
+    const weightedChecked = isMbWeighted() ? 'checked' : '';
+
     mbBody.innerHTML = `
       <div class="fillin-setup">
         <div class="fillin-setup-section">
@@ -707,6 +787,14 @@
         <div class="fillin-setup-section">
           <div class="fillin-setup-label">問題数</div>
           <select id="mb-size-select" class="fillin-size-select">${sizeOpts}</select>
+        </div>
+        <div class="fillin-setup-section">
+          <div class="fillin-setup-label">出題の重み付け</div>
+          <label class="fillin-cat mb-weighted-toggle"><input type="checkbox" id="mb-weighted" ${weightedChecked}><span>苦手・頻出を優先 <em>(重要度 × 誤答履歴)</em></span></label>
+          <div class="mb-stats-line">直近誤答 ${wrongCount}問 ／ 未回答 ${pool.length - answeredCount}問 ／ 回答済み ${answeredCount}問</div>
+          <div class="fillin-setup-actions">
+            <button type="button" class="quiz-btn fillin-btn-mini" id="mb-stats-reset">履歴リセット</button>
+          </div>
         </div>
         <div class="fillin-setup-section fillin-setup-start">
           <button type="button" class="quiz-btn quiz-btn-primary" id="mb-start-btn">開始 ▶</button>
@@ -731,6 +819,14 @@
     });
     mbBody.querySelector('#mb-size-select').addEventListener('change', (e) => {
       mbSize = parseInt(e.target.value, 10) || MARUBATSU_SIZE_DEFAULT;
+    });
+    mbBody.querySelector('#mb-weighted').addEventListener('change', (e) => {
+      setMbWeighted(e.target.checked);
+    });
+    mbBody.querySelector('#mb-stats-reset').addEventListener('click', () => {
+      if (!confirm('一問一答の正誤履歴を消去する。よいか？')) return;
+      resetMbStats();
+      renderMbSetup(pool);
     });
     mbBody.querySelector('#mb-start-btn').addEventListener('click', () => startMb(pool));
   }

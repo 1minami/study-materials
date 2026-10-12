@@ -22,6 +22,8 @@ TARGET = PROJECT_DIR / "marubatsu.json"
 REQUIRED_FIELDS = ["id", "category", "section", "statement", "answer", "explanation"]
 # script.js の絞り込みUIがプールから動的生成するため、表記ゆれは別カテゴリ扱いになる
 VALID_CATEGORIES = {"権利関係", "宅建業法", "法令上の制限", "税・価格", "免除科目"}
+# 任意フィールド。未設定は script.js 側で B 扱い（付与は scripts/apply_mb_importance.py）
+VALID_IMPORTANCE = {"A", "B", "C"}
 
 
 def validate(questions):
@@ -40,6 +42,8 @@ def validate(questions):
             errors.append(f"{where}: answer が bool でない ({q['answer']!r})")
         if q.get("category") not in VALID_CATEGORIES:
             errors.append(f"{where}: category が既定5値でない ({q.get('category')!r})")
+        if "importance" in q and q["importance"] not in VALID_IMPORTANCE:
+            errors.append(f"{where}: importance が A/B/C でない ({q['importance']!r})")
         for field in ("statement", "explanation"):
             if not str(q.get(field, "")).strip():
                 errors.append(f"{where}: {field} が空")
@@ -72,6 +76,8 @@ def main():
     print(f"synced {SOURCE.name}: docs -> root ({before} -> {len(questions)} 問)")
     for cat, n in Counter(q["category"] for q in questions).most_common():
         print(f"  {cat}: {n}")
+    imp = Counter(q.get("importance", "未設定") for q in questions)
+    print("  importance: " + " / ".join(f"{k}: {imp[k]}" for k in ("A", "B", "C", "未設定") if imp[k]))
     return 0
 
 
