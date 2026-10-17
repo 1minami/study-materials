@@ -1006,6 +1006,23 @@ hr {
   background: var(--accent-light);
 }
 .marubatsu-btn:disabled { cursor: default; opacity: .7; }
+/* スワイプ連動: --mb-pull（0〜1）= 確定位置までの引っ張り量。指に追従させるためドラッグ中は transition を切る */
+/* スマホの hover 残留に背景を上書きされないよう .mb-answer-bar で詳細度を上げる */
+.marubatsu-btn.is-dragging,
+#marubatsu-next-btn.is-dragging { transition: none; }
+.mb-answer-bar .marubatsu-btn.is-pulled {
+  --mb-swipe-color: #b91c1c;
+  border-color: var(--mb-swipe-color);
+  background: color-mix(in srgb, var(--mb-swipe-color) calc(var(--mb-pull, 0) * 22%), var(--card-bg));
+  transform: translateY(calc(var(--mb-pull, 0) * -6px)) scale(calc(1 + var(--mb-pull, 0) * .06));
+}
+.mb-answer-bar .marubatsu-btn.is-pulled[data-ans="true"] { --mb-swipe-color: #15803d; }
+.mb-answer-bar .marubatsu-btn.is-armed {
+  background: var(--mb-swipe-color);
+  color: #fff;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--mb-swipe-color) 45%, transparent);
+}
+#marubatsu-next-btn.is-armed { box-shadow: 0 0 0 3px var(--accent-light); }
 .mb-key-hint {
   margin-right: auto;
   align-self: center;

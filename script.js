@@ -611,7 +611,7 @@
   }
 
   // 非復元の重み付き抽出（Efraimidis–Spirakis）: key = U^(1/w) の上位 n 件
-  function weightedSample(items, weightOf, n) {
+  function weightedSampleBy(items, weightOf, n) {
     return items
       .map(item => ({ item, key: Math.pow(Math.random(), 1 / weightOf(item)) }))
       .sort((a, b) => b.key - a.key)
@@ -629,7 +629,7 @@
     if (!isMbWeighted()) return shuffle(filtered).slice(0, n);
     const stats = loadMbStats();
     // 抽出結果は重い順に並びやすいので、出題順は混ぜ直す
-    return shuffle(weightedSample(filtered, q => mbWeight(q, stats), n));
+    return shuffle(weightedSampleBy(filtered, q => mbWeight(q, stats), n));
   }
 
   // 回答ボタンはフッター固定（スマホで親指が届く位置）。左 = ⭕ / 右 = ❌ でキー操作と揃える
@@ -898,11 +898,48 @@
   }
 
   function releaseMbCard() {
+    releaseMbFooter();
     const card = document.getElementById('mb-statement');
     if (!card) return;
     card.classList.remove('is-dragging');
     card.style.transform = '';
     delete card.dataset.swipe;
+  }
+
+  // スワイプ中は下の回答ボタンも連動させ、離すとどちらの回答になるかを示す。
+  // 回答前 = 引っ張っている側のボタンを持ち上げて色付け（確定位置で塗りつぶし）/ 回答後 = 「次へ」ボタンを指に追従
+  function dragMbFooter(dx) {
+    const pull = Math.min(1, Math.abs(dx) / mbSwipeLimit());
+    const armed = pull >= 1;
+    if (mbAnswered) {
+      if (mbNextBtn.hidden) return;
+      mbNextBtn.classList.add('is-dragging');
+      mbNextBtn.classList.toggle('is-armed', armed);
+      mbNextBtn.style.transform = `translateX(${Math.sign(dx) * pull * 16}px)`;
+      return;
+    }
+    if (!mbAnswerBar || mbAnswerBar.hidden) return;
+    const target = dx < 0 ? 'true' : 'false';
+    mbAnswerBar.querySelectorAll('.marubatsu-btn').forEach(btn => {
+      const on = btn.dataset.ans === target;
+      btn.classList.add('is-dragging');
+      btn.classList.toggle('is-pulled', on);
+      btn.classList.toggle('is-armed', on && armed);
+      btn.style.setProperty('--mb-pull', on ? pull : 0);
+      btn.style.opacity = on ? '' : String(1 - pull * 0.6);
+    });
+  }
+
+  function releaseMbFooter() {
+    if (mbAnswerBar) {
+      mbAnswerBar.querySelectorAll('.marubatsu-btn').forEach(btn => {
+        btn.classList.remove('is-dragging', 'is-pulled', 'is-armed');
+        btn.style.removeProperty('--mb-pull');
+        btn.style.opacity = '';
+      });
+    }
+    mbNextBtn.classList.remove('is-dragging', 'is-armed');
+    mbNextBtn.style.transform = '';
   }
 
   if (mbBody) {
@@ -929,6 +966,7 @@
       if (mbSwipe.dir !== 'h') return; // 縦は解説のスクロールに譲る
       if (e.cancelable) e.preventDefault();
       mbSwipe.dx = dx;
+      dragMbFooter(dx);
       if (mbAnswered) return; // 回答後は「次へ」の判定のみ。カードは動かさない
       const card = document.getElementById('mb-statement');
       if (!card) return;

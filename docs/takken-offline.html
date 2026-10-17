@@ -1014,6 +1014,23 @@ hr {
   background: var(--accent-light);
 }
 .marubatsu-btn:disabled { cursor: default; opacity: .7; }
+/* スワイプ連動: --mb-pull（0〜1）= 確定位置までの引っ張り量。指に追従させるためドラッグ中は transition を切る */
+/* スマホの hover 残留に背景を上書きされないよう .mb-answer-bar で詳細度を上げる */
+.marubatsu-btn.is-dragging,
+#marubatsu-next-btn.is-dragging { transition: none; }
+.mb-answer-bar .marubatsu-btn.is-pulled {
+  --mb-swipe-color: #b91c1c;
+  border-color: var(--mb-swipe-color);
+  background: color-mix(in srgb, var(--mb-swipe-color) calc(var(--mb-pull, 0) * 22%), var(--card-bg));
+  transform: translateY(calc(var(--mb-pull, 0) * -6px)) scale(calc(1 + var(--mb-pull, 0) * .06));
+}
+.mb-answer-bar .marubatsu-btn.is-pulled[data-ans="true"] { --mb-swipe-color: #15803d; }
+.mb-answer-bar .marubatsu-btn.is-armed {
+  background: var(--mb-swipe-color);
+  color: #fff;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--mb-swipe-color) 45%, transparent);
+}
+#marubatsu-next-btn.is-armed { box-shadow: 0 0 0 3px var(--accent-light); }
 .mb-key-hint {
   margin-right: auto;
   align-self: center;
@@ -13597,7 +13614,7 @@ body.tts-active .back-top { bottom: calc(84px + env(safe-area-inset-bottom, 0px)
   }
 
   // 非復元の重み付き抽出（Efraimidis–Spirakis）: key = U^(1/w) の上位 n 件
-  function weightedSample(items, weightOf, n) {
+  function weightedSampleBy(items, weightOf, n) {
     return items
       .map(item => ({ item, key: Math.pow(Math.random(), 1 / weightOf(item)) }))
       .sort((a, b) => b.key - a.key)
@@ -13615,7 +13632,7 @@ body.tts-active .back-top { bottom: calc(84px + env(safe-area-inset-bottom, 0px)
     if (!isMbWeighted()) return shuffle(filtered).slice(0, n);
     const stats = loadMbStats();
     // 抽出結果は重い順に並びやすいので、出題順は混ぜ直す
-    return shuffle(weightedSample(filtered, q => mbWeight(q, stats), n));
+    return shuffle(weightedSampleBy(filtered, q => mbWeight(q, stats), n));
   }
 
   // 回答ボタンはフッター固定（スマホで親指が届く位置）。左 = ⭕ / 右 = ❌ でキー操作と揃える
@@ -13884,11 +13901,48 @@ body.tts-active .back-top { bottom: calc(84px + env(safe-area-inset-bottom, 0px)
   }
 
   function releaseMbCard() {
+    releaseMbFooter();
     const card = document.getElementById('mb-statement');
     if (!card) return;
     card.classList.remove('is-dragging');
     card.style.transform = '';
     delete card.dataset.swipe;
+  }
+
+  // スワイプ中は下の回答ボタンも連動させ、離すとどちらの回答になるかを示す。
+  // 回答前 = 引っ張っている側のボタンを持ち上げて色付け（確定位置で塗りつぶし）/ 回答後 = 「次へ」ボタンを指に追従
+  function dragMbFooter(dx) {
+    const pull = Math.min(1, Math.abs(dx) / mbSwipeLimit());
+    const armed = pull >= 1;
+    if (mbAnswered) {
+      if (mbNextBtn.hidden) return;
+      mbNextBtn.classList.add('is-dragging');
+      mbNextBtn.classList.toggle('is-armed', armed);
+      mbNextBtn.style.transform = `translateX(${Math.sign(dx) * pull * 16}px)`;
+      return;
+    }
+    if (!mbAnswerBar || mbAnswerBar.hidden) return;
+    const target = dx < 0 ? 'true' : 'false';
+    mbAnswerBar.querySelectorAll('.marubatsu-btn').forEach(btn => {
+      const on = btn.dataset.ans === target;
+      btn.classList.add('is-dragging');
+      btn.classList.toggle('is-pulled', on);
+      btn.classList.toggle('is-armed', on && armed);
+      btn.style.setProperty('--mb-pull', on ? pull : 0);
+      btn.style.opacity = on ? '' : String(1 - pull * 0.6);
+    });
+  }
+
+  function releaseMbFooter() {
+    if (mbAnswerBar) {
+      mbAnswerBar.querySelectorAll('.marubatsu-btn').forEach(btn => {
+        btn.classList.remove('is-dragging', 'is-pulled', 'is-armed');
+        btn.style.removeProperty('--mb-pull');
+        btn.style.opacity = '';
+      });
+    }
+    mbNextBtn.classList.remove('is-dragging', 'is-armed');
+    mbNextBtn.style.transform = '';
   }
 
   if (mbBody) {
@@ -13915,6 +13969,7 @@ body.tts-active .back-top { bottom: calc(84px + env(safe-area-inset-bottom, 0px)
       if (mbSwipe.dir !== 'h') return; // 縦は解説のスクロールに譲る
       if (e.cancelable) e.preventDefault();
       mbSwipe.dx = dx;
+      dragMbFooter(dx);
       if (mbAnswered) return; // 回答後は「次へ」の判定のみ。カードは動かさない
       const card = document.getElementById('mb-statement');
       if (!card) return;
