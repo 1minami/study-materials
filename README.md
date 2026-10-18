@@ -21,12 +21,10 @@ docs/
   ├── script.js        # JS（ビルド時に自動コピー）
   ├── quiz.json        # 4択演習問題データ（ビルド時に自動生成）
   ├── marubatsu.json   # 一問一答データ（docs/ 直接管理・唯一の正）
-  ├── fillin.json      # 穴埋め問題データ（ビルド時に自動生成）
-  └── takken-offline.html  # オフライン版（build_offline_html.py で生成）
+  └── fillin.json      # 穴埋め問題データ（ビルド時に自動生成）
 scripts/
   ├── fetch_egov.py           # e-Gov 法令取得スクリプト（3試験統合版）
   ├── build_takken_textbook.py  # 宅建教材 → HTML テキストブック + quiz.json 変換
-  ├── build_offline_html.py     # docs/ → 自己完結オフラインHTML 変換
   ├── sync_marubatsu.py         # docs/marubatsu.json → ルートの複製へ同期（検証付き）
   ├── apply_mb_importance.py    # docs/marubatsu.json の importance 未設定問題へ section 既定値（A/B/C）を付与
   └── audit_quiz.py             # quiz.json の「正解が1つに定まらない問題」「解説の逃げ口上」を検出（要修正時 exit 1）
@@ -138,14 +136,14 @@ scripts/
 - **重み付き出題**（既定 ON。設定画面の「苦手・頻出を優先」で切替、OFF は従来の一様ランダム）: 各問題の当選確率を `重要度係数 × 履歴係数` で決める。全問が候補のままで、同一セット内の重複はない（非復元の重み付き抽出）
   - 重要度（`importance` フィールド）: `A` 頻出 ×3 / `B` 標準 ×2 / `C` 低頻度 ×1。未設定は B 扱い。出題中はメタ欄にバッジ表示
   - 履歴: 直近が誤答 ×4 / 未回答 ×2 / 正解1回 ×1 / 連続正解2回以上 ×0.5
-  - 正誤履歴は `localStorage` の `takken-mb-stats`（`{ id: { s: 連続正解数, n: 回答数 } }`）、ON/OFF は `takken-mb-weighted` に保存。**端末・オリジン別**（スマホと PC、公開版とオフライン版は別履歴）。設定画面に集計（直近誤答／未回答／回答済み）と「履歴リセット」ボタンがある
+  - 正誤履歴は `localStorage` の `takken-mb-stats`（`{ id: { s: 連続正解数, n: 回答数 } }`）、ON/OFF は `takken-mb-weighted` に保存。**端末・オリジン別**（スマホと PC は別履歴）。設定画面に集計（直近誤答／未回答／回答済み）と「履歴リセット」ボタンがある
   - 重要度の付与: `python scripts/apply_mb_importance.py` が section 単位の既定値表（スクリプト内 `_BY_LEVEL`）から **未設定の問題だけ** に書き込む。問題単位で変えたいときは `docs/marubatsu.json` の `importance` を直接書き換える（再実行しても上書きされない）。表に無い section は B
 - 回答操作: フッター固定の ⭕❌ ボタン（左 = ⭕ / 右 = ❌）をタップ。PC は `←` = ⭕ / `→` = ❌ のキーでも回答。回答後は「次の問題 ▶」のみ（`←→` でも次へ）
 - スワイプ回答（タッチ端末のみ）: 問題エリアを左スワイプ = ⭕ / 右スワイプ = ❌。カードが指に追従し、離すと回答が確定する位置（80px または画面幅の 25% の小さい方）を超えると ⭕/❌ を表示。下の回答ボタンも連動し、引っ張っている側が持ち上がって色付き（確定位置で塗りつぶし）・反対側は薄くなる。手前で離すと元に戻り未回答のまま。回答後は左右どちらのスワイプでも次へ（「次の問題」ボタンが指に追従）。縦方向は従来どおりスクロール。モーダル表示中は左端スワイプでサイドバーを開かない
 - スマホ（768px 以下）: モーダルを全画面表示（`100dvh` + セーフエリア対応）。回答ボタンは下部固定で 56px 以上、回答すると解説位置まで自動スクロール
 - 結果画面: スコア + 正答率に加え、**間違えた問題の一覧**（カテゴリ／章・問題文・正解・解説）を表示。全問正解時は「全問正解 🎉」のみ
 - 回答後は解説の下に「📌 テキストに追加」欄が出る（PC のみ・[回答を学習メモへ追加](#回答を学習メモへ追加pc-のみ4択演習一問一答-共通)）。メモ欄の入力中は `←→` が次の問題へ進まずカーソル移動として働く
-- 問題追加: `/takken-marubatsu` スキル（`.claude/skills/takken-marubatsu/`）— 論点提案 → 承認 → 追記 → ルート同期 → オフライン版再生成 → push まで対話形式で実行。難問・引っ掛け設計ガイドライン付き
+- 問題追加: `/takken-marubatsu` スキル（`.claude/skills/takken-marubatsu/`）— 論点提案 → 承認 → 追記 → ルート同期 → push まで対話形式で実行。難問・引っ掛け設計ガイドライン付き
 
 ### 穴埋め演習
 
@@ -167,7 +165,7 @@ python scripts/build_takken_textbook.py   # HTML + CSS + JS + quiz.json を生�
 git add docs/ && git commit -m "update textbook" && git push
 ```
 
-> `templates/script.js`・`templates/style.css`、およびスクリプト内の HTML テンプレートは `docs/` の公開版と同期済み（2026-09-20）。フル実行しても一問一答モーダル・分割テキストペイン・オフライン版リンクは失われない。
+> `templates/script.js`・`templates/style.css`、およびスクリプト内の HTML テンプレートは `docs/` の公開版と同期済み（2026-09-20）。フル実行しても一問一答モーダル・分割テキストペインは失われない。
 >
 > **注意**: `docs/script.js`・`docs/style.css` を直接編集すると次回のフルビルドで上書きされ、機能が退行する（2026-09-20 に実際に発生）。**必ず `templates/` を編集してからビルドすること**。
 >
@@ -178,7 +176,7 @@ git add docs/ && git commit -m "update textbook" && git push
 > python scripts/build_takken_textbook.py --fillin-only   # fillin.json のみ
 > ```
 >
-> テンプレート（`templates/` またはスクリプト内 HTML）を変更したときは、フル実行後に `marubatsu-overlay` / `quiz-textbook-pane` / `offline-download` が `docs/index.html` に残っているか確認すること。
+> テンプレート（`templates/` またはスクリプト内 HTML）を変更したときは、フル実行後に `marubatsu-overlay` / `quiz-textbook-pane` が `docs/index.html` に残っているか確認すること。
 
 ### 本文の装飾ルール
 
@@ -188,19 +186,6 @@ git add docs/ && git commit -m "update textbook" && git push
 - **見出し内の `★`**（頻出度）: `<span class="stars">` で包みバッジ表示（`--star`）
 - **行頭が `⚠` の箇条書き・段落**: `class="caution"` を付け囲み表示（`--warn-bg` / `--warn-border`）。文中の `⚠` は対象外
 - 見出しの強弱: h2（章・青字）> h3（節・薄青帯）> h4（項・左マーカー）> h5（小見出し・淡色）
-
-### オフライン版（takken-offline.html）
-
-CSS・JS・演習データ（quiz / 一問一答 / 穴埋め）をすべて 1 ファイルに埋め込んだ自己完結 HTML。ネット接続なしで全機能が動作する（`fetch` をシムして埋め込み JSON を返す）。
-
-```bash
-python scripts/build_offline_html.py   # docs/ の現行ファイルから docs/takken-offline.html を生成（約 1MB）
-```
-
-- **入手方法**: 公開ページのサイドバー「📥 オフライン版」からダウンロード、または `docs/takken-offline.html` を直接コピー
-- **使い方**: スマホ / PC のブラウザでファイルを開くだけ（機内モードでも動作）
-- **再生成タイミング**: `docs/` 配下（index.html / script.js / style.css / 各 JSON）を更新したら再実行して commit + push
-- 読み上げは端末内蔵の日本語音声を使うためオフラインでも動作する（オンライン専用の音声しか無い端末では不可）
 
 ## 使い方
 

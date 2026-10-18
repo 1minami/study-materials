@@ -375,8 +375,8 @@
     if (!quizTextbookIframe) return;
     const anchorId = SECTION_TO_ID[section];
     if (!anchorId) return;
-    // テキスト本体は自分自身。生成先が index.html / takken-textbook.html /
-    // takken-offline.html のいずれでも動くよう、自ページのファイル名を使う
+    // テキスト本体は自分自身。生成先が index.html / takken-textbook.html の
+    // どちらでも動くよう、自ページのファイル名を使う
     const selfPage = location.pathname.split('/').pop() || 'index.html';
     const url = selfPage + '#' + encodeURIComponent(anchorId);
     if (quizTextbookPane) quizTextbookPane.classList.remove('is-hidden');

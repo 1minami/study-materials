@@ -234,9 +234,6 @@ def build_toc(sections: dict) -> str:
     toc += '<div class="toc-section">\n'
     toc += '  <a href="#" class="toc-section-title fillin-launcher" onclick="openFillin();return false;">✍️ 穴埋め演習</a>\n'
     toc += '</div>\n'
-    toc += '<div class="toc-section">\n'
-    toc += '  <a href="takken-offline.html" class="toc-section-title offline-download" download="takken-offline.html">📥 オフライン版</a>\n'
-    toc += '</div>\n'
     for sec_name, sec_data in sections.items():
         sec_id = slugify(sec_name)
         icon = sec_data["icon"]
