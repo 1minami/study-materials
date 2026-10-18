@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2563eb">
+<title>OSS-DB Silver 要点整理テキスト</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+  <button class="menu-toggle" onclick="toggleSidebar()" aria-label="メニュー">☰</button>
+  <h1>OSS-DB Silver 要点整理テキスト</h1>
+  <span class="subtitle">Ver.3.0 / PostgreSQL 14 基準</span>
+</header>
+
+<div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar">
+<nav id="toc" class="toc">
+<h2>目次</h2>
+<div class="toc-search" id="searchbar">
+  <input type="search" id="search-input" placeholder="🔍 テキスト内を検索" autocomplete="off" spellcheck="false" aria-label="テキスト内を検索">
+  <div class="toc-search-nav">
+    <span class="toc-search-count" id="search-count">0 / 0</span>
+    <button class="toc-search-btn" id="search-prev" title="前へ (Shift+Enter)" aria-label="前へ">↑</button>
+    <button class="toc-search-btn" id="search-next" title="次へ (Enter)" aria-label="次へ">↓</button>
+    <button class="toc-search-btn" id="search-close" title="クリア (Esc)" aria-label="クリア">✕</button>
+  </div>
+</div>
+<div class="toc-section">
+  <a href="#試験概要" class="toc-section-title">📋 試験概要</a>
+  <ul>
+    <li><a href="#00-試験概要">試験概要</a></li>
+  </ul>
+</div>
+<div class="toc-section">
+  <a href="#一般知識" class="toc-section-title">📚 一般知識</a>
+  <ul>
+    <li><a href="#01-一般知識">一般知識</a></li>
+  </ul>
+</div>
+</nav>
+
+</aside>
+
+<main class="main">
+<section class="part" id="試験概要">
+<h1 class="part-title">📋 試験概要</h1>
+<article class="chapter" id="00-試験概要">
+<h2 id="00-試験概要-1">試験概要</h2>
+<blockquote>
+<p>OSS-DB Silver（Ver.3.0）の試験情報と、このテキストの使い方。運用管理が半分以上を占める。</p>
+</blockquote>
+<h3 id="00-試験概要-2">1. 試験の基本情報</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>試験名</td>
+<td>OSS-DB Exam Silver（オープンソースデータベース技術者認定試験）</td>
+</tr>
+<tr>
+<td>実施団体</td>
+<td>LPI-Japan</td>
+</tr>
+<tr>
+<td>試験バージョン</td>
+<td><strong>Ver.3.0</strong></td>
+</tr>
+<tr>
+<td>基準 RDBMS</td>
+<td><strong>PostgreSQL 12 以上</strong>（公式は「2023年2月時点で14まで対応」）。このテキストは <strong>PostgreSQL 14</strong> を基準に書く</td>
+</tr>
+<tr>
+<td>出題数</td>
+<td>約<strong>50問</strong></td>
+</tr>
+<tr>
+<td>試験時間</td>
+<td>90分（公式の出題範囲ページには記載なし。市販対策書の記載による）</td>
+</tr>
+<tr>
+<td>受験料</td>
+<td>16,500円（税込）</td>
+</tr>
+<tr>
+<td>合格ライン</td>
+<td>非公開</td>
+</tr>
+<tr>
+<td>形式</td>
+<td>CBT（テストセンター / オンライン）。ほぼ選択式で、一部キーボード入力あり</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ PostgreSQL 15 で関数名が変わったものがある（例: <code>pg_start_backup()</code> → <code>pg_backup_start()</code>）。試験は14基準なので<strong>旧名</strong>で覚える。該当箇所は本文で注記する</li>
+</ul>
+<h3 id="00-試験概要-3">2. 出題範囲と配点</h3>
+<table>
+<thead>
+<tr>
+<th>分野</th>
+<th>比率</th>
+<th>小項目（重要度）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1 一般知識</td>
+<td>16%</td>
+<td>S1.1 OSS-DB の一般的特徴（4）/ S1.2 リレーショナルデータベースに関する一般知識（4）</td>
+</tr>
+<tr>
+<td>S2 運用管理</td>
+<td><strong>52%</strong></td>
+<td>S2.1 インストール方法（2）/ S2.2 標準付属ツールの使い方（5）/ S2.3 設定ファイル（5）/ S2.4 バックアップ方法（<strong>7</strong>）/ S2.5 基本的な運用管理作業（<strong>7</strong>）</td>
+</tr>
+<tr>
+<td>S3 開発/SQL</td>
+<td>32%</td>
+<td>S3.1 SQL コマンド（<strong>13</strong>）/ S3.2 組み込み関数（2）/ S3.3 トランザクションの概念（1）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>重要度の合計は50。重要度1 ≒ 1問と見てよい</li>
+<li>最大の山は <strong>S3.1 SQL コマンド（13）</strong>、次いで <strong>バックアップ（7）</strong> と <strong>基本的な運用管理作業（7）</strong></li>
+</ul>
+<h3 id="00-試験概要-4">3. 章と出題範囲・学習週の対応</h3>
+<table>
+<thead>
+<tr>
+<th>章</th>
+<th>出題範囲</th>
+<th>学習週</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01 一般知識</td>
+<td>S1.1 / S1.2</td>
+<td>W1（10/19–）</td>
+</tr>
+<tr>
+<td>02 SQL① 定義・更新</td>
+<td>S3.1</td>
+<td>W2（10/26–）</td>
+</tr>
+<tr>
+<td>03 SQL② 検索・オブジェクト</td>
+<td>S3.1</td>
+<td>W3（11/02–）</td>
+</tr>
+<tr>
+<td>04 関数・トランザクション</td>
+<td>S3.2 / S3.3</td>
+<td>W3（11/02–）</td>
+</tr>
+<tr>
+<td>05 インストール・標準付属ツール</td>
+<td>S2.1 / S2.2</td>
+<td>W4（11/09–）</td>
+</tr>
+<tr>
+<td>06 設定ファイル</td>
+<td>S2.3</td>
+<td>W5（11/16–）</td>
+</tr>
+<tr>
+<td>07 バックアップ</td>
+<td>S2.4</td>
+<td>W6（11/23–）</td>
+</tr>
+<tr>
+<td>08 運用管理作業</td>
+<td>S2.5</td>
+<td>W7（11/30–）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>W8 以降は ping-t で演習（このテキストは演習中の調べ物に使う）</li>
+</ul>
+<h3 id="00-試験概要-5">4. このテキストの読み方</h3>
+<ul>
+<li>見出しの <strong>★</strong> は出題頻度の目安（★★★ = 毎回出る）</li>
+<li>行頭の <strong>⚠</strong> は引っ掛けになりやすい点</li>
+<li><strong>太字</strong>は暗記対象のキーワード</li>
+<li>右サイドバーの学習メモは章ごとにブラウザへ保存される（宅建版とは別の保存先）</li>
+</ul>
+</article>
+</section>
+<section class="part" id="一般知識">
+<h1 class="part-title">📚 一般知識</h1>
+<article class="chapter" id="01-一般知識">
+<h2 id="01-一般知識-1">一般知識</h2>
+<blockquote>
+<p>S1.1 OSS-DB の一般的特徴（重要度4）＋ S1.2 リレーショナルデータベースに関する一般知識（重要度4）。合わせて8問前後。ライセンス・バージョン方針・正規化が定番。</p>
+</blockquote>
+<h3 id="01-一般知識-2">1. OSS とライセンス <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="01-一般知識-3">OSS（オープンソースソフトウェア）</h4>
+<ul>
+<li>ソースコードが公開され、利用・改変・再配布が認められたソフトウェア</li>
+<li>定義は <strong>OSI</strong>（Open Source Initiative）の <strong>OSD</strong>（The Open Source Definition）。「再配布の自由」「ソースコードの入手」「派生物の許可」「個人・団体・利用分野で差別しない」など10項目</li>
+<li class="caution">⚠ 「無償」は OSS の条件ではない。有償で販売・サポートしてもよい</li>
+</ul>
+<h4 id="01-一般知識-4">主なライセンスの分類</h4>
+<table>
+<thead>
+<tr>
+<th>種類</th>
+<th>代表例</th>
+<th>改変物を配布するときの義務</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>コピーレフト型</td>
+<td><strong>GPL</strong></td>
+<td>派生物にも <strong>GPL を適用</strong>し、ソースコードを公開する</td>
+</tr>
+<tr>
+<td>弱いコピーレフト型</td>
+<td><strong>LGPL</strong>、MPL</td>
+<td>ライブラリ自体を改変したら公開。リンクして使うだけなら自作部分は公開不要</td>
+</tr>
+<tr>
+<td>非コピーレフト型（寛容型）</td>
+<td><strong>BSD</strong>、<strong>MIT</strong>、Apache、<strong>PostgreSQL ライセンス</strong></td>
+<td>著作権表示と免責条項を残せばよい。ソース公開義務なし</td>
+</tr>
+</tbody>
+</table>
+<h4 id="01-一般知識-5">PostgreSQL ライセンス</h4>
+<ul>
+<li><strong>BSD / MIT ライセンスに近い寛容型</strong>のライセンス</li>
+<li><strong>商用利用・改変・再配布が自由</strong>。改変したソースコードを<strong>公開する義務はない</strong></li>
+<li>条件は「著作権表示・ライセンス文・免責条項を残す」ことだけ</li>
+<li><strong>無償</strong>で利用できる。PostgreSQL を組み込んだ製品を、ソース非公開で販売してもよい</li>
+<li class="caution">⚠ PostgreSQL は <strong>GPL ではない</strong>。MySQL（GPL と商用ライセンスのデュアルライセンス）と混同しない</li>
+</ul>
+<h3 id="01-一般知識-6">2. PostgreSQL の歴史と開発体制 <span class="stars" data-n="2">★★</span></h3>
+<h4 id="01-一般知識-7">歴史</h4>
+<table>
+<thead>
+<tr>
+<th>年</th>
+<th>出来事</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1986</td>
+<td>カリフォルニア大学バークレー校で <strong>POSTGRES</strong> プロジェクト開始（<strong>Michael Stonebraker</strong> 教授）。Ingres の後継研究</td>
+</tr>
+<tr>
+<td>1994</td>
+<td><strong>Postgres95</strong>。問い合わせ言語を PostQUEL から <strong>SQL</strong> に置き換え、<code>psql</code> を追加</td>
+</tr>
+<tr>
+<td>1996</td>
+<td><strong>PostgreSQL</strong> に改名。最初のバージョンは <strong>6.0</strong></td>
+</tr>
+</tbody>
+</table>
+<h4 id="01-一般知識-8">開発体制</h4>
+<ul>
+<li>特定の企業が所有・開発しているのではなく、<strong>PostgreSQL Global Development Group</strong>（世界中の開発者のコミュニティ）が開発</li>
+<li>誰でも参加できる。開発の議論・パッチ投稿は<strong>メーリングリスト</strong>（開発者向けの <code>pgsql-hackers</code> など）で行い、パッチは <strong>CommitFest</strong>（定期的なレビュー期間）で審査される</li>
+<li>日本には <strong>日本 PostgreSQL ユーザ会（JPUG）</strong> があり、勉強会・ドキュメント翻訳などを行う</li>
+</ul>
+<h4 id="01-一般知識-9">バグ報告</h4>
+<ul>
+<li>公式サイトの<strong>バグ報告フォーム</strong>、または <strong><code>pgsql-bugs</code> メーリングリスト</strong>で報告する</li>
+<li>報告には PostgreSQL のバージョン（<code>SELECT version();</code> で確認）、OS、再現手順、期待した結果と実際の結果を書く</li>
+</ul>
+<h3 id="01-一般知識-10">3. バージョンとリリースサイクル <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="01-一般知識-11">バージョン番号の付け方</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>メジャーバージョン</th>
+<th>マイナーバージョン</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>10 以降</strong></td>
+<td><strong>1つ目の数字</strong>（10 → 11 → 12）</td>
+<td><strong>2つ目の数字</strong>（14.0 → 14.1）</td>
+</tr>
+<tr>
+<td>9.6 以前</td>
+<td><strong>1つ目と2つ目の数字</strong>（9.5 → 9.6）</td>
+<td><strong>3つ目の数字</strong>（9.6.1 → 9.6.2）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ 「14.5」は<strong>メジャー14のマイナー5</strong>。「9.6.5」は<strong>メジャー9.6のマイナー5</strong></li>
+</ul>
+<h4 id="01-一般知識-12">リリースとサポート</h4>
+<ul>
+<li>メジャーバージョン: <strong>年1回</strong>（例年 <strong>9〜10月</strong>）リリース。新機能が入る</li>
+<li>マイナーバージョン: <strong>少なくとも3か月に1回</strong>リリース。<strong>バグ修正・セキュリティ修正のみ</strong>（新機能は入らない）。重大な脆弱性はスケジュール外でも出る</li>
+<li>サポート期間: 各メジャーバージョンは初回リリースから <strong>5年間</strong>。期限後に最終マイナーリリースを出して <strong>EOL</strong>（サポート終了）</li>
+<li>コミュニティは<strong>最新のマイナーバージョンを使う</strong>ことを推奨している</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>バージョン</th>
+<th>初回リリース</th>
+<th>サポート終了</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>12</td>
+<td>2019-10</td>
+<td>2024-11（終了済み）</td>
+</tr>
+<tr>
+<td>13</td>
+<td>2020-09</td>
+<td>2025-11（終了済み）</td>
+</tr>
+<tr>
+<td>14</td>
+<td>2021-09</td>
+<td>2026-11</td>
+</tr>
+<tr>
+<td>15</td>
+<td>2022-10</td>
+<td>2027-11</td>
+</tr>
+<tr>
+<td>16</td>
+<td>2023-09</td>
+<td>2028-11</td>
+</tr>
+<tr>
+<td>17</td>
+<td>2024-09</td>
+<td>2029-11</td>
+</tr>
+<tr>
+<td>18</td>
+<td>2025-09</td>
+<td>2030-11</td>
+</tr>
+</tbody>
+</table>
+<h4 id="01-一般知識-13">アップグレード方法</h4>
+<ul>
+<li><strong>マイナーアップグレード</strong>: サーバを停止 → プログラム（バイナリ）を入れ替え → 再起動。<strong>データベースクラスタはそのまま使える</strong>（ダンプ・リストア<strong>不要</strong>）</li>
+<li><strong>メジャーアップグレード</strong>: データディレクトリの形式に互換性がないため、次のどちらかが必要<ul>
+<li><strong><code>pg_dump</code> / <code>pg_dumpall</code> でダンプ → 新バージョンでリストア</strong></li>
+<li><strong><code>pg_upgrade</code></strong> で変換</li>
+</ul>
+</li>
+<li class="caution">⚠ メジャーバージョンは途中を飛ばして（例: 12 → 16）アップグレードしてよい</li>
+</ul>
+<h3 id="01-一般知識-14">4. PostgreSQL の主な機能・特徴 <span class="stars" data-n="2">★★</span></h3>
+<ul>
+<li><strong>ACID</strong> 特性を満たすトランザクション</li>
+<li><strong>MVCC</strong>（多版型同時実行制御）: 更新時に行の新しい版を作り、古い版を残す → <strong>読み取りと書き込みが互いをブロックしない</strong>。不要になった古い行は <strong>VACUUM</strong> で回収する</li>
+<li><strong>WAL</strong>（先行書き込みログ）: 変更をデータファイルより先にログへ書く → クラッシュ時の復旧、<strong>PITR</strong>（ポイントインタイムリカバリ）、レプリケーションの基盤</li>
+<li><strong>SQL 標準</strong>への高い準拠</li>
+<li><strong>拡張性</strong>: ユーザー定義のデータ型・関数・演算子・インデックス方式を追加できる。<code>CREATE EXTENSION</code> で拡張機能を導入</li>
+<li><strong>手続き言語</strong>: <strong>PL/pgSQL</strong>（標準）、PL/Perl、PL/Python、PL/Tcl</li>
+<li>豊富なデータ型: <strong>JSON / JSONB</strong>、配列、範囲型、幾何データ型、ネットワークアドレス型 など</li>
+<li>インデックス方式: <strong>B-tree</strong>（デフォルト）、Hash、GiST、SP-GiST、GIN、BRIN</li>
+<li>レプリケーション: <strong>ストリーミングレプリケーション</strong>（物理）、<strong>論理レプリケーション</strong>（<code>CREATE PUBLICATION</code> / <code>CREATE SUBSCRIPTION</code>）</li>
+<li><strong>宣言的パーティショニング</strong>（<code>PARTITION BY</code> / <code>PARTITION OF</code>）、パラレルクエリ</li>
+<li><strong>マルチプロセス</strong>構成: 接続ごとにサーバプロセス（バックエンド）が1つ起動する（スレッドではない）</li>
+<li>対応 OS: Linux・Windows・macOS・各種 UNIX</li>
+</ul>
+<h4 id="01-一般知識-15">主な上限値（PostgreSQL 14）</h4>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>上限</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>データベースのサイズ</td>
+<td><strong>無制限</strong></td>
+</tr>
+<tr>
+<td>テーブル（リレーション）のサイズ</td>
+<td><strong>32TB</strong>（ブロックサイズ 8KB の場合）</td>
+</tr>
+<tr>
+<td>1テーブルの列数</td>
+<td><strong>1,600</strong></td>
+</tr>
+<tr>
+<td>1フィールドのサイズ</td>
+<td><strong>1GB</strong></td>
+</tr>
+<tr>
+<td>1テーブルのインデックス数</td>
+<td>無制限</td>
+</tr>
+<tr>
+<td>識別子（テーブル名・列名など）の長さ</td>
+<td><strong>63バイト</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ 63バイトを超える識別子はエラーにならず、<strong>切り詰められる</strong>（NOTICE が出る）</li>
+</ul>
+<h3 id="01-一般知識-16">5. リレーショナルデータモデルの基本 <span class="stars" data-n="2">★★</span></h3>
+<ul>
+<li>1970年に <strong>E.F. Codd</strong> が提唱。データを<strong>表（リレーション）</strong>で表し、集合演算で操作する</li>
+</ul>
+<h4 id="01-一般知識-17">用語の対応</h4>
+<table>
+<thead>
+<tr>
+<th>リレーショナルモデル</th>
+<th>SQL / 一般的な呼び方</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>リレーション</strong></td>
+<td>テーブル（表）</td>
+</tr>
+<tr>
+<td><strong>タプル</strong></td>
+<td>行（レコード）</td>
+</tr>
+<tr>
+<td><strong>属性</strong></td>
+<td>列（カラム）</td>
+</tr>
+<tr>
+<td><strong>定義域（ドメイン）</strong></td>
+<td>列が取りうる値の集合（データ型＋制約）</td>
+</tr>
+<tr>
+<td><strong>次数</strong></td>
+<td>列の数</td>
+</tr>
+<tr>
+<td><strong>濃度（カーディナリティ）</strong></td>
+<td>行の数</td>
+</tr>
+</tbody>
+</table>
+<h4 id="01-一般知識-18">キー</h4>
+<ul>
+<li><strong>スーパーキー</strong>: 行を一意に識別できる属性の組（余分な属性を含んでもよい）</li>
+<li><strong>候補キー</strong>: 行を一意に識別できる<strong>最小</strong>の属性の組</li>
+<li><strong>主キー（PRIMARY KEY）</strong>: 候補キーから1つ選んだもの。<strong>一意（UNIQUE）かつ NOT NULL</strong>。1テーブルに<strong>1つだけ</strong></li>
+<li><strong>代替キー</strong>: 主キーに選ばれなかった候補キー</li>
+<li><strong>複合キー</strong>: 複数の列からなるキー</li>
+<li><strong>外部キー（FOREIGN KEY）</strong>: 他のテーブルの主キー（または UNIQUE 列）を参照する列。<strong>参照整合性</strong>（存在しない値を参照させない）を保証する</li>
+<li class="caution">⚠ 外部キーの列には NULL を入れてよい（参照先が無い状態を表す）</li>
+</ul>
+<h4 id="01-一般知識-19">NULL</h4>
+<ul>
+<li>「値が不明」「値が存在しない」ことを表す特別なマーカー。<strong>0 や空文字（&rsquo;&lsquo;）とは別物</strong></li>
+<li>NULL との比較（<code>= NULL</code>、<code>&lt;&gt; NULL</code>）の結果は真でも偽でもない <strong>UNKNOWN</strong>（NULL）→ 判定には <strong><code>IS NULL</code> / <code>IS NOT NULL</code></strong> を使う</li>
+</ul>
+<h4 id="01-一般知識-20">関係演算</h4>
+<table>
+<thead>
+<tr>
+<th>演算</th>
+<th>内容</th>
+<th>SQL での表現</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>選択（制限）</strong></td>
+<td>条件に合う<strong>行</strong>を取り出す</td>
+<td><code>WHERE</code></td>
+</tr>
+<tr>
+<td><strong>射影</strong></td>
+<td>特定の<strong>列</strong>を取り出す</td>
+<td><code>SELECT 列名</code></td>
+</tr>
+<tr>
+<td><strong>結合</strong></td>
+<td>共通の列で2つの表をつなぐ</td>
+<td><code>JOIN</code></td>
+</tr>
+<tr>
+<td>和</td>
+<td>両方の行を合わせる</td>
+<td><code>UNION</code></td>
+</tr>
+<tr>
+<td>差</td>
+<td>一方にだけある行</td>
+<td><code>EXCEPT</code></td>
+</tr>
+<tr>
+<td>積（共通）</td>
+<td>両方にある行</td>
+<td><code>INTERSECT</code></td>
+</tr>
+<tr>
+<td>直積</td>
+<td>すべての行の組み合わせ</td>
+<td><code>CROSS JOIN</code></td>
+</tr>
+<tr>
+<td>商</td>
+<td>割り算に相当する演算</td>
+<td>直接の構文なし</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ 「選択 = 行」「射影 = 列」を逆にした選択肢が定番の引っ掛け</li>
+</ul>
+<h3 id="01-一般知識-21">6. データベース管理システム（DBMS）の役割 <span class="stars" data-n="1">★</span></h3>
+<ul>
+<li><strong>データ定義</strong>: 表・制約などの構造を定義する</li>
+<li><strong>データ操作</strong>: 検索・追加・更新・削除</li>
+<li><strong>整合性の維持</strong>: 制約（主キー・外部キー・CHECK など）で不正なデータを防ぐ</li>
+<li><strong>同時実行制御</strong>: 複数ユーザーが同時に使っても矛盾しない（ロック・MVCC）</li>
+<li><strong>障害回復</strong>: ログ（WAL）を使ってクラッシュ前の確定済みの状態へ戻す</li>
+<li><strong>セキュリティ</strong>: ユーザー認証とアクセス権限の管理</li>
+<li><strong>データ独立性</strong>: 物理的な格納方法を変えてもアプリケーションに影響しない（3層スキーマ: 外部スキーマ / 概念スキーマ / 内部スキーマ）</li>
+</ul>
+<h4 id="01-一般知識-22">ACID 特性</h4>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong>tomicity（原子性）</td>
+<td>トランザクションは<strong>全部実行されるか、全く実行されないか</strong>のどちらか</td>
+</tr>
+<tr>
+<td><strong>C</strong>onsistency（一貫性）</td>
+<td>トランザクションの前後でデータが制約を満たした正しい状態に保たれる</td>
+</tr>
+<tr>
+<td><strong>I</strong>solation（独立性・分離性）</td>
+<td>同時に実行されるトランザクションが互いに影響しない</td>
+</tr>
+<tr>
+<td><strong>D</strong>urability（永続性）</td>
+<td><strong>コミットした結果は障害が起きても失われない</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="01-一般知識-23">7. SQL の一般知識と分類 <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="01-一般知識-24">SQL の特徴</h4>
+<ul>
+<li>リレーショナルデータベースを操作する<strong>標準言語</strong>（ISO / JIS で規格化）</li>
+<li><strong>宣言型</strong>の言語: 「どうやって取り出すか」ではなく「何が欲しいか」を書く</li>
+<li>キーワード（<code>SELECT</code> など）は<strong>大文字・小文字を区別しない</strong></li>
+<li>引用符で囲まない識別子（テーブル名・列名）は、PostgreSQL では<strong>小文字に変換</strong>される。大文字を区別したいときは<strong>二重引用符</strong>（<code>"MyTable"</code>）で囲む</li>
+<li>文字列リテラルは<strong>単一引用符</strong>（<code>'abc'</code>）で囲む</li>
+<li>コメントは <code>--</code>（行末まで）と <code>/* */</code>（範囲）</li>
+<li>文の終わりは <code>;</code></li>
+</ul>
+<h4 id="01-一般知識-25">SQL の分類</h4>
+<table>
+<thead>
+<tr>
+<th>分類</th>
+<th>正式名</th>
+<th>主なコマンド</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DDL</strong></td>
+<td>Data Definition Language（データ定義言語）</td>
+<td><code>CREATE</code>、<code>ALTER</code>、<code>DROP</code>（<code>TRUNCATE</code> も DDL に分類されることが多い）</td>
+</tr>
+<tr>
+<td><strong>DML</strong></td>
+<td>Data Manipulation Language（データ操作言語）</td>
+<td><code>SELECT</code>、<code>INSERT</code>、<code>UPDATE</code>、<code>DELETE</code></td>
+</tr>
+<tr>
+<td><strong>DCL</strong></td>
+<td>Data Control Language（データ制御言語）</td>
+<td><code>GRANT</code>、<code>REVOKE</code>。トランザクション制御（<code>BEGIN</code>、<code>COMMIT</code>、<code>ROLLBACK</code>）も DCL に含めることが多い</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <code>GRANT</code> / <code>REVOKE</code> は <strong>DCL</strong>（DDL ではない）</li>
+<li class="caution">⚠ <code>SELECT</code> は <strong>DML</strong>（「データを変更しないから DML ではない」は誤り）</li>
+</ul>
+<h3 id="01-一般知識-26">8. データベース設計と正規化 <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="01-一般知識-27">設計の流れ</h4>
+<ol>
+<li><strong>概念設計</strong>: 業務の対象を <strong>E-R 図</strong>で表す（DBMS に依存しない）</li>
+<li><strong>論理設計</strong>: テーブル・列・キーを決め、<strong>正規化</strong>する</li>
+<li><strong>物理設計</strong>: インデックス・格納場所など、特定の DBMS に合わせて決める</li>
+</ol>
+<h4 id="01-一般知識-28">E-R 図</h4>
+<ul>
+<li><strong>エンティティ</strong>（実体: 顧客・商品など）、<strong>属性</strong>、<strong>リレーションシップ</strong>（関連）で表す</li>
+<li>関連の多重度: <strong>1対1</strong>、<strong>1対多</strong>、<strong>多対多</strong></li>
+<li class="caution">⚠ <strong>多対多</strong>の関連はそのままテーブルにできない → <strong>連関エンティティ（中間テーブル）</strong>を作って1対多の2つに分解する</li>
+</ul>
+<h4 id="01-一般知識-29">関数従属</h4>
+<ul>
+<li><strong>関数従属</strong>: 列 A の値が決まると列 B の値が1つに決まる（A → B）</li>
+<li><strong>部分関数従属</strong>: 複合キーの<strong>一部</strong>だけで、非キー列が決まる</li>
+<li><strong>推移関数従属</strong>: キー → 非キー列 X → 非キー列 Y のように、<strong>非キー列を経由して</strong>決まる</li>
+</ul>
+<h4 id="01-一般知識-30">正規形</h4>
+<table>
+<thead>
+<tr>
+<th>正規形</th>
+<th>条件</th>
+<th>やること</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>第1正規形</strong></td>
+<td>すべての列が<strong>単一の値（原子値）</strong>を持つ。<strong>繰り返し項目がない</strong></td>
+<td>繰り返し項目を別の行・別の表に分ける</td>
+</tr>
+<tr>
+<td><strong>第2正規形</strong></td>
+<td>第1正規形 ＋ <strong>部分関数従属がない</strong></td>
+<td>複合キーの一部で決まる列を別表に分ける</td>
+</tr>
+<tr>
+<td><strong>第3正規形</strong></td>
+<td>第2正規形 ＋ <strong>推移関数従属がない</strong></td>
+<td>非キー列で決まる列を別表に分ける</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ 主キーが<strong>単一の列</strong>なら、第1正規形の時点で部分関数従属は起こらない（自動的に第2正規形）</li>
+</ul>
+<h4 id="01-一般知識-31">例: 受注表の正規化</h4>
+<p>非正規形: <code>受注(受注番号, 受注日, 顧客番号, 顧客名, {商品番号, 商品名, 数量})</code> ※ <code>{ }</code> は繰り返し</p>
+<ul>
+<li>第1正規形: 繰り返しをなくす → <code>受注明細(受注番号, 商品番号, 受注日, 顧客番号, 顧客名, 商品名, 数量)</code>（主キー: 受注番号＋商品番号）</li>
+<li>第2正規形: 部分関数従属をなくす<ul>
+<li><code>受注(受注番号, 受注日, 顧客番号, 顧客名)</code> ← 受注番号だけで決まる</li>
+<li><code>商品(商品番号, 商品名)</code> ← 商品番号だけで決まる</li>
+<li><code>受注明細(受注番号, 商品番号, 数量)</code></li>
+</ul>
+</li>
+<li>第3正規形: 推移関数従属（受注番号 → 顧客番号 → 顧客名）をなくす<ul>
+<li><code>受注(受注番号, 受注日, 顧客番号)</code></li>
+<li><code>顧客(顧客番号, 顧客名)</code></li>
+</ul>
+</li>
+</ul>
+<h4 id="01-一般知識-32">正規化の目的</h4>
+<ul>
+<li>データの<strong>重複（冗長性）をなくす</strong></li>
+<li><strong>更新時異常</strong>を防ぐ: 挿入時異常（商品を登録したいのに受注が無いと登録できない）、更新時異常（顧客名を一部の行だけ直して矛盾する）、削除時異常（最後の受注を消すと顧客情報まで消える）</li>
+<li class="caution">⚠ 正規化を進めると結合（JOIN）が増えて検索が遅くなることがある。性能のために意図的に正規化を崩すことを<strong>非正規化</strong>という</li>
+</ul>
+</article>
+</section>
+
+</main>
+
+<aside class="right-sidebar">
+  <div class="right-sidebar-title">学習メモ</div>
+  <div class="right-sidebar-chapter" id="note-chapter-name">—</div>
+  <textarea class="right-sidebar-textarea" id="note-textarea" placeholder="この章のメモを入力..."></textarea>
+  <div class="right-sidebar-status" id="note-status"></div>
+</aside>
+
+<button class="back-top" onclick="scrollTo({top:0,behavior:'smooth'})" title="トップへ戻る">↑</button>
+
+<script>window.TEXTBOOK_CONFIG = {storagePrefix: "ossdb", ttsChapters: [0, 98]};</script>
+<script src="script.js"></script>
+
+</body>
+</html>

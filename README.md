@@ -1,6 +1,6 @@
 # 資格試験学習資料
 
-宅建士・不動産鑑定士・行政書士の学習資料を統合管理し、NotebookLM に投入するためのプロジェクト。
+宅建士・不動産鑑定士・行政書士の学習資料を統合管理し、NotebookLM に投入するためのプロジェクト。OSS-DB Silver の Web テキストも同居する。
 
 ## 構成
 
@@ -8,7 +8,8 @@
 materials/
   ├── takken/          # 宅建士（23ファイル: 教材00-18 + 論点別演習問題19-22）
   ├── kanteishi/       # 不動産鑑定士（試験概要 + 短答式/ + 論文式/）
-  └── gyoseishoshi/    # 行政書士（14ファイル）
+  ├── gyoseishoshi/    # 行政書士（14ファイル）
+  └── ossdb/           # OSS-DB Silver（00-08。学習計画に合わせて順次追加）
 data/
   ├── laws/            # e-Gov API から取得した法令原文（37法令・重複排除済み）
   └── standards/       # 不動産鑑定評価基準等（非法令資料）
@@ -21,10 +22,12 @@ docs/
   ├── script.js        # JS（ビルド時に自動コピー）
   ├── quiz.json        # 4択演習問題データ（ビルド時に自動生成）
   ├── marubatsu.json   # 一問一答データ（docs/ 直接管理・唯一の正）
-  └── fillin.json      # 穴埋め問題データ（ビルド時に自動生成）
+  ├── fillin.json      # 穴埋め問題データ（ビルド時に自動生成）
+  └── ossdb/           # OSS-DB テキスト（index.html / style.css / script.js。build_ossdb_textbook.py で生成）
 scripts/
   ├── fetch_egov.py           # e-Gov 法令取得スクリプト（3試験統合版）
   ├── build_takken_textbook.py  # 宅建教材 → HTML テキストブック + quiz.json 変換
+  ├── build_ossdb_textbook.py   # OSS-DB 教材 → HTML テキストブック（本文のみ。変換関数は宅建版を共用）
   ├── sync_marubatsu.py         # docs/marubatsu.json → ルートの複製へ同期（検証付き）
   ├── apply_mb_importance.py    # docs/marubatsu.json の importance 未設定問題へ section 既定値（A/B/C）を付与
   └── audit_quiz.py             # quiz.json の「正解が1つに定まらない問題」「解説の逃げ口上」を検出（要修正時 exit 1）
@@ -186,6 +189,30 @@ git add docs/ && git commit -m "update textbook" && git push
 - **見出し内の `★`**（頻出度）: `<span class="stars">` で包みバッジ表示（`--star`）
 - **行頭が `⚠` の箇条書き・段落**: `class="caution"` を付け囲み表示（`--warn-bg` / `--warn-border`）。文中の `⚠` は対象外
 - 見出しの強弱: h2（章・青字）> h3（節・薄青帯）> h4（項・左マーカー）> h5（小見出し・淡色）
+
+## OSS-DB Silver テキスト
+
+**URL**: https://1minami.github.io/study-materials/ossdb/
+
+- OSS-DB Silver Ver.3.0（PostgreSQL 14 基準）の要点整理テキスト。**本文のみ**（4択・一問一答・穴埋めは無し。演習は ping-t で行う）
+- 検索・学習メモ・読み上げ・ダークモードは宅建版と同じ `templates/` を使う
+- 章は出題範囲（S1〜S3）に対応。学習計画（`knowledge/dev/oss-db-plan.md`）の週に先行して追加する。未作成の章はビルド時にスキップされる
+
+```bash
+python scripts/build_ossdb_textbook.py   # materials/ossdb/ → docs/ossdb/
+```
+
+### 試験ごとの設定（`window.TEXTBOOK_CONFIG`）
+
+`templates/script.js` は、ページが `script.js` より前に定義した `window.TEXTBOOK_CONFIG` を読む。未定義なら宅建の値になる。
+
+| キー | 既定値（宅建） | OSS-DB | 用途 |
+|---|---|---|---|
+| `storagePrefix` | `takken` | `ossdb` | localStorage のキーの接頭辞（学習メモ・一問一答の履歴・読み上げ速度）。github.io 上で同一オリジンになるため試験ごとに分ける |
+| `ttsChapters` | `[0, 18]` | `[0, 98]` | 読み上げ ▶ を出す章番号の範囲 |
+
+- 演習モーダル（4択・一問一答・穴埋め）を持たないページでも動くよう、`closeQuiz` / `closeMarubatsu` / `closeFillin` は要素が無ければ何もしない
+- 読み辞書 `TTS_READINGS` は宅建向けだが共用している（OSS-DB の本文で誤爆する語は今のところ無い）
 
 ## 使い方
 

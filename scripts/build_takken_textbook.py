@@ -213,8 +213,8 @@ def decorate_html(html: str) -> str:
     return CAUTION_RE.sub(r'<\1 class="caution">', html)
 
 
-def build_toc(sections: dict) -> str:
-    """目次HTMLを生成"""
+def build_toc(sections: dict, materials_dir: Path = MATERIALS_DIR, launchers: bool = True) -> str:
+    """目次HTMLを生成（launchers=False で演習モーダルの起動リンクを出さない）"""
     toc = '<nav id="toc" class="toc">\n<h2>目次</h2>\n'
     toc += '<div class="toc-search" id="searchbar">\n'
     toc += '  <input type="search" id="search-input" placeholder="🔍 テキスト内を検索" autocomplete="off" spellcheck="false" aria-label="テキスト内を検索">\n'
@@ -225,15 +225,16 @@ def build_toc(sections: dict) -> str:
     toc += '    <button class="toc-search-btn" id="search-close" title="クリア (Esc)" aria-label="クリア">✕</button>\n'
     toc += '  </div>\n'
     toc += '</div>\n'
-    toc += '<div class="toc-section">\n'
-    toc += '  <a href="#" class="toc-section-title quiz-launcher" onclick="openQuiz();return false;">📝 ランダム問題演習</a>\n'
-    toc += '</div>\n'
-    toc += '<div class="toc-section">\n'
-    toc += '  <a href="#" class="toc-section-title marubatsu-launcher" onclick="openMarubatsu();return false;">⭕ 一問一答</a>\n'
-    toc += '</div>\n'
-    toc += '<div class="toc-section">\n'
-    toc += '  <a href="#" class="toc-section-title fillin-launcher" onclick="openFillin();return false;">✍️ 穴埋め演習</a>\n'
-    toc += '</div>\n'
+    if launchers:
+        toc += '<div class="toc-section">\n'
+        toc += '  <a href="#" class="toc-section-title quiz-launcher" onclick="openQuiz();return false;">📝 ランダム問題演習</a>\n'
+        toc += '</div>\n'
+        toc += '<div class="toc-section">\n'
+        toc += '  <a href="#" class="toc-section-title marubatsu-launcher" onclick="openMarubatsu();return false;">⭕ 一問一答</a>\n'
+        toc += '</div>\n'
+        toc += '<div class="toc-section">\n'
+        toc += '  <a href="#" class="toc-section-title fillin-launcher" onclick="openFillin();return false;">✍️ 穴埋め演習</a>\n'
+        toc += '</div>\n'
     for sec_name, sec_data in sections.items():
         sec_id = slugify(sec_name)
         icon = sec_data["icon"]
@@ -241,7 +242,7 @@ def build_toc(sections: dict) -> str:
         toc += f'  <a href="#{sec_id}" class="toc-section-title">{icon} {sec_name}</a>\n'
         toc += f"  <ul>\n"
         for fname in sec_data["files"]:
-            fpath = MATERIALS_DIR / fname
+            fpath = materials_dir / fname
             if fpath.exists():
                 md = fpath.read_text(encoding="utf-8")
                 title = extract_title(md)
@@ -252,7 +253,7 @@ def build_toc(sections: dict) -> str:
     return toc
 
 
-def build_body(sections: dict) -> str:
+def build_body(sections: dict, materials_dir: Path = MATERIALS_DIR) -> str:
     """本文HTMLを生成"""
     body = ""
     for sec_name, sec_data in sections.items():
@@ -261,7 +262,7 @@ def build_body(sections: dict) -> str:
         body += f'<section class="part" id="{sec_id}">\n'
         body += f'<h1 class="part-title">{icon} {sec_name}</h1>\n'
         for fname in sec_data["files"]:
-            fpath = MATERIALS_DIR / fname
+            fpath = materials_dir / fname
             if not fpath.exists():
                 continue
             md = fpath.read_text(encoding="utf-8")

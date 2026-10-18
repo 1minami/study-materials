@@ -1,4 +1,9 @@
 (function() {
+  // ページ側（ビルドスクリプトの HTML テンプレート）が試験ごとの設定を渡す。未指定は宅建の値
+  const CONFIG = window.TEXTBOOK_CONFIG || {};
+  const STORAGE_PREFIX = CONFIG.storagePrefix || 'takken';
+  const TTS_CHAPTERS = CONFIG.ttsChapters || [0, 18];
+
   const sidebar = document.querySelector('.sidebar');
   const overlay = document.querySelector('.sidebar-overlay');
   const main = document.querySelector('.main');
@@ -91,7 +96,7 @@
     currentNoteId = chapterId;
     if (noteChapterName) noteChapterName.textContent = chapterTitle || '—';
     if (noteTextarea) {
-      noteTextarea.value = localStorage.getItem('takken-note-' + chapterId) || '';
+      noteTextarea.value = localStorage.getItem(STORAGE_PREFIX + '-note-' + chapterId) || '';
       noteTextarea.disabled = false;
     }
     if (noteStatus) noteStatus.textContent = '';
@@ -101,9 +106,9 @@
     if (!chapterId || !noteTextarea) return;
     const val = noteTextarea.value;
     if (val) {
-      localStorage.setItem('takken-note-' + chapterId, val);
+      localStorage.setItem(STORAGE_PREFIX + '-note-' + chapterId, val);
     } else {
-      localStorage.removeItem('takken-note-' + chapterId);
+      localStorage.removeItem(STORAGE_PREFIX + '-note-' + chapterId);
     }
   }
 
@@ -211,7 +216,7 @@
     return MB_SECTION_TO_CHAPTER[section] || null;
   }
 
-  function quizNoteKey(chapterId) { return 'takken-note-' + chapterId; }
+  function quizNoteKey(chapterId) { return STORAGE_PREFIX + '-note-' + chapterId; }
 
   function quizNoteMarker(q) { return '[' + (q.id || '') + ']'; }
 
@@ -519,6 +524,7 @@
   };
 
   window.closeQuiz = function() {
+    if (!quizOverlay) return;
     quizOverlay.classList.remove('visible');
     document.body.style.overflow = '';
     if (quizTextbookIframe) {
@@ -558,8 +564,8 @@
 
   // --- 重み付き出題（重要度 × 誤答履歴）---
   // 履歴は { id: { s: 連続正解数, n: 回答数 } }。誤答で s = 0 に戻す
-  const MB_STATS_KEY = 'takken-mb-stats';
-  const MB_WEIGHTED_KEY = 'takken-mb-weighted';
+  const MB_STATS_KEY = STORAGE_PREFIX + '-mb-stats';
+  const MB_WEIGHTED_KEY = STORAGE_PREFIX + '-mb-weighted';
   const MB_IMPORTANCE_WEIGHT = { A: 3, B: 2, C: 1 };
   const MB_IMPORTANCE_DEFAULT = 'B';
 
@@ -1283,6 +1289,7 @@
   };
 
   window.closeFillin = function() {
+    if (!fillinOverlay) return;
     fillinOverlay.classList.remove('visible');
     document.body.style.overflow = '';
   };
@@ -1291,7 +1298,7 @@
   const ttsSynth = window.speechSynthesis;
   if (ttsSynth && typeof SpeechSynthesisUtterance === 'function') {
     const TTS_RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
-    const TTS_RATE_KEY = 'takken-tts-rate';
+    const TTS_RATE_KEY = STORAGE_PREFIX + '-tts-rate';
     const TTS_CHUNK_MAX = 70;         // 1発話の上限文字数（Chrome は長い発話が約15秒で黙るため文単位に刻む）
     let ttsQueue = [];                // { el, chunks, head }（head = h2/h3 = 節の先頭）
     let ttsPos = 0;
@@ -1310,7 +1317,7 @@
 
     const isTtsChapter = (ch) => {
       const n = parseInt(ch.id, 10);
-      return n >= 0 && n <= 18;       // 19-22 は演習問題、99 は用語索引
+      return n >= TTS_CHAPTERS[0] && n <= TTS_CHAPTERS[1];   // 宅建は 0-18（19-22 は演習問題、99 は用語索引）
     };
 
     function ttsClean(text) {
