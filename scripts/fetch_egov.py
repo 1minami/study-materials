@@ -82,6 +82,13 @@ LAWS = [
         "category": "宅建業法",
         "exams": ["takken", "kanteishi"],
     },
+    {
+        "name": "宅地建物取引業法施行規則",
+        "law_num": "昭和三十二年建設省令第十二号",
+        "filename": "38-宅地建物取引業法施行規則.md",
+        "category": "宅建業法",
+        "exams": ["takken"],
+    },
     # --- 都市計画・建築 ---
     {
         "name": "都市計画法",
