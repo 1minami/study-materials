@@ -41,6 +41,14 @@
     <li><a href="#01-一般知識">一般知識</a></li>
   </ul>
 </div>
+<div class="toc-section">
+  <a href="#開発SQL" class="toc-section-title">🧮 開発/SQL</a>
+  <ul>
+    <li><a href="#02-SQL①定義・更新">SQL① 定義・更新</a></li>
+    <li><a href="#03-SQL②検索・オブジェクト">SQL② 検索・オブジェクト</a></li>
+    <li><a href="#04-関数・トランザクション">関数・トランザクション</a></li>
+  </ul>
+</div>
 </nav>
 
 </aside>
@@ -682,6 +690,1718 @@
 <li>データの<strong>重複（冗長性）をなくす</strong></li>
 <li><strong>更新時異常</strong>を防ぐ: 挿入時異常（商品を登録したいのに受注が無いと登録できない）、更新時異常（顧客名を一部の行だけ直して矛盾する）、削除時異常（最後の受注を消すと顧客情報まで消える）</li>
 <li class="caution">⚠ 正規化を進めると結合（JOIN）が増えて検索が遅くなることがある。性能のために意図的に正規化を崩すことを<strong>非正規化</strong>という</li>
+</ul>
+</article>
+</section>
+<section class="part" id="開発SQL">
+<h1 class="part-title">🧮 開発/SQL</h1>
+<article class="chapter" id="02-SQL①定義・更新">
+<h2 id="02-SQL①定義・更新-1">SQL① 定義・更新</h2>
+<blockquote>
+<p>S3.1 SQL コマンド（重要度13）の前半。データ型・テーブル定義（DDL）・制約・データの追加/更新/削除（DML）。「どの操作がエラーになるか」「NULL はどう扱われるか」が定番。</p>
+</blockquote>
+<h3 id="02-SQL①定義・更新-2">1. データ型 <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="02-SQL①定義・更新-3">数値型</h4>
+<table>
+<thead>
+<tr>
+<th>型</th>
+<th>サイズ</th>
+<th>範囲・特徴</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>smallint</strong>（int2）</td>
+<td>2バイト</td>
+<td>-32768 〜 32767</td>
+</tr>
+<tr>
+<td><strong>integer</strong>（int / int4）</td>
+<td>4バイト</td>
+<td>約 ±21億。整数の標準</td>
+</tr>
+<tr>
+<td><strong>bigint</strong>（int8）</td>
+<td>8バイト</td>
+<td>約 ±922京</td>
+</tr>
+<tr>
+<td><strong>numeric(p, s)</strong>（decimal）</td>
+<td>可変</td>
+<td><strong>精度 p（全体の桁数）・位取り s（小数点以下の桁数）</strong>を指定する<strong>正確な</strong>数値。金額向き</td>
+</tr>
+<tr>
+<td><strong>real</strong>（float4）</td>
+<td>4バイト</td>
+<td>単精度浮動小数点（有効桁 約6桁）。<strong>誤差がある</strong></td>
+</tr>
+<tr>
+<td><strong>double precision</strong>（float8）</td>
+<td>8バイト</td>
+<td>倍精度浮動小数点（有効桁 約15桁）。<strong>誤差がある</strong></td>
+</tr>
+<tr>
+<td><strong>smallserial / serial / bigserial</strong></td>
+<td>2 / 4 / 8バイト</td>
+<td>自動採番（実体は整数型＋シーケンス。→ 03章）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>numeric(5, 2)</code> は<strong>全体5桁・小数2桁</strong> → 最大 999.99<ul>
+<li>小数部が s を超える値（123.456）は<strong>丸められて</strong>入る（123.46）</li>
+<li>整数部が収まらない値（1234.5）は <strong>エラー</strong>（numeric field overflow）</li>
+</ul>
+</li>
+<li><code>numeric</code> を精度なしで書くと、上限内で任意の桁数を持てる</li>
+<li>integer 列に 1.5 を入れると<strong>四捨五入</strong>されて 2 になる（エラーではない）</li>
+</ul>
+<h4 id="02-SQL①定義・更新-4">文字列型</h4>
+<table>
+<thead>
+<tr>
+<th>型</th>
+<th>特徴</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>char(n)</strong>（character）</td>
+<td><strong>固定長</strong>。n 文字に満たない分は<strong>空白で埋める</strong>。<code>char</code> だけなら <code>char(1)</code></td>
+</tr>
+<tr>
+<td><strong>varchar(n)</strong>（character varying）</td>
+<td><strong>可変長</strong>。最大 n 文字。<code>varchar</code> だけなら長さ無制限</td>
+</tr>
+<tr>
+<td><strong>text</strong></td>
+<td>可変長・<strong>長さ無制限</strong>。PostgreSQL ではよく使う</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>n は<strong>バイト数ではなく文字数</strong></li>
+<li class="caution">⚠ n を超える文字列を入れると <strong>エラー</strong>（value too long）。ただし超えた部分が<strong>すべて空白なら切り詰めて</strong>入る</li>
+<li class="caution">⚠ <code>CAST('abcdef' AS varchar(3))</code> のように<strong>明示的にキャスト</strong>すると、エラーにならず<strong>切り詰め</strong>られる（&rsquo;abc&rsquo;）</li>
+<li>性能は char・varchar・text でほぼ同じ（char が速いわけではない）</li>
+</ul>
+<h4 id="02-SQL①定義・更新-5">日付・時刻型</h4>
+<table>
+<thead>
+<tr>
+<th>型</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>date</strong></td>
+<td>日付のみ</td>
+</tr>
+<tr>
+<td><strong>time</strong></td>
+<td>時刻のみ（タイムゾーンなし）</td>
+</tr>
+<tr>
+<td><strong>timestamp</strong></td>
+<td>日付＋時刻（<strong>タイムゾーンなし</strong>）</td>
+</tr>
+<tr>
+<td><strong>timestamptz</strong>（timestamp with time zone）</td>
+<td>日付＋時刻（<strong>タイムゾーンあり</strong>）。内部では UTC で保存し、表示時に <code>timezone</code> 設定に合わせて変換する</td>
+</tr>
+<tr>
+<td><strong>interval</strong></td>
+<td>時間の<strong>間隔</strong>（&lsquo;1 day&rsquo;、&lsquo;3 hours&rsquo; など）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <code>timestamp</code> だけなら <strong>without time zone</strong>（タイムゾーンなし）</li>
+<li>入力例: <code>'2026-10-19'</code>、<code>'2026-10-19 09:30:00'</code>。特別な値 <code>'now'</code>、<code>'today'</code>、<code>'tomorrow'</code>、<code>'infinity'</code> も使える</li>
+</ul>
+<h4 id="02-SQL①定義・更新-6">その他の型</h4>
+<table>
+<thead>
+<tr>
+<th>型</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>boolean</strong></td>
+<td><code>true</code> / <code>false</code> / NULL の3値。入力は <code>'t'</code>・<code>'yes'</code>・<code>'on'</code>・<code>'1'</code> なども真と解釈される</td>
+</tr>
+<tr>
+<td><strong>bytea</strong></td>
+<td>バイナリデータ</td>
+</tr>
+<tr>
+<td><strong>json / jsonb</strong></td>
+<td>JSON。json はテキストのまま保存、<strong>jsonb は分解したバイナリ形式</strong>で保存（検索が速く、インデックスを作れる）</td>
+</tr>
+<tr>
+<td>配列</td>
+<td><code>integer[]</code>、<code>text[]</code> のように型の後ろに <code>[]</code>。添字は <strong>1 始まり</strong></td>
+</tr>
+<tr>
+<td>uuid、inet / cidr、money など</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="02-SQL①定義・更新-7">2. テーブルの作成（CREATE TABLE）<span class="stars" data-n="3">★★★</span></h3>
+<pre><code class="language-sql">CREATE TABLE products (
+    id      integer PRIMARY KEY,
+    name    varchar(50) NOT NULL,
+    price   integer DEFAULT 0 CHECK (price &gt;= 0),
+    cat_id  integer REFERENCES categories (id)
+);
+</code></pre>
+<ul>
+<li>列ごとに「列名 データ型 [列制約]」をカンマ区切りで並べる</li>
+<li><code>CREATE TABLE IF NOT EXISTS t ...</code>: 既に存在してもエラーにせず<strong>何もしない</strong>（NOTICE を出す）</li>
+<li>識別子は引用符なしなら<strong>小文字</strong>に変換される（<code>CREATE TABLE Products</code> → <code>products</code>）</li>
+</ul>
+<h4 id="02-SQL①定義・更新-8">既存のデータ・定義から作る</h4>
+<table>
+<thead>
+<tr>
+<th>書き方</th>
+<th>作られるもの</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CREATE TABLE t2 AS SELECT * FROM t1;</code></td>
+<td>検索結果の<strong>列とデータ</strong>をコピー</td>
+</tr>
+<tr>
+<td><code>SELECT * INTO t2 FROM t1;</code></td>
+<td>上と同じ（PostgreSQL 独自の書き方）</td>
+</tr>
+<tr>
+<td><code>CREATE TABLE t2 AS SELECT * FROM t1 WITH NO DATA;</code></td>
+<td>列定義だけ（データなし）</td>
+</tr>
+<tr>
+<td><code>CREATE TABLE t2 (LIKE t1);</code></td>
+<td>列定義と <strong>NOT NULL 制約</strong>だけ。<code>INCLUDING ALL</code> でデフォルト・CHECK 制約・インデックスなども複製</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <code>CREATE TABLE AS</code> / <code>SELECT INTO</code> では、<strong>制約（NOT NULL・主キーも含む）・デフォルト値・インデックスは一切コピーされない</strong></li>
+</ul>
+<h4 id="02-SQL①定義・更新-9">一時テーブル</h4>
+<ul>
+<li><code>CREATE TEMPORARY TABLE t (...)</code>（<code>TEMP</code> でも可）</li>
+<li>作成した<strong>セッションの中だけ</strong>で見え、<strong>セッション終了時に自動で削除</strong>される</li>
+<li><code>ON COMMIT DROP</code>（コミット時に削除）、<code>ON COMMIT DELETE ROWS</code>（コミット時に全行削除）も指定できる</li>
+</ul>
+<h3 id="02-SQL①定義・更新-10">3. 制約 <span class="stars" data-n="3">★★★</span></h3>
+<table>
+<thead>
+<tr>
+<th>制約</th>
+<th>内容</th>
+<th>NULL の扱い</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NOT NULL</strong></td>
+<td>NULL を禁止</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>UNIQUE</strong></td>
+<td>値の重複を禁止</td>
+<td>⚠ <strong>NULL は何個でも入る</strong>（NULL 同士は等しくないと扱う）</td>
+</tr>
+<tr>
+<td><strong>PRIMARY KEY</strong></td>
+<td><strong>UNIQUE ＋ NOT NULL</strong>。1テーブルに<strong>1つだけ</strong></td>
+<td>入らない</td>
+</tr>
+<tr>
+<td><strong>CHECK (条件)</strong></td>
+<td>条件を満たさない値を禁止</td>
+<td>⚠ 条件が <strong>NULL（UNKNOWN）なら通る</strong>（偽のときだけ拒否）</td>
+</tr>
+<tr>
+<td><strong>FOREIGN KEY</strong> / <strong>REFERENCES</strong></td>
+<td>参照先テーブルに存在する値だけ許可</td>
+<td>NULL は入る</td>
+</tr>
+<tr>
+<td><strong>DEFAULT 値</strong></td>
+<td>値を省略したときに入る値（厳密には制約ではない）</td>
+<td>省略時のデフォルトは NULL</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>PRIMARY KEY・UNIQUE を付けると、自動で一意インデックスが作られる</strong></li>
+<li class="caution">⚠ 外部キー（参照する側の列）には<strong>インデックスは自動で作られない</strong></li>
+<li>外部キーの参照先は<strong>主キーか UNIQUE 制約のある列</strong>でなければならない</li>
+</ul>
+<h4 id="02-SQL①定義・更新-11">列制約と表制約</h4>
+<pre><code class="language-sql">CREATE TABLE order_items (
+    order_id   integer,
+    product_id integer,
+    qty        integer NOT NULL,
+    PRIMARY KEY (order_id, product_id),                 -- 複合主キー（表制約）
+    FOREIGN KEY (product_id) REFERENCES products (id),
+    CONSTRAINT qty_positive CHECK (qty &gt; 0)             -- 制約に名前を付ける
+);
+</code></pre>
+<ul>
+<li><strong>列制約</strong>: 列定義の後ろに書く。その列だけが対象</li>
+<li><strong>表制約</strong>: 列定義と並べて書く。<strong>複数列にまたがる制約</strong>（複合主キーなど）はこちらでしか書けない</li>
+<li class="caution">⚠ <strong>NOT NULL は列制約としてしか書けない</strong></li>
+<li><code>CONSTRAINT 名前</code> で制約に名前を付けられる（省略すると自動で付く。削除するときに使う）</li>
+</ul>
+<h4 id="02-SQL①定義・更新-12">外部キーの参照動作</h4>
+<p>参照先（親）の行を削除・更新したとき、参照元（子）をどうするか。</p>
+<table>
+<thead>
+<tr>
+<th>指定</th>
+<th>動作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NO ACTION</strong>（<strong>デフォルト</strong>）</td>
+<td>参照されている行は削除・更新できない（エラー）。チェックは文の最後に行う</td>
+</tr>
+<tr>
+<td><strong>RESTRICT</strong></td>
+<td>NO ACTION と同じくエラー。チェックを即座に行う（遅延できない）</td>
+</tr>
+<tr>
+<td><strong>CASCADE</strong></td>
+<td>子の行も<strong>一緒に削除</strong>（更新なら子の値も更新）</td>
+</tr>
+<tr>
+<td><strong>SET NULL</strong></td>
+<td>子の列を <strong>NULL</strong> にする</td>
+</tr>
+<tr>
+<td><strong>SET DEFAULT</strong></td>
+<td>子の列を<strong>デフォルト値</strong>にする</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-sql">cat_id integer REFERENCES categories (id) ON DELETE CASCADE ON UPDATE CASCADE
+</code></pre>
+<h3 id="02-SQL①定義・更新-13">4. テーブル定義の変更（ALTER TABLE）<span class="stars" data-n="3">★★★</span></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>構文</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>列の追加</td>
+<td><code>ALTER TABLE t ADD COLUMN c integer;</code>（<code>COLUMN</code> は省略可）</td>
+</tr>
+<tr>
+<td>列の削除</td>
+<td><code>ALTER TABLE t DROP COLUMN c;</code></td>
+</tr>
+<tr>
+<td>列名の変更</td>
+<td><code>ALTER TABLE t RENAME COLUMN c TO c2;</code></td>
+</tr>
+<tr>
+<td>テーブル名の変更</td>
+<td><code>ALTER TABLE t RENAME TO t2;</code></td>
+</tr>
+<tr>
+<td>データ型の変更</td>
+<td><code>ALTER TABLE t ALTER COLUMN c TYPE bigint;</code>（自動変換できないときは <code>USING 式</code>）</td>
+</tr>
+<tr>
+<td>デフォルト値</td>
+<td><code>ALTER TABLE t ALTER COLUMN c SET DEFAULT 0;</code> / <code>DROP DEFAULT</code></td>
+</tr>
+<tr>
+<td>NOT NULL</td>
+<td><code>ALTER TABLE t ALTER COLUMN c SET NOT NULL;</code> / <code>DROP NOT NULL</code></td>
+</tr>
+<tr>
+<td>制約の追加</td>
+<td><code>ALTER TABLE t ADD CONSTRAINT 名前 UNIQUE (c);</code></td>
+</tr>
+<tr>
+<td>制約の削除</td>
+<td><code>ALTER TABLE t DROP CONSTRAINT 名前;</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>追加した列の既存行の値は、DEFAULT 指定があれば<strong>その値</strong>、なければ <strong>NULL</strong></li>
+<li class="caution">⚠ NULL を含む列に <code>SET NOT NULL</code> すると<strong>エラー</strong>。既存データが制約に違反する <code>ADD CONSTRAINT</code> も同様</li>
+<li class="caution">⚠ 列名変更は <code>RENAME COLUMN</code>、型変更は <code>ALTER COLUMN ... TYPE</code>。<code>MODIFY</code>（Oracle / MySQL の構文）は<strong>使えない</strong></li>
+<li>カンマで区切れば1文で複数の変更ができる（<code>ALTER TABLE t ADD COLUMN a int, ADD COLUMN b int;</code>）</li>
+</ul>
+<h3 id="02-SQL①定義・更新-14">5. テーブルの削除（DROP / TRUNCATE）<span class="stars" data-n="2">★★</span></h3>
+<h4 id="02-SQL①定義・更新-15">DROP TABLE</h4>
+<ul>
+<li><code>DROP TABLE t;</code> テーブルの<strong>定義ごと</strong>削除。複数をカンマで並べられる</li>
+<li><code>DROP TABLE IF EXISTS t;</code> 存在しなくてもエラーにしない</li>
+<li><strong>RESTRICT</strong>（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば<strong>エラー</strong></li>
+<li><strong>CASCADE</strong>: 依存するオブジェクトも削除</li>
+<li class="caution">⚠ CASCADE で消えるのは<strong>ビュー</strong>や、参照元テーブルの<strong>外部キー制約</strong>。参照元の<strong>テーブル自体は消えない</strong></li>
+</ul>
+<h4 id="02-SQL①定義・更新-16">TRUNCATE</h4>
+<ul>
+<li><code>TRUNCATE t;</code> テーブルの<strong>全行を高速に削除</strong>（定義は残る）</li>
+<li><code>DELETE</code>（WHERE なし）との違い</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>DELETE</th>
+<th>TRUNCATE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>WHERE で行を絞る</td>
+<td>できる</td>
+<td><strong>できない</strong>（常に全行）</td>
+</tr>
+<tr>
+<td>速度</td>
+<td>行ごとに処理（遅い）</td>
+<td>テーブルのファイルを作り直す（<strong>速い</strong>）</td>
+</tr>
+<tr>
+<td>領域</td>
+<td>不要行が残る → VACUUM で回収</td>
+<td><strong>即座に解放</strong></td>
+</tr>
+<tr>
+<td>ON DELETE トリガー</td>
+<td>実行される</td>
+<td><strong>実行されない</strong></td>
+</tr>
+<tr>
+<td>ロールバック</td>
+<td>できる</td>
+<td><strong>できる</strong>（PostgreSQL では TRUNCATE もトランザクション内で取り消せる）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>RESTART IDENTITY</code>: 列に紐づくシーケンスを初期値に戻す（デフォルトは <code>CONTINUE IDENTITY</code> で戻さない）</li>
+<li class="caution">⚠ 外部キーで<strong>参照されているテーブル</strong>は、<code>CASCADE</code> を付けるか参照元も同時に指定しないと TRUNCATE できない（参照元が空でもエラー）</li>
+</ul>
+<h3 id="02-SQL①定義・更新-17">6. データの追加（INSERT）<span class="stars" data-n="3">★★★</span></h3>
+<pre><code class="language-sql">INSERT INTO products (id, name, price) VALUES (1, 'りんご', 120);
+INSERT INTO products VALUES (2, 'みかん', 80, NULL);              -- 列名省略: 全列を定義順に
+INSERT INTO products (id, name) VALUES (3, 'ぶどう'), (4, 'もも');  -- 複数行を一度に
+INSERT INTO products (id, name, price) VALUES (5, 'なし', DEFAULT); -- デフォルト値を明示
+INSERT INTO products_bak SELECT * FROM products WHERE price &gt; 100;  -- 検索結果を追加
+INSERT INTO logs DEFAULT VALUES;                                     -- 全列デフォルト値
+</code></pre>
+<ul>
+<li>列リストで<strong>省略した列にはデフォルト値</strong>（なければ NULL）が入る</li>
+<li>列名を省略すると定義順に先頭から当てはめる。値の数が列数より少なければ、残りの列はデフォルト値</li>
+<li class="caution">⚠ <code>INSERT ... SELECT</code> に <strong>VALUES は付けない</strong></li>
+</ul>
+<h4 id="02-SQL①定義・更新-18">RETURNING</h4>
+<ul>
+<li>追加・更新・削除した行の値を<strong>その場で返す</strong>（INSERT / UPDATE / DELETE で使える）</li>
+<li><code>INSERT INTO products (name) VALUES ('かき') RETURNING id;</code> → 自動採番された id を取得</li>
+</ul>
+<h4 id="02-SQL①定義・更新-19">ON CONFLICT（UPSERT）</h4>
+<p>一意制約に違反したときの動作を指定する。</p>
+<pre><code class="language-sql">INSERT INTO products (id, name, price) VALUES (1, 'りんご', 150)
+ON CONFLICT (id) DO UPDATE SET price = EXCLUDED.price;   -- あれば更新、なければ追加
+
+INSERT INTO products (id, name) VALUES (1, 'りんご')
+ON CONFLICT DO NOTHING;                                   -- あれば何もしない
+</code></pre>
+<ul>
+<li><strong><code>EXCLUDED</code></strong> は「追加しようとして衝突した行」を指す</li>
+<li class="caution">⚠ <code>DO UPDATE</code> では衝突対象（<code>(id)</code> や <code>ON CONSTRAINT 制約名</code>）の指定が<strong>必須</strong>。<code>DO NOTHING</code> は省略できる</li>
+</ul>
+<h3 id="02-SQL①定義・更新-20">7. データの更新・削除（UPDATE / DELETE）<span class="stars" data-n="3">★★★</span></h3>
+<pre><code class="language-sql">UPDATE products SET price = price * 1.1, name = 'ふじ' WHERE id = 1;
+DELETE FROM products WHERE price IS NULL;
+</code></pre>
+<ul>
+<li class="caution">⚠ <strong>WHERE を省略すると全行が対象</strong>（エラーにも警告にもならない）</li>
+<li>SET の右辺はすべて<strong>更新前の値</strong>で計算される（<code>SET a = b, b = a</code> で値が入れ替わる）</li>
+<li>該当行が0件でもエラーにならない（<code>UPDATE 0</code> / <code>DELETE 0</code> と表示）</li>
+<li>制約に違反する更新・削除は<strong>文全体がエラー</strong>になり、1行も変わらない</li>
+</ul>
+<h4 id="02-SQL①定義・更新-21">他のテーブルを参照して更新・削除</h4>
+<pre><code class="language-sql">-- UPDATE は FROM
+UPDATE products p SET price = s.price
+FROM sale_prices s WHERE p.id = s.product_id;
+
+-- DELETE は USING
+DELETE FROM products p USING discontinued d WHERE p.id = d.product_id;
+
+-- サブクエリでも書ける
+DELETE FROM products WHERE id IN (SELECT product_id FROM discontinued);
+</code></pre>
+<ul>
+<li class="caution">⚠ 結合に使う句は <strong>UPDATE → <code>FROM</code></strong>、<strong>DELETE → <code>USING</code></strong>（逆にしない）</li>
+</ul>
+</article>
+<article class="chapter" id="03-SQL②検索・オブジェクト">
+<h2 id="03-SQL②検索・オブジェクト-1">SQL② 検索・オブジェクト</h2>
+<blockquote>
+<p>S3.1 SQL コマンド（重要度13）の後半。SELECT の各句・結合・サブクエリ・集合演算と、ビュー・インデックス・シーケンス・スキーマ・関数・トリガー。NULL の扱いと「エラーになるのはどれか」が頻出。</p>
+</blockquote>
+<h3 id="03-SQL②検索・オブジェクト-2">1. SELECT の基本と評価順序 <span class="stars" data-n="3">★★★</span></h3>
+<pre><code class="language-sql">SELECT   cat_id, count(*) AS cnt        -- 5. 列を選ぶ
+FROM     products                        -- 1. 対象テーブル
+WHERE    price &gt;= 100                    -- 2. 行を絞る
+GROUP BY cat_id                          -- 3. グループ化
+HAVING   count(*) &gt;= 2                   -- 4. グループを絞る
+ORDER BY cnt DESC                        -- 6. 並べ替え
+LIMIT    10;                             -- 7. 件数を制限
+</code></pre>
+<ul>
+<li>評価順: <strong>FROM → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT / OFFSET</strong></li>
+<li class="caution">⚠ SELECT で付けた<strong>列の別名</strong>（<code>AS cnt</code>）は <strong>ORDER BY では使えるが、WHERE では使えない</strong>（WHERE の時点ではまだ存在しない）</li>
+<li><code>AS</code> は省略できる（<code>count(*) cnt</code>）。別名に大文字・空白を含めるときは二重引用符</li>
+<li><code>SELECT 1 + 1;</code> のように <strong>FROM 句なしでも実行できる</strong>（PostgreSQL の特徴）</li>
+</ul>
+<h4 id="03-SQL②検索・オブジェクト-3">ORDER BY</h4>
+<ul>
+<li><code>ORDER BY 列 [ASC | DESC]</code>。デフォルトは <strong>ASC（昇順）</strong>。列番号（<code>ORDER BY 2</code>）や別名も使える</li>
+<li>複数指定すると、前の列が同じ値のときに次の列で並べる</li>
+<li class="caution">⚠ NULL は<strong>最も大きい値</strong>として扱う → <strong>ASC では最後、DESC では先頭</strong>。<code>NULLS FIRST</code> / <code>NULLS LAST</code> で変えられる</li>
+<li>ORDER BY がないと<strong>行の順序は保証されない</strong></li>
+</ul>
+<h4 id="03-SQL②検索・オブジェクト-4">LIMIT / OFFSET</h4>
+<ul>
+<li><code>LIMIT n</code>: 先頭 n 行だけ返す。<code>OFFSET m</code>: 先頭 m 行を<strong>飛ばす</strong></li>
+<li><code>LIMIT 10 OFFSET 20</code> → 21〜30行目</li>
+<li>SQL 標準の書き方: <code>OFFSET 20 ROWS FETCH FIRST 10 ROWS ONLY</code></li>
+</ul>
+<h4 id="03-SQL②検索・オブジェクト-5">DISTINCT</h4>
+<ul>
+<li><code>SELECT DISTINCT cat_id FROM products;</code> 重複行を1つにまとめる（NULL 同士も1つにまとまる）</li>
+<li><code>DISTINCT ON (式)</code>: 式の値ごとに<strong>先頭の1行だけ</strong>を返す（PostgreSQL 独自）。ORDER BY の先頭は DISTINCT ON の式と一致させる</li>
+</ul>
+<pre><code class="language-sql">-- カテゴリごとに最も高い商品を1件ずつ
+SELECT DISTINCT ON (cat_id) cat_id, name, price
+FROM products ORDER BY cat_id, price DESC;
+</code></pre>
+<h3 id="03-SQL②検索・オブジェクト-6">2. WHERE の条件 <span class="stars" data-n="3">★★★</span></h3>
+<table>
+<thead>
+<tr>
+<th>演算子</th>
+<th>例</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>比較</td>
+<td><code>=</code>、<code>&lt;&gt;</code>（<code>!=</code> も可）、<code>&lt;</code>、<code>&lt;=</code>、<code>&gt;</code>、<code>&gt;=</code></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>BETWEEN</strong></td>
+<td><code>price BETWEEN 100 AND 200</code></td>
+<td>100 以上 200 <strong>以下</strong>（<strong>両端を含む</strong>）</td>
+</tr>
+<tr>
+<td><strong>IN</strong></td>
+<td><code>cat_id IN (1, 3, 5)</code></td>
+<td>いずれかに一致</td>
+</tr>
+<tr>
+<td><strong>LIKE</strong></td>
+<td><code>name LIKE 'A%'</code></td>
+<td>パターン一致（大文字小文字を<strong>区別する</strong>）</td>
+</tr>
+<tr>
+<td><strong>ILIKE</strong></td>
+<td><code>name ILIKE 'a%'</code></td>
+<td>大文字小文字を<strong>区別しない</strong> LIKE（PostgreSQL 独自）</td>
+</tr>
+<tr>
+<td><strong>SIMILAR TO</strong></td>
+<td><code>name SIMILAR TO '[AB]%'</code></td>
+<td>SQL 標準の正規表現風パターン</td>
+</tr>
+<tr>
+<td><strong>~</strong></td>
+<td><code>name ~ '^A.*z$'</code></td>
+<td>POSIX 正規表現（<code>~*</code> は大文字小文字を区別しない、<code>!~</code> は否定）</td>
+</tr>
+<tr>
+<td><strong>IS NULL</strong></td>
+<td><code>price IS NULL</code></td>
+<td>NULL かどうか</td>
+</tr>
+<tr>
+<td><strong>IS DISTINCT FROM</strong></td>
+<td><code>a IS DISTINCT FROM b</code></td>
+<td>NULL も値として比較する <code>&lt;&gt;</code>（NULL と NULL は「同じ」）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="03-SQL②検索・オブジェクト-7">LIKE のワイルドカード</h4>
+<ul>
+<li><strong><code>%</code></strong>: 0文字以上の任意の文字列</li>
+<li><strong><code>_</code></strong>: <strong>ちょうど1文字</strong></li>
+<li><code>%</code> や <code>_</code> 自体を探すときは<strong>エスケープ文字（デフォルトは <code>\</code>）</strong>を前に付ける（<code>LIKE '100\%'</code>）。<code>ESCAPE '#'</code> で変更できる</li>
+<li class="caution">⚠ <code>LIKE</code> は<strong>全体一致</strong>。<code>name LIKE 'abc'</code> は <code>name = 'abc'</code> と同じ（部分一致には <code>%</code> が要る）</li>
+</ul>
+<h4 id="03-SQL②検索・オブジェクト-8">NULL と論理演算</h4>
+<ul>
+<li>NULL を含む比較は <strong>UNKNOWN</strong>（NULL）になり、WHERE では<strong>偽と同じく行が除外</strong>される</li>
+<li>AND / OR の3値論理</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>A AND B</th>
+<th>A OR B</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TRUE</td>
+<td>NULL</td>
+<td><strong>NULL</strong></td>
+<td><strong>TRUE</strong></td>
+</tr>
+<tr>
+<td>FALSE</td>
+<td>NULL</td>
+<td><strong>FALSE</strong></td>
+<td><strong>NULL</strong></td>
+</tr>
+<tr>
+<td>NULL</td>
+<td>NULL</td>
+<td>NULL</td>
+<td>NULL</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>NULL（UNKNOWN）を NOT で否定しても NULL のまま</li>
+<li class="caution">⚠ <strong><code>NOT IN</code> のリスト（サブクエリ結果）に NULL が1つでも含まれると、結果は0行</strong>（すべて UNKNOWN になるため）</li>
+</ul>
+<h3 id="03-SQL②検索・オブジェクト-9">3. 集約関数と GROUP BY <span class="stars" data-n="3">★★★</span></h3>
+<table>
+<thead>
+<tr>
+<th>関数</th>
+<th>内容</th>
+<th>NULL の扱い</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>count(*)</strong></td>
+<td>行数</td>
+<td><strong>NULL の行も数える</strong></td>
+</tr>
+<tr>
+<td><strong>count(列)</strong></td>
+<td>列が NULL でない行の数</td>
+<td>NULL を除く</td>
+</tr>
+<tr>
+<td><strong>count(DISTINCT 列)</strong></td>
+<td>重複を除いた値の数</td>
+<td>NULL を除く</td>
+</tr>
+<tr>
+<td><strong>sum / avg</strong></td>
+<td>合計 / 平均</td>
+<td>NULL を除いて計算</td>
+</tr>
+<tr>
+<td><strong>max / min</strong></td>
+<td>最大 / 最小</td>
+<td>NULL を除く</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ 対象が0行のとき: <strong>count は 0</strong>、<strong>sum・avg・max・min は NULL</strong></li>
+<li class="caution">⚠ avg は NULL を<strong>分母に含めない</strong>（値 10, 20, NULL の avg は 15。20 ではない）</li>
+<li>文字列の連結は <code>string_agg(列, ',')</code>、配列にまとめるのは <code>array_agg(列)</code>（→ 04章）</li>
+</ul>
+<h4 id="03-SQL②検索・オブジェクト-10">GROUP BY / HAVING</h4>
+<ul>
+<li>GROUP BY の列の値が同じ行を1グループにまとめ、グループごとに集約する</li>
+<li class="caution">⚠ GROUP BY を使うと、SELECT に書けるのは <strong>GROUP BY の列・集約関数・定数</strong>だけ（それ以外の列はエラー。ただし GROUP BY に主キーを書いた場合、そのテーブルの他の列は書ける）</li>
+<li class="caution">⚠ <strong>集約関数は WHERE に書けない</strong> → グループに対する条件は <strong>HAVING</strong> に書く</li>
+<li>WHERE は<strong>グループ化の前</strong>に行を絞り、HAVING は<strong>グループ化の後</strong>にグループを絞る</li>
+<li>GROUP BY がなくても集約関数を使えば、全体が1グループになる</li>
+<li>GROUP BY では NULL も1つのグループにまとまる</li>
+</ul>
+<h3 id="03-SQL②検索・オブジェクト-11">4. 結合（JOIN）<span class="stars" data-n="3">★★★</span></h3>
+<table>
+<thead>
+<tr>
+<th>結合</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>INNER JOIN</strong>（<code>JOIN</code> だけでも同じ）</td>
+<td>結合条件に一致する行だけ</td>
+</tr>
+<tr>
+<td><strong>LEFT [OUTER] JOIN</strong></td>
+<td>左表の全行＋一致する右表の行（なければ右表の列は <strong>NULL</strong>）</td>
+</tr>
+<tr>
+<td><strong>RIGHT [OUTER] JOIN</strong></td>
+<td>右表の全行＋一致する左表の行</td>
+</tr>
+<tr>
+<td><strong>FULL [OUTER] JOIN</strong></td>
+<td>両表の全行（一致しない側は NULL）</td>
+</tr>
+<tr>
+<td><strong>CROSS JOIN</strong></td>
+<td><strong>直積</strong>（全組み合わせ。m 行 × n 行 = m×n 行）。結合条件なし</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-sql">SELECT p.name, c.name
+FROM products p
+LEFT JOIN categories c ON p.cat_id = c.id;
+</code></pre>
+<h4 id="03-SQL②検索・オブジェクト-12">結合条件の書き方</h4>
+<ul>
+<li><strong><code>ON 条件</code></strong>: 任意の条件</li>
+<li><strong><code>USING (列名)</code></strong>: 両表の<strong>同名の列</strong>で等価結合。結果にその列は<strong>1つだけ</strong>現れる</li>
+<li><strong><code>NATURAL JOIN</code></strong>: <strong>同名の列すべて</strong>で自動的に等価結合（意図しない列で結合しやすい）</li>
+<li>古い書き方: <code>FROM a, b WHERE a.id = b.a_id</code>（カンマは CROSS JOIN と同じ。WHERE で絞ると内部結合と同じ結果）</li>
+<li><strong>自己結合</strong>: 同じテーブルに別名を付けて結合（<code>FROM emp e JOIN emp m ON e.boss_id = m.id</code>）</li>
+<li class="caution">⚠ 外部結合で右表の条件を <strong>WHERE</strong> に書くと、NULL の行が除外されて<strong>内部結合と同じ結果</strong>になる。残したいときは <strong>ON</strong> に書く</li>
+</ul>
+<h3 id="03-SQL②検索・オブジェクト-13">5. サブクエリ <span class="stars" data-n="3">★★★</span></h3>
+<table>
+<thead>
+<tr>
+<th>種類</th>
+<th>例</th>
+<th>注意</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>スカラサブクエリ</strong></td>
+<td><code>WHERE price &gt; (SELECT avg(price) FROM products)</code></td>
+<td>⚠ <strong>2行以上返すとエラー</strong>。0行なら NULL</td>
+</tr>
+<tr>
+<td><strong>IN</strong></td>
+<td><code>WHERE cat_id IN (SELECT id FROM categories WHERE ...)</code></td>
+<td>複数行を返してよい</td>
+</tr>
+<tr>
+<td><strong>EXISTS</strong></td>
+<td><code>WHERE EXISTS (SELECT 1 FROM orders o WHERE o.pid = p.id)</code></td>
+<td><strong>1行でも返れば真</strong>。SELECT の列は何でもよい</td>
+</tr>
+<tr>
+<td><strong>ANY / SOME</strong></td>
+<td><code>WHERE price &gt; ANY (SELECT ...)</code></td>
+<td>いずれか1つと比較して真なら真（<code>= ANY</code> は IN と同じ）</td>
+</tr>
+<tr>
+<td><strong>ALL</strong></td>
+<td><code>WHERE price &gt; ALL (SELECT ...)</code></td>
+<td>すべてと比較して真なら真（0行なら真）</td>
+</tr>
+<tr>
+<td><strong>FROM 句</strong></td>
+<td><code>FROM (SELECT ...) AS sub</code></td>
+<td>⚠ PostgreSQL 14 では<strong>別名が必須</strong>（省略するとエラー）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>相関サブクエリ</strong>: 外側のクエリの列を参照するサブクエリ。外側の<strong>1行ごとに</strong>評価される（EXISTS の例）</li>
+</ul>
+<h3 id="03-SQL②検索・オブジェクト-14">6. 集合演算 <span class="stars" data-n="2">★★</span></h3>
+<table>
+<thead>
+<tr>
+<th>演算</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>UNION</strong></td>
+<td>和。<strong>重複を除く</strong></td>
+</tr>
+<tr>
+<td><strong>UNION ALL</strong></td>
+<td>和。<strong>重複を残す</strong>（重複除去しない分速い）</td>
+</tr>
+<tr>
+<td><strong>INTERSECT</strong></td>
+<td>共通部分</td>
+</tr>
+<tr>
+<td><strong>EXCEPT</strong></td>
+<td>差（左にあって右にない行）。Oracle の MINUS に当たる</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ 2つの SELECT の<strong>列の数が同じ</strong>で、対応する列の<strong>データ型に互換性</strong>がないとエラー</li>
+<li>結果の列名は<strong>最初の SELECT</strong> の列名</li>
+<li>ORDER BY は<strong>最後に1つだけ</strong>書き、全体を並べ替える</li>
+<li>INTERSECT ALL / EXCEPT ALL も使える</li>
+</ul>
+<h3 id="03-SQL②検索・オブジェクト-15">7. 条件式・CTE・ウィンドウ関数 <span class="stars" data-n="2">★★</span></h3>
+<h4 id="03-SQL②検索・オブジェクト-16">CASE</h4>
+<pre><code class="language-sql">-- 検索 CASE
+SELECT name, CASE WHEN price &gt;= 1000 THEN '高' WHEN price &gt;= 100 THEN '中' ELSE '低' END
+FROM products;
+
+-- 単純 CASE
+SELECT CASE cat_id WHEN 1 THEN '果物' WHEN 2 THEN '野菜' END FROM products;
+</code></pre>
+<ul>
+<li>上の WHEN から順に評価し、<strong>最初に真になった THEN</strong> を返す</li>
+<li class="caution">⚠ <strong>ELSE を省略して、どれにも当てはまらないと NULL</strong></li>
+<li class="caution">⚠ 単純 CASE で <code>CASE x WHEN NULL</code> と書いても NULL には一致しない（<code>=</code> で比較するため）</li>
+</ul>
+<h4 id="03-SQL②検索・オブジェクト-17">WITH 句（共通テーブル式・CTE）</h4>
+<pre><code class="language-sql">WITH expensive AS (
+    SELECT * FROM products WHERE price &gt;= 1000
+)
+SELECT cat_id, count(*) FROM expensive GROUP BY cat_id;
+</code></pre>
+<ul>
+<li>クエリの中だけで使える<strong>名前付きの一時的な結果</strong>。サブクエリを読みやすくする</li>
+<li><strong><code>WITH RECURSIVE</code></strong>: 自分自身を参照して再帰処理（階層構造の展開、連番の生成など）</li>
+</ul>
+<h4 id="03-SQL②検索・オブジェクト-18">ウィンドウ関数</h4>
+<ul>
+<li><code>関数() OVER (PARTITION BY 列 ORDER BY 列)</code>: 行をまとめずに、グループ内での順位・累計などを各行に付ける</li>
+<li>主な関数: <strong>row_number()</strong>（連番）、<strong>rank()</strong>（同順位の次は飛ぶ: 1,1,3）、<strong>dense_rank()</strong>（飛ばない: 1,1,2）、集約関数（<code>sum(price) OVER (...)</code>）</li>
+<li class="caution">⚠ GROUP BY と違い、<strong>行数は減らない</strong></li>
+</ul>
+<h3 id="03-SQL②検索・オブジェクト-19">8. スキーマ <span class="stars" data-n="2">★★</span></h3>
+<ul>
+<li><strong>データベース → スキーマ → テーブルなどのオブジェクト</strong> の階層。スキーマはオブジェクトをまとめる名前空間</li>
+<li>別のスキーマなら同じ名前のテーブルを作れる。<code>スキーマ名.テーブル名</code> で指定する</li>
+<li>新しいデータベースには <strong>public</strong> スキーマがある。スキーマを指定しないと public に作られる（通常）</li>
+<li class="caution">⚠ <strong>別のデータベース</strong>のテーブルは1つのクエリで参照<strong>できない</strong>（スキーマは参照できる）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>構文</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>作成</td>
+<td><code>CREATE SCHEMA s;</code>（<code>AUTHORIZATION ユーザー名</code> で所有者を指定）</td>
+</tr>
+<tr>
+<td>削除</td>
+<td><code>DROP SCHEMA s;</code>（中にオブジェクトがあればエラー。<code>CASCADE</code> で中身ごと削除）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="03-SQL②検索・オブジェクト-20">search_path</h4>
+<ul>
+<li>スキーマ名を省略したときに<strong>探すスキーマの順番</strong></li>
+<li>デフォルトは <strong><code>"$user", public</code></strong>（ユーザー名と同じ名前のスキーマ → public）</li>
+<li>オブジェクトを作るときは、search_path の中で<strong>最初に存在するスキーマ</strong>に作られる</li>
+<li>確認: <code>SHOW search_path;</code> 変更: <code>SET search_path TO s, public;</code></li>
+<li>システムカタログの <strong>pg_catalog</strong> スキーマは、search_path に書かなくても<strong>常に最初に</strong>検索される</li>
+<li class="caution">⚠ PostgreSQL 14 までは、public スキーマに<strong>誰でもオブジェクトを作れる</strong>（15 から作成権限が既定で外された）</li>
+</ul>
+<h3 id="03-SQL②検索・オブジェクト-21">9. ビュー <span class="stars" data-n="3">★★★</span></h3>
+<pre><code class="language-sql">CREATE VIEW expensive_products AS
+SELECT id, name, price FROM products WHERE price &gt;= 1000;
+</code></pre>
+<ul>
+<li>SELECT 文に名前を付けたもの。<strong>データは持たず</strong>、参照するたびに元の SELECT を実行する</li>
+<li><strong><code>CREATE OR REPLACE VIEW</code></strong>: 既存のビューを置き換える。⚠ ただし<strong>列の削除・名前変更・型変更はできず、末尾への列追加だけ</strong>できる</li>
+<li><code>DROP VIEW v;</code></li>
+<li class="caution">⚠ ビューが参照しているテーブルは、<code>DROP TABLE ... CASCADE</code> でないと削除できない（CASCADE ならビューも消える）</li>
+</ul>
+<h4 id="03-SQL②検索・オブジェクト-22">更新可能ビュー</h4>
+<ul>
+<li>次の条件を満たす<strong>単純なビュー</strong>は、INSERT / UPDATE / DELETE が自動的に元テーブルへ反映される<ul>
+<li>FROM に<strong>テーブル（またはビュー）が1つだけ</strong></li>
+<li><strong>集約関数・GROUP BY・HAVING・DISTINCT・LIMIT/OFFSET・UNION 等の集合演算・WITH・ウィンドウ関数を含まない</strong></li>
+</ul>
+</li>
+<li>それ以外のビューは、<code>INSTEAD OF</code> トリガーやルールを作れば更新できる</li>
+<li><strong><code>WITH CHECK OPTION</code></strong>: ビューの WHERE 条件を満たさない行を、ビュー経由で追加・更新できなくする</li>
+</ul>
+<h4 id="03-SQL②検索・オブジェクト-23">マテリアライズドビュー</h4>
+<ul>
+<li><code>CREATE MATERIALIZED VIEW mv AS SELECT ...;</code> 検索結果を<strong>実データとして保存</strong>する。参照が速い</li>
+<li class="caution">⚠ 元テーブルを変更しても<strong>自動では反映されない</strong> → <strong><code>REFRESH MATERIALIZED VIEW mv;</code></strong> で更新</li>
+<li>インデックスを作れる。直接 INSERT / UPDATE はできない</li>
+</ul>
+<h3 id="03-SQL②検索・オブジェクト-24">10. インデックス <span class="stars" data-n="3">★★★</span></h3>
+<pre><code class="language-sql">CREATE INDEX idx_products_name ON products (name);
+CREATE UNIQUE INDEX idx_products_code ON products (code);    -- 一意インデックス
+CREATE INDEX ON products (cat_id, price);                     -- 複数列。名前は省略可（自動命名）
+CREATE INDEX idx_lower_name ON products (lower(name));        -- 式インデックス
+CREATE INDEX idx_active ON products (name) WHERE deleted = false;  -- 部分インデックス
+CREATE INDEX idx_tags ON products USING gin (tags);           -- 方式の指定
+DROP INDEX idx_products_name;
+</code></pre>
+<ul>
+<li>検索（WHERE・JOIN・ORDER BY）を速くする。代わりに<strong>更新は遅くなり、領域を使う</strong></li>
+<li>デフォルトの方式は <strong>B-tree</strong>（等価・範囲検索・ソートに使える）</li>
+<li><strong>式インデックス</strong>: <code>WHERE lower(name) = 'abc'</code> のように<strong>同じ式</strong>で検索したときに使われる</li>
+<li><strong>部分インデックス</strong>: 条件に合う行だけを索引に入れる</li>
+<li><strong><code>CREATE INDEX CONCURRENTLY</code></strong>: テーブルへの書き込みを<strong>止めずに</strong>作成（時間はかかる。トランザクションブロック内では実行できない）</li>
+<li><code>REINDEX INDEX 名前;</code> / <code>REINDEX TABLE t;</code> でインデックスを作り直す</li>
+<li class="caution">⚠ <code>LIKE 'abc%'</code>（前方一致）は B-tree が使える場合があるが、<strong><code>LIKE '%abc'</code>（後方・中間一致）は B-tree を使えない</strong></li>
+<li class="caution">⚠ インデックスはテーブルに属し、<strong>DROP TABLE で一緒に削除</strong>される</li>
+</ul>
+<h3 id="03-SQL②検索・オブジェクト-25">11. シーケンスと自動採番 <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="03-SQL②検索・オブジェクト-26">シーケンス</h4>
+<pre><code class="language-sql">CREATE SEQUENCE seq_order START 100 INCREMENT 10;
+SELECT nextval('seq_order');    -- 100
+SELECT nextval('seq_order');    -- 110
+SELECT currval('seq_order');    -- 110（このセッションで最後に nextval した値）
+SELECT setval('seq_order', 500);  -- 次の nextval は 510
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>関数</th>
+<th>動作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>nextval(&lsquo;名前&rsquo;)</strong></td>
+<td>値を進めて返す</td>
+</tr>
+<tr>
+<td><strong>currval(&lsquo;名前&rsquo;)</strong></td>
+<td><strong>そのセッション</strong>で最後に nextval が返した値。⚠ セッション内で一度も nextval していないと<strong>エラー</strong></td>
+</tr>
+<tr>
+<td><strong>lastval()</strong></td>
+<td>そのセッションで最後に使った（どれかの）シーケンスの値</td>
+</tr>
+<tr>
+<td><strong>setval(&lsquo;名前&rsquo;, n)</strong></td>
+<td>現在値を n にする → <strong>次の nextval は n + 増分</strong>。<code>setval('名前', n, false)</code> なら次の nextval は <strong>n</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>オプション: <code>START</code>（初期値・デフォルト1）、<code>INCREMENT</code>（増分・負も可）、<code>MINVALUE</code>、<code>MAXVALUE</code>、<code>CYCLE</code>（最大値に達したら最小値に戻る。デフォルトは NO CYCLE で、達するとエラー）、<code>CACHE</code></li>
+<li class="caution">⚠ <strong>nextval はロールバックしても戻らない</strong> → 番号に<strong>欠番</strong>が出る</li>
+<li>複数のセッションが同時に nextval しても、<strong>同じ値は返らない</strong></li>
+</ul>
+<h4 id="03-SQL②検索・オブジェクト-27">serial 型</h4>
+<pre><code class="language-sql">CREATE TABLE orders (id serial PRIMARY KEY, ...);
+</code></pre>
+<ul>
+<li>次の3つをまとめて行う略記: ① integer 列を作る ② シーケンス <code>orders_id_seq</code> を作る ③ 列の DEFAULT を <code>nextval('orders_id_seq')</code> にし、<strong>NOT NULL</strong> を付ける</li>
+<li class="caution">⚠ serial だけでは <strong>UNIQUE / PRIMARY KEY は付かない</strong>（重複を防ぐには別途指定）</li>
+<li class="caution">⚠ 値を<strong>明示的に指定して INSERT できる</strong>（シーケンスは進まない → 後で重複エラーの原因になる）</li>
+<li>列（テーブル）を削除すると、シーケンスも削除される</li>
+</ul>
+<h4 id="03-SQL②検索・オブジェクト-28">IDENTITY 列（SQL 標準）</h4>
+<pre><code class="language-sql">id integer GENERATED ALWAYS AS IDENTITY       -- 明示的な値の指定を拒否
+id integer GENERATED BY DEFAULT AS IDENTITY   -- 値を指定すればそれを使う
+</code></pre>
+<ul>
+<li><strong>ALWAYS</strong>: INSERT で値を指定すると<strong>エラー</strong>（<code>OVERRIDING SYSTEM VALUE</code> を付ければ指定できる）</li>
+<li><strong>BY DEFAULT</strong>: 値を省略したときだけ自動採番（serial に近い）</li>
+<li>IDENTITY 列には自動で NOT NULL が付く</li>
+</ul>
+<h3 id="03-SQL②検索・オブジェクト-29">12. パーティショニング <span class="stars" data-n="1">★</span></h3>
+<pre><code class="language-sql">CREATE TABLE sales (sold_on date, amount integer) PARTITION BY RANGE (sold_on);
+CREATE TABLE sales_2026 PARTITION OF sales
+    FOR VALUES FROM ('2026-01-01') TO ('2027-01-01');
+</code></pre>
+<ul>
+<li>大きなテーブルを、キーの値で複数の<strong>子テーブル（パーティション）</strong>に分ける（宣言的パーティショニング）</li>
+<li>方式: <strong>RANGE</strong>（範囲）、<strong>LIST</strong>（値の列挙: <code>FOR VALUES IN ('東京', '大阪')</code>）、<strong>HASH</strong>（ハッシュ値で均等に分散）</li>
+<li class="caution">⚠ RANGE の <code>FROM ... TO ...</code> は <strong>FROM を含み、TO を含まない</strong></li>
+<li>親テーブルに INSERT すると、適切なパーティションに自動で振り分けられる。行き先のパーティションがなければエラー（<code>DEFAULT</code> パーティションを作れば受け止められる）</li>
+</ul>
+<h3 id="03-SQL②検索・オブジェクト-30">13. 関数・プロシージャ・トリガー <span class="stars" data-n="2">★★</span></h3>
+<h4 id="03-SQL②検索・オブジェクト-31">ユーザー定義関数</h4>
+<pre><code class="language-sql">CREATE FUNCTION tax_in(price integer) RETURNS integer AS $$
+    SELECT (price * 1.1)::integer;
+$$ LANGUAGE sql;
+
+SELECT tax_in(100);   -- 110
+</code></pre>
+<ul>
+<li><code>CREATE [OR REPLACE] FUNCTION 名前(引数) RETURNS 戻り値の型 AS 本体 LANGUAGE 言語;</code></li>
+<li>本体は文字列。<strong>ドル引用符 <code>$$ ... $$</code></strong> を使うと中の単一引用符をエスケープしなくてよい</li>
+<li>言語: <strong>sql</strong>、<strong>plpgsql</strong>（変数・IF・ループが使える）、C など</li>
+<li><code>RETURNS void</code>（返り値なし）、<code>RETURNS SETOF 型</code> / <code>RETURNS TABLE (...)</code>（複数行を返す）</li>
+<li>同じ名前でも<strong>引数の型・数が違えば別の関数</strong>として作れる（オーバーロード）。削除時は <code>DROP FUNCTION tax_in(integer);</code> のように引数の型で区別する</li>
+<li><strong>プロシージャ</strong>: <code>CREATE PROCEDURE</code> で作り <strong><code>CALL</code></strong> で実行。戻り値を持たず、<strong>中で COMMIT / ROLLBACK できる</strong>（関数はできない）</li>
+</ul>
+<h4 id="03-SQL②検索・オブジェクト-32">PL/pgSQL の基本形</h4>
+<pre><code class="language-sql">CREATE FUNCTION grade(score integer) RETURNS text AS $$
+DECLARE
+    result text;
+BEGIN
+    IF score &gt;= 80 THEN
+        result := 'A';
+    ELSE
+        result := 'B';
+    END IF;
+    RETURN result;
+END;
+$$ LANGUAGE plpgsql;
+</code></pre>
+<h4 id="03-SQL②検索・オブジェクト-33">トリガー</h4>
+<p>テーブルへの INSERT / UPDATE / DELETE（/ TRUNCATE）をきっかけに、関数を自動実行する。</p>
+<pre><code class="language-sql">CREATE FUNCTION set_updated() RETURNS trigger AS $$
+BEGIN
+    NEW.updated_at := now();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_updated BEFORE UPDATE ON products
+    FOR EACH ROW EXECUTE FUNCTION set_updated();
+</code></pre>
+<ul>
+<li>手順: ① <strong>戻り値の型が <code>trigger</code> の関数</strong>を作る（引数なし）→ ② <strong>CREATE TRIGGER</strong> でテーブルに紐づける</li>
+<li>タイミング: <strong>BEFORE</strong>（実行前）/ <strong>AFTER</strong>（実行後）/ <strong>INSTEAD OF</strong>（ビューに対してのみ。代わりに実行）</li>
+<li>単位: <strong>FOR EACH ROW</strong>（1行ごと）/ <strong>FOR EACH STATEMENT</strong>（1文に1回。<strong>デフォルト</strong>）</li>
+<li>行トリガーでは <strong>NEW</strong>（新しい行。INSERT・UPDATE）と <strong>OLD</strong>（古い行。UPDATE・DELETE）を参照できる</li>
+<li class="caution">⚠ BEFORE の行トリガーが <strong>NULL を返すと、その行の操作は行われない</strong>。NEW を書き換えて返すと、書き換えた値で保存される</li>
+<li>AFTER トリガーや文単位トリガーの戻り値は無視される</li>
+<li><code>EXECUTE PROCEDURE</code> は古い書き方（意味は同じ）。<code>DROP TRIGGER trg_updated ON products;</code></li>
+</ul>
+</article>
+<article class="chapter" id="04-関数・トランザクション">
+<h2 id="04-関数・トランザクション-1">関数・トランザクション</h2>
+<blockquote>
+<p>S3.2 組み込み関数（重要度2）＋ S3.3 トランザクションの概念（重要度1）。合わせて3問前後だが、トランザクションの知識は運用管理（ロック・VACUUM）の問題でも前提になる。</p>
+</blockquote>
+<h3 id="04-関数・トランザクション-2">1. 演算子と型変換 <span class="stars" data-n="2">★★</span></h3>
+<h4 id="04-関数・トランザクション-3">算術演算子</h4>
+<table>
+<thead>
+<tr>
+<th>演算子</th>
+<th>例</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>+</code> <code>-</code> <code>*</code></td>
+<td><code>2 * 3</code></td>
+<td>6</td>
+</tr>
+<tr>
+<td><strong><code>/</code></strong></td>
+<td><code>7 / 2</code></td>
+<td><strong>3</strong>（整数同士は<strong>小数点以下切り捨て</strong>）</td>
+</tr>
+<tr>
+<td></td>
+<td><code>7.0 / 2</code></td>
+<td>3.5000000000000000</td>
+</tr>
+<tr>
+<td><strong><code>%</code></strong></td>
+<td><code>7 % 2</code></td>
+<td>1（剰余）</td>
+</tr>
+<tr>
+<td><strong><code>^</code></strong></td>
+<td><code>2 ^ 3</code></td>
+<td>8（べき乗）</td>
+</tr>
+<tr>
+<td><code>@</code></td>
+<td><code>@ -5</code></td>
+<td>5（絶対値）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <strong>整数 ÷ 整数は整数</strong>。小数が欲しいときはどちらかを numeric にする（<code>7::numeric / 2</code>）</li>
+<li>0 で割るとエラー（division by zero）</li>
+<li>平方根は演算子 <code>|/</code> か関数 <code>sqrt()</code></li>
+</ul>
+<h4 id="04-関数・トランザクション-4">文字列の連結</h4>
+<ul>
+<li><strong><code>||</code></strong> で連結: <code>'Postgre' || 'SQL'</code> → <code>'PostgreSQL'</code></li>
+<li class="caution">⚠ <strong><code>||</code> は片方が NULL だと結果も NULL</strong></li>
+<li><strong><code>concat('a', NULL, 'b')</code></strong> → <code>'ab'</code>（<strong>NULL を無視</strong>する）。<code>concat_ws(',', 'a', 'b')</code> は区切り文字付き</li>
+</ul>
+<h4 id="04-関数・トランザクション-5">型変換（キャスト）</h4>
+<table>
+<thead>
+<tr>
+<th>書き方</th>
+<th>例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>CAST(値 AS 型)</code></strong>（SQL 標準）</td>
+<td><code>CAST('123' AS integer)</code></td>
+</tr>
+<tr>
+<td><strong><code>値::型</code></strong>（PostgreSQL 独自）</td>
+<td><code>'123'::integer</code></td>
+</tr>
+<tr>
+<td><strong><code>型 '文字列'</code></strong>（定数のみ）</td>
+<td><code>date '2026-10-19'</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>変換できない値はエラー（<code>'abc'::integer</code> → invalid input syntax）</li>
+<li class="caution">⚠ <code>'1.5'::integer</code> は<strong>エラー</strong>（文字列から直接は小数を整数にできない）。<code>1.5::integer</code> は数値からの変換なので<strong>四捨五入して 2</strong></li>
+</ul>
+<h3 id="04-関数・トランザクション-6">2. 文字列関数 <span class="stars" data-n="3">★★★</span></h3>
+<table>
+<thead>
+<tr>
+<th>関数</th>
+<th>例</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>length(s)</strong> / <strong>char_length(s)</strong></td>
+<td><code>length('データ')</code></td>
+<td><strong>3</strong>（<strong>文字数</strong>）</td>
+</tr>
+<tr>
+<td><strong>octet_length(s)</strong></td>
+<td><code>octet_length('データ')</code></td>
+<td><strong>9</strong>（<strong>バイト数</strong>。UTF-8 で日本語は1文字3バイト）</td>
+</tr>
+<tr>
+<td><strong>upper(s)</strong> / <strong>lower(s)</strong></td>
+<td><code>upper('abc')</code></td>
+<td>&lsquo;ABC&rsquo;</td>
+</tr>
+<tr>
+<td>initcap(s)</td>
+<td><code>initcap('hello world')</code></td>
+<td>&lsquo;Hello World&rsquo;</td>
+</tr>
+<tr>
+<td><strong>substring(s FROM n FOR m)</strong></td>
+<td><code>substring('PostgreSQL' FROM 5 FOR 3)</code></td>
+<td>&lsquo;gre&rsquo;</td>
+</tr>
+<tr>
+<td><strong>substr(s, n, m)</strong></td>
+<td><code>substr('PostgreSQL', 5, 3)</code></td>
+<td>&lsquo;gre&rsquo;</td>
+</tr>
+<tr>
+<td>left(s, n) / right(s, n)</td>
+<td><code>left('PostgreSQL', 4)</code></td>
+<td>&lsquo;Post&rsquo;</td>
+</tr>
+<tr>
+<td><strong>position(t IN s)</strong> / <strong>strpos(s, t)</strong></td>
+<td><code>position('SQL' IN 'PostgreSQL')</code></td>
+<td>8（見つからなければ <strong>0</strong>）</td>
+</tr>
+<tr>
+<td><strong>trim(s)</strong></td>
+<td><code>trim('  abc  ')</code></td>
+<td>&lsquo;abc&rsquo;（両端の空白を除く）</td>
+</tr>
+<tr>
+<td>ltrim / rtrim / btrim</td>
+<td><code>ltrim('xxabc', 'x')</code></td>
+<td>&lsquo;abc&rsquo;（指定した文字を除く）</td>
+</tr>
+<tr>
+<td><strong>replace(s, from, to)</strong></td>
+<td><code>replace('a-b-c', '-', '/')</code></td>
+<td>&lsquo;a/b/c&rsquo;</td>
+</tr>
+<tr>
+<td><strong>lpad(s, n, c)</strong> / rpad</td>
+<td><code>lpad('42', 5, '0')</code></td>
+<td>&lsquo;00042&rsquo;</td>
+</tr>
+<tr>
+<td>split_part(s, 区切り, n)</td>
+<td><code>split_part('a,b,c', ',', 2)</code></td>
+<td>&lsquo;b&rsquo;</td>
+</tr>
+<tr>
+<td>repeat(s, n)</td>
+<td><code>repeat('ab', 3)</code></td>
+<td>&lsquo;ababab&rsquo;</td>
+</tr>
+<tr>
+<td>reverse(s)</td>
+<td><code>reverse('abc')</code></td>
+<td>&lsquo;cba&rsquo;</td>
+</tr>
+<tr>
+<td>to_char(数値, 書式)</td>
+<td><code>to_char(1234567, 'FM9,999,999')</code></td>
+<td>&lsquo;1,234,567&rsquo;</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ 文字の位置は <strong>1 から</strong>数える（0 始まりではない）</li>
+<li class="caution">⚠ <code>length</code> は<strong>文字数</strong>、<code>octet_length</code> は<strong>バイト数</strong></li>
+<li><code>trim(LEADING 'x' FROM s)</code>（先頭）、<code>trim(TRAILING ...)</code>（末尾）、<code>trim(BOTH ...)</code>（両端）の書き方もある</li>
+</ul>
+<h3 id="04-関数・トランザクション-7">3. 数値関数 <span class="stars" data-n="2">★★</span></h3>
+<table>
+<thead>
+<tr>
+<th>関数</th>
+<th>例</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>abs(x)</strong></td>
+<td><code>abs(-5)</code></td>
+<td>5</td>
+</tr>
+<tr>
+<td><strong>round(x)</strong></td>
+<td><code>round(2.5)</code></td>
+<td><strong>3</strong>（四捨五入）</td>
+</tr>
+<tr>
+<td><strong>round(x, n)</strong></td>
+<td><code>round(3.14159, 2)</code></td>
+<td>3.14（小数第 n 位に丸める。n が負なら整数部を丸める）</td>
+</tr>
+<tr>
+<td><strong>trunc(x, n)</strong></td>
+<td><code>trunc(3.789, 1)</code></td>
+<td>3.7（<strong>切り捨て</strong>）</td>
+</tr>
+<tr>
+<td><strong>ceil(x)</strong> / ceiling</td>
+<td><code>ceil(3.1)</code></td>
+<td>4（<strong>以上の最小の整数</strong>）</td>
+</tr>
+<tr>
+<td><strong>floor(x)</strong></td>
+<td><code>floor(3.9)</code></td>
+<td>3（<strong>以下の最大の整数</strong>）</td>
+</tr>
+<tr>
+<td><strong>mod(x, y)</strong></td>
+<td><code>mod(7, 3)</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td>power(x, y)</td>
+<td><code>power(2, 10)</code></td>
+<td>1024</td>
+</tr>
+<tr>
+<td>sqrt(x)</td>
+<td><code>sqrt(16)</code></td>
+<td>4</td>
+</tr>
+<tr>
+<td><strong>random()</strong></td>
+<td><code>random()</code></td>
+<td><strong>0 以上 1 未満</strong>の乱数</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ 負の数: <code>ceil(-3.1)</code> = <strong>-3</strong>、<code>floor(-3.1)</code> = <strong>-4</strong>、<code>trunc(-3.7)</code> = <strong>-3</strong>（0 の方向へ切り捨て）</li>
+<li><code>round(1234, -2)</code> = 1200</li>
+</ul>
+<h3 id="04-関数・トランザクション-8">4. 日付・時刻関数 <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="04-関数・トランザクション-9">現在日時</h4>
+<table>
+<thead>
+<tr>
+<th>関数</th>
+<th>返す値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>current_date</strong></td>
+<td>今日の日付（date）</td>
+</tr>
+<tr>
+<td><strong>current_time</strong></td>
+<td>現在時刻（time with time zone）</td>
+</tr>
+<tr>
+<td><strong>current_timestamp</strong> / <strong>now()</strong></td>
+<td><strong>トランザクション開始時刻</strong>（timestamptz）</td>
+</tr>
+<tr>
+<td>localtimestamp</td>
+<td>トランザクション開始時刻（timestamp。タイムゾーンなし）</td>
+</tr>
+<tr>
+<td>statement_timestamp()</td>
+<td><strong>文の開始時刻</strong></td>
+</tr>
+<tr>
+<td><strong>clock_timestamp()</strong></td>
+<td><strong>関数を呼んだ瞬間</strong>の実時刻（同じ文の中でも変わる）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <code>current_date</code>・<code>current_timestamp</code> などは<strong>括弧を付けない</strong>（<code>current_date()</code> はエラー）。<code>now()</code> は括弧が要る</li>
+<li class="caution">⚠ <strong>now() / current_timestamp は1つのトランザクションの中では何度呼んでも同じ値</strong>。実時刻が欲しいときは clock_timestamp()</li>
+</ul>
+<h4 id="04-関数・トランザクション-10">日時の計算</h4>
+<table>
+<thead>
+<tr>
+<th>計算</th>
+<th>結果の型</th>
+<th>例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>date + integer</strong></td>
+<td>date</td>
+<td><code>date '2026-10-19' + 7</code> → 2026-10-26</td>
+</tr>
+<tr>
+<td><strong>date - date</strong></td>
+<td><strong>integer（日数）</strong></td>
+<td><code>date '2026-12-26' - date '2026-10-19'</code> → 68</td>
+</tr>
+<tr>
+<td>date + interval</td>
+<td>timestamp</td>
+<td><code>date '2026-10-19' + interval '1 month'</code> → 2026-11-19 00:00:00</td>
+</tr>
+<tr>
+<td>timestamp - timestamp</td>
+<td><strong>interval</strong></td>
+<td>→ &lsquo;2 days 03:00:00&rsquo; など</td>
+</tr>
+<tr>
+<td>timestamp ± interval</td>
+<td>timestamp</td>
+<td><code>now() - interval '1 hour'</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="04-関数・トランザクション-11">日時を扱う関数</h4>
+<table>
+<thead>
+<tr>
+<th>関数</th>
+<th>例</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>extract(field FROM t)</strong></td>
+<td><code>extract(year FROM date '2026-10-19')</code></td>
+<td>2026</td>
+</tr>
+<tr>
+<td><strong>date_part(&lsquo;field&rsquo;, t)</strong></td>
+<td><code>date_part('month', date '2026-10-19')</code></td>
+<td>10</td>
+</tr>
+<tr>
+<td><strong>date_trunc(&lsquo;field&rsquo;, t)</strong></td>
+<td><code>date_trunc('month', timestamp '2026-10-19 09:30')</code></td>
+<td>2026-10-01 00:00:00（<strong>指定単位未満を切り捨て</strong>）</td>
+</tr>
+<tr>
+<td><strong>age(t1, t2)</strong></td>
+<td><code>age(date '2026-10-19', date '2000-04-01')</code></td>
+<td>26 years 6 mons 18 days（t1 − t2）</td>
+</tr>
+<tr>
+<td>age(t)</td>
+<td><code>age(date '2000-04-01')</code></td>
+<td>current_date（今日の0時）からの経過</td>
+</tr>
+<tr>
+<td><strong>to_char(t, 書式)</strong></td>
+<td><code>to_char(now(), 'YYYY/MM/DD HH24:MI')</code></td>
+<td>&lsquo;2026/10/19 09:30&rsquo;</td>
+</tr>
+<tr>
+<td><strong>to_date(s, 書式)</strong></td>
+<td><code>to_date('20261019', 'YYYYMMDD')</code></td>
+<td>date 型の 2026-10-19</td>
+</tr>
+<tr>
+<td>to_timestamp(s, 書式)</td>
+<td><code>to_timestamp('2026-10-19 09:30', 'YYYY-MM-DD HH24:MI')</code></td>
+<td>timestamptz</td>
+</tr>
+<tr>
+<td>to_number(s, 書式)</td>
+<td><code>to_number('1,234', '9,999')</code></td>
+<td>1234</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>extract / date_part の主な field: <code>year</code>、<code>month</code>、<code>day</code>、<code>hour</code>、<code>minute</code>、<code>second</code>、<strong><code>dow</code>（曜日。日曜 = 0）</strong>、<code>doy</code>（年内の日数）、<code>epoch</code>（1970-01-01 からの秒数）</li>
+<li>書式の主な記号: <strong><code>YYYY</code></strong>（年）、<strong><code>MM</code></strong>（月）、<strong><code>DD</code></strong>（日）、<strong><code>HH24</code></strong>（24時間制の時）、<code>HH</code> / <code>HH12</code>（12時間制）、<strong><code>MI</code></strong>（分）、<strong><code>SS</code></strong>（秒）</li>
+<li class="caution">⚠ 分は <strong><code>MI</code></strong>。<code>MM</code> は<strong>月</strong>（取り違えの引っ掛け）</li>
+</ul>
+<h3 id="04-関数・トランザクション-12">5. NULL・条件を扱う関数 <span class="stars" data-n="3">★★★</span></h3>
+<table>
+<thead>
+<tr>
+<th>関数</th>
+<th>動作</th>
+<th>例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>COALESCE(a, b, &hellip;)</strong></td>
+<td>引数のうち<strong>最初の NULL でない値</strong></td>
+<td><code>COALESCE(NULL, NULL, 3)</code> → 3</td>
+</tr>
+<tr>
+<td><strong>NULLIF(a, b)</strong></td>
+<td>a = b なら <strong>NULL</strong>、違えば a</td>
+<td><code>NULLIF(0, 0)</code> → NULL</td>
+</tr>
+<tr>
+<td><strong>GREATEST(a, b, &hellip;)</strong></td>
+<td>最大値</td>
+<td><code>GREATEST(3, NULL, 5)</code> → 5</td>
+</tr>
+<tr>
+<td><strong>LEAST(a, b, &hellip;)</strong></td>
+<td>最小値</td>
+<td><code>LEAST(3, NULL, 5)</code> → 3</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>典型例: NULL を 0 として表示 → <code>COALESCE(price, 0)</code></li>
+<li>典型例: 0 除算の回避 → <code>total / NULLIF(cnt, 0)</code>（cnt が 0 なら NULL を返し、エラーにならない）</li>
+<li class="caution">⚠ PostgreSQL の GREATEST / LEAST は <strong>NULL を無視</strong>する（全部 NULL のときだけ NULL）</li>
+</ul>
+<h3 id="04-関数・トランザクション-13">6. 集約関数（補足）<span class="stars" data-n="1">★</span></h3>
+<ul>
+<li>基本（count・sum・avg・max・min）と NULL の扱いは → 03章「集約関数と GROUP BY」</li>
+<li><strong>string_agg(列, 区切り文字)</strong>: 文字列を連結 → <code>string_agg(name, ',' ORDER BY name)</code> で &lsquo;みかん,りんご&rsquo;</li>
+<li><strong>array_agg(列)</strong>: 配列にまとめる</li>
+<li>bool_and / bool_or（every）: 真偽値の AND / OR</li>
+<li class="caution">⚠ avg を整数列に使うと結果は <strong>numeric</strong>（小数になる）。sum を integer 列に使うと <strong>bigint</strong></li>
+</ul>
+<h3 id="04-関数・トランザクション-14">7. システム情報関数 <span class="stars" data-n="1">★</span></h3>
+<table>
+<thead>
+<tr>
+<th>関数</th>
+<th>返す値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>version()</strong></td>
+<td>PostgreSQL のバージョン文字列</td>
+</tr>
+<tr>
+<td><strong>current_user</strong></td>
+<td>現在の（権限チェックに使う）ユーザー名</td>
+</tr>
+<tr>
+<td>session_user</td>
+<td>セッションを開始したユーザー名</td>
+</tr>
+<tr>
+<td><strong>current_database()</strong></td>
+<td>接続中のデータベース名</td>
+</tr>
+<tr>
+<td>current_schema</td>
+<td>search_path で最初に見つかるスキーマ名</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <code>current_user</code>・<code>session_user</code> は<strong>括弧なし</strong>（付けるとエラー）、<code>version()</code>・<code>current_database()</code> は<strong>括弧あり</strong></li>
+<li>psql の <code>\df</code> で関数の一覧、<code>\df 名前</code> で引数・戻り値の型を確認できる</li>
+</ul>
+<h3 id="04-関数・トランザクション-15">8. トランザクションの基本 <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="04-関数・トランザクション-16">開始・確定・取り消し</h4>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>コマンド（同じ意味の別名）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>開始</td>
+<td><strong>BEGIN</strong> / START TRANSACTION</td>
+</tr>
+<tr>
+<td>確定</td>
+<td><strong>COMMIT</strong> / END</td>
+</tr>
+<tr>
+<td>取り消し</td>
+<td><strong>ROLLBACK</strong> / ABORT</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>psql は<strong>デフォルトで自動コミット</strong>（AUTOCOMMIT が on）: BEGIN しなければ<strong>1文ごとに自動で COMMIT</strong> される</li>
+<li>psql で <code>\set AUTOCOMMIT off</code> にすると、最初の文で自動的にトランザクションが始まり、COMMIT するまで確定しない</li>
+<li>トランザクション外で COMMIT / ROLLBACK を実行してもエラーにならない（WARNING: there is no transaction in progress）</li>
+</ul>
+<h4 id="04-関数・トランザクション-17">エラーが起きたとき</h4>
+<pre><code>BEGIN;
+INSERT INTO t VALUES (1);
+INSERT INTO t VALUES ('abc');   -- エラー
+INSERT INTO t VALUES (2);
+-- ERROR:  current transaction is aborted, commands ignored until end of transaction block
+COMMIT;                          -- 実際には ROLLBACK される（1 も入らない）
+</code></pre>
+<ul>
+<li class="caution">⚠ トランザクション内でエラーが起きると、以降の文は<strong>すべて拒否</strong>される（アボート状態）</li>
+<li class="caution">⚠ この状態で <strong>COMMIT しても ROLLBACK になる</strong>（表示も <code>ROLLBACK</code>）。エラー前の文も含めて全部取り消される</li>
+<li>抜け出すには ROLLBACK（またはセーブポイントへのロールバック）</li>
+</ul>
+<h4 id="04-関数・トランザクション-18">セーブポイント</h4>
+<pre><code class="language-sql">BEGIN;
+INSERT INTO t VALUES (1);
+SAVEPOINT sp1;
+INSERT INTO t VALUES (2);
+ROLLBACK TO SAVEPOINT sp1;   -- 2 の INSERT だけ取り消す（SAVEPOINT は省略可）
+INSERT INTO t VALUES (3);
+COMMIT;                      -- 1 と 3 が確定
+</code></pre>
+<ul>
+<li><strong>SAVEPOINT 名前</strong>: トランザクション内に中間地点を作る</li>
+<li><strong>ROLLBACK TO [SAVEPOINT] 名前</strong>: その地点まで戻す。<strong>トランザクションは続く</strong>（セーブポイント自体も残る）</li>
+<li><strong>RELEASE [SAVEPOINT] 名前</strong>: セーブポイントを破棄する（それまでの変更は取り消されない）</li>
+<li>エラーでアボート状態になっても、エラー前のセーブポイントへ ROLLBACK TO すれば続行できる</li>
+<li class="caution">⚠ セーブポイントは<strong>トランザクションブロックの中でしか使えない</strong></li>
+</ul>
+<h4 id="04-関数・トランザクション-19">トランザクションと DDL</h4>
+<ul>
+<li>PostgreSQL では <strong>CREATE TABLE・DROP TABLE・TRUNCATE などの DDL もロールバックできる</strong></li>
+<li class="caution">⚠ 例外: <strong>CREATE DATABASE / DROP DATABASE</strong>、CREATE TABLESPACE / DROP TABLESPACE、<strong>VACUUM</strong>、ALTER SYSTEM、CREATE INDEX CONCURRENTLY は<strong>トランザクションブロック内で実行できない</strong>（エラー）</li>
+<li class="caution">⚠ シーケンスの nextval は<strong>ロールバックしても戻らない</strong>（→ 03章）</li>
+</ul>
+<h3 id="04-関数・トランザクション-20">9. トランザクション分離レベル <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="04-関数・トランザクション-21">同時実行で起きる現象</h4>
+<table>
+<thead>
+<tr>
+<th>現象</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ダーティリード</strong></td>
+<td>他のトランザクションが<strong>コミットしていない</strong>変更が読めてしまう</td>
+</tr>
+<tr>
+<td><strong>ノンリピータブルリード</strong>（反復不能読み取り）</td>
+<td>同じ行を2回読むと、間に他がコミットした<strong>更新・削除</strong>のせいで値が変わる</td>
+</tr>
+<tr>
+<td><strong>ファントムリード</strong></td>
+<td>同じ条件で2回検索すると、間に他がコミットした<strong>追加</strong>のせいで行が増える（減る）</td>
+</tr>
+<tr>
+<td><strong>直列化異常</strong></td>
+<td>同時に実行した結果が、どの順番で1つずつ実行した結果とも一致しない</td>
+</tr>
+</tbody>
+</table>
+<h4 id="04-関数・トランザクション-22">分離レベルと PostgreSQL の動作</h4>
+<table>
+<thead>
+<tr>
+<th>分離レベル</th>
+<th>ダーティリード</th>
+<th>ノンリピータブルリード</th>
+<th>ファントムリード</th>
+<th>直列化異常</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>READ UNCOMMITTED</td>
+<td><strong>起きない</strong>（※）</td>
+<td>起きる</td>
+<td>起きる</td>
+<td>起きる</td>
+</tr>
+<tr>
+<td><strong>READ COMMITTED</strong>（<strong>デフォルト</strong>）</td>
+<td>起きない</td>
+<td>起きる</td>
+<td>起きる</td>
+<td>起きる</td>
+</tr>
+<tr>
+<td><strong>REPEATABLE READ</strong></td>
+<td>起きない</td>
+<td>起きない</td>
+<td><strong>起きない</strong>（※）</td>
+<td>起きる</td>
+</tr>
+<tr>
+<td><strong>SERIALIZABLE</strong></td>
+<td>起きない</td>
+<td>起きない</td>
+<td>起きない</td>
+<td>起きない</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <strong>PostgreSQL のデフォルトは READ COMMITTED</strong></li>
+<li class="caution">⚠ ※ PostgreSQL では <strong>READ UNCOMMITTED を指定しても READ COMMITTED として動く</strong>（ダーティリードは<strong>どのレベルでも起きない</strong>）</li>
+<li class="caution">⚠ ※ SQL 標準では REPEATABLE READ でファントムリードが起きてもよいが、<strong>PostgreSQL の REPEATABLE READ では起きない</strong></li>
+<li><strong>READ COMMITTED</strong>: <strong>文ごと</strong>に、その文の開始時点でコミット済みのデータを見る</li>
+<li><strong>REPEATABLE READ / SERIALIZABLE</strong>: トランザクション内の<strong>最初の文</strong>の開始時点のデータをずっと見る</li>
+<li>REPEATABLE READ / SERIALIZABLE では、他と競合すると「could not serialize access &hellip;」のエラーになる → アプリ側で<strong>トランザクションを最初からやり直す</strong></li>
+</ul>
+<h4 id="04-関数・トランザクション-23">設定方法</h4>
+<pre><code class="language-sql">BEGIN ISOLATION LEVEL SERIALIZABLE;              -- 開始時に指定
+-- または
+BEGIN;
+SET TRANSACTION ISOLATION LEVEL REPEATABLE READ; -- 最初の文より前に実行
+</code></pre>
+<ul>
+<li class="caution">⚠ <code>SET TRANSACTION</code> は、トランザクション内で <strong>SELECT や INSERT などを実行した後では変更できない</strong>（エラー）</li>
+<li>セッション全体のデフォルト: <code>SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL ...;</code> またはパラメータ <strong>default_transaction_isolation</strong>（postgresql.conf でも設定可）</li>
+<li>確認: <code>SHOW transaction_isolation;</code></li>
+</ul>
+<h3 id="04-関数・トランザクション-24">10. ロック <span class="stars" data-n="2">★★</span></h3>
+<h4 id="04-関数・トランザクション-25">MVCC とロックの関係</h4>
+<ul>
+<li>PostgreSQL は MVCC なので、<strong>読み取り（SELECT）と書き込み（UPDATE など）は互いを待たない</strong></li>
+<li><strong>同じ行を2つのトランザクションが更新</strong>しようとすると、後の方は先の方がコミット / ロールバックするまで<strong>待たされる</strong>（行ロック）</li>
+<li class="caution">⚠ ただし <strong>ACCESS EXCLUSIVE ロック</strong>（DROP TABLE・TRUNCATE・VACUUM FULL・多くの ALTER TABLE）は <strong>SELECT もブロック</strong>する</li>
+</ul>
+<h4 id="04-関数・トランザクション-26">主なテーブルロックのモード</h4>
+<table>
+<thead>
+<tr>
+<th>ロックモード</th>
+<th>取得する主なコマンド</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ACCESS SHARE</td>
+<td><strong>SELECT</strong></td>
+</tr>
+<tr>
+<td>ROW SHARE</td>
+<td>SELECT &hellip; FOR UPDATE / FOR SHARE</td>
+</tr>
+<tr>
+<td>ROW EXCLUSIVE</td>
+<td><strong>INSERT・UPDATE・DELETE</strong></td>
+</tr>
+<tr>
+<td>SHARE UPDATE EXCLUSIVE</td>
+<td><strong>VACUUM</strong>（FULL なし）、ANALYZE、CREATE INDEX CONCURRENTLY</td>
+</tr>
+<tr>
+<td>SHARE</td>
+<td><strong>CREATE INDEX</strong>（CONCURRENTLY なし）</td>
+</tr>
+<tr>
+<td>SHARE ROW EXCLUSIVE</td>
+<td>CREATE TRIGGER など</td>
+</tr>
+<tr>
+<td>EXCLUSIVE</td>
+<td>REFRESH MATERIALIZED VIEW CONCURRENTLY</td>
+</tr>
+<tr>
+<td><strong>ACCESS EXCLUSIVE</strong></td>
+<td><strong>DROP TABLE、TRUNCATE、VACUUM FULL、ALTER TABLE（多く）</strong>、LOCK TABLE（モード省略時）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>下に行くほど強い。ACCESS EXCLUSIVE は<strong>他のすべてのロックと競合</strong>する</li>
+<li class="caution">⚠ CREATE INDEX（SHARE）は<strong>書き込みを止める</strong>が読み取りは止めない。書き込みも止めたくないときは CONCURRENTLY</li>
+</ul>
+<h4 id="04-関数・トランザクション-27">明示的なロック</h4>
+<ul>
+<li><strong><code>LOCK TABLE t IN 〜 MODE;</code></strong>: テーブルロックを取る。モードを省略すると <strong>ACCESS EXCLUSIVE</strong><ul>
+<li class="caution">⚠ <strong>トランザクションブロックの中でしか使えない</strong>。ロックは<strong>トランザクション終了時に解放</strong>される（個別に解放する UNLOCK コマンドはない）</li>
+</ul>
+</li>
+<li><strong><code>SELECT ... FOR UPDATE</code></strong>: 読んだ行に更新用の行ロックをかける（他は更新・削除・FOR UPDATE できず待つ）<ul>
+<li><code>FOR SHARE</code>: 共有ロック（他の FOR SHARE は可、更新は不可）</li>
+<li><strong><code>NOWAIT</code></strong>: ロックが取れなければ<strong>待たずにエラー</strong></li>
+<li><strong><code>SKIP LOCKED</code></strong>: ロックされている行を<strong>飛ばして</strong>返す</li>
+</ul>
+</li>
+</ul>
+<h4 id="04-関数・トランザクション-28">デッドロック</h4>
+<ul>
+<li>2つのトランザクションが<strong>互いに相手のロック解放を待つ</strong>状態</li>
+<li>PostgreSQL は<strong>自動で検出</strong>し、<strong>片方のトランザクションをエラーにしてロールバック</strong>させる（もう片方は続行できる）</li>
+<li>検出のチェックを始めるまでの待ち時間はパラメータ <strong>deadlock_timeout</strong>（デフォルト <strong>1秒</strong>）</li>
+<li>防ぐには、複数の行・テーブルを<strong>同じ順番で</strong>ロックするようにする</li>
+<li>現在のロックの状況はシステムビュー <strong>pg_locks</strong> で確認できる</li>
 </ul>
 </article>
 </section>
