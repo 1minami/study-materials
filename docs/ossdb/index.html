@@ -492,7 +492,7 @@
 </ul>
 <h4 id="01-一般知識-19">NULL</h4>
 <ul>
-<li>「値が不明」「値が存在しない」ことを表す特別なマーカー。<strong>0 や空文字（&rsquo;&lsquo;）とは別物</strong></li>
+<li>「値が不明」「値が存在しない」ことを表す特別なマーカー。<strong>0 や空文字（''）とは別物</strong></li>
 <li>NULL との比較（<code>= NULL</code>、<code>&lt;&gt; NULL</code>）の結果は真でも偽でもない <strong>UNKNOWN</strong>（NULL）→ 判定には <strong><code>IS NULL</code> / <code>IS NOT NULL</code></strong> を使う</li>
 </ul>
 <h4 id="01-一般知識-20">関係演算</h4>
@@ -792,7 +792,7 @@
 <ul>
 <li>n は<strong>バイト数ではなく文字数</strong></li>
 <li class="caution">⚠ n を超える文字列を入れると <strong>エラー</strong>（value too long）。ただし超えた部分が<strong>すべて空白なら切り詰めて</strong>入る</li>
-<li class="caution">⚠ <code>CAST('abcdef' AS varchar(3))</code> のように<strong>明示的にキャスト</strong>すると、エラーにならず<strong>切り詰め</strong>られる（&rsquo;abc&rsquo;）</li>
+<li class="caution">⚠ <code>CAST('abcdef' AS varchar(3))</code> のように<strong>明示的にキャスト</strong>すると、エラーにならず<strong>切り詰め</strong>られる（'abc'）</li>
 <li>性能は char・varchar・text でほぼ同じ（char が速いわけではない）</li>
 </ul>
 <h4 id="02-SQL①定義・更新-5">日付・時刻型</h4>
@@ -822,7 +822,7 @@
 </tr>
 <tr>
 <td><strong>interval</strong></td>
-<td>時間の<strong>間隔</strong>（&lsquo;1 day&rsquo;、&lsquo;3 hours&rsquo; など）</td>
+<td>時間の<strong>間隔</strong>（'1 day'、'3 hours' など）</td>
 </tr>
 </tbody>
 </table>
@@ -1613,11 +1613,11 @@ SELECT setval('seq_order', 500);  -- 次の nextval は 510
 </thead>
 <tbody>
 <tr>
-<td><strong>nextval(&lsquo;名前&rsquo;)</strong></td>
+<td><strong>nextval('名前')</strong></td>
 <td>値を進めて返す</td>
 </tr>
 <tr>
-<td><strong>currval(&lsquo;名前&rsquo;)</strong></td>
+<td><strong>currval('名前')</strong></td>
 <td><strong>そのセッション</strong>で最後に nextval が返した値。⚠ セッション内で一度も nextval していないと<strong>エラー</strong></td>
 </tr>
 <tr>
@@ -1625,7 +1625,7 @@ SELECT setval('seq_order', 500);  -- 次の nextval は 510
 <td>そのセッションで最後に使った（どれかの）シーケンスの値</td>
 </tr>
 <tr>
-<td><strong>setval(&lsquo;名前&rsquo;, n)</strong></td>
+<td><strong>setval('名前', n)</strong></td>
 <td>現在値を n にする → <strong>次の nextval は n + 増分</strong>。<code>setval('名前', n, false)</code> なら次の nextval は <strong>n</strong></td>
 </tr>
 </tbody>
@@ -1825,27 +1825,27 @@ CREATE TRIGGER trg_updated BEFORE UPDATE ON products
 <tr>
 <td><strong>upper(s)</strong> / <strong>lower(s)</strong></td>
 <td><code>upper('abc')</code></td>
-<td>&lsquo;ABC&rsquo;</td>
+<td>'ABC'</td>
 </tr>
 <tr>
 <td>initcap(s)</td>
 <td><code>initcap('hello world')</code></td>
-<td>&lsquo;Hello World&rsquo;</td>
+<td>'Hello World'</td>
 </tr>
 <tr>
 <td><strong>substring(s FROM n FOR m)</strong></td>
 <td><code>substring('PostgreSQL' FROM 5 FOR 3)</code></td>
-<td>&lsquo;gre&rsquo;</td>
+<td>'gre'</td>
 </tr>
 <tr>
 <td><strong>substr(s, n, m)</strong></td>
 <td><code>substr('PostgreSQL', 5, 3)</code></td>
-<td>&lsquo;gre&rsquo;</td>
+<td>'gre'</td>
 </tr>
 <tr>
 <td>left(s, n) / right(s, n)</td>
 <td><code>left('PostgreSQL', 4)</code></td>
-<td>&lsquo;Post&rsquo;</td>
+<td>'Post'</td>
 </tr>
 <tr>
 <td><strong>position(t IN s)</strong> / <strong>strpos(s, t)</strong></td>
@@ -1855,42 +1855,42 @@ CREATE TRIGGER trg_updated BEFORE UPDATE ON products
 <tr>
 <td><strong>trim(s)</strong></td>
 <td><code>trim('  abc  ')</code></td>
-<td>&lsquo;abc&rsquo;（両端の空白を除く）</td>
+<td>'abc'（両端の空白を除く）</td>
 </tr>
 <tr>
 <td>ltrim / rtrim / btrim</td>
 <td><code>ltrim('xxabc', 'x')</code></td>
-<td>&lsquo;abc&rsquo;（指定した文字を除く）</td>
+<td>'abc'（指定した文字を除く）</td>
 </tr>
 <tr>
 <td><strong>replace(s, from, to)</strong></td>
 <td><code>replace('a-b-c', '-', '/')</code></td>
-<td>&lsquo;a/b/c&rsquo;</td>
+<td>'a/b/c'</td>
 </tr>
 <tr>
 <td><strong>lpad(s, n, c)</strong> / rpad</td>
 <td><code>lpad('42', 5, '0')</code></td>
-<td>&lsquo;00042&rsquo;</td>
+<td>'00042'</td>
 </tr>
 <tr>
 <td>split_part(s, 区切り, n)</td>
 <td><code>split_part('a,b,c', ',', 2)</code></td>
-<td>&lsquo;b&rsquo;</td>
+<td>'b'</td>
 </tr>
 <tr>
 <td>repeat(s, n)</td>
 <td><code>repeat('ab', 3)</code></td>
-<td>&lsquo;ababab&rsquo;</td>
+<td>'ababab'</td>
 </tr>
 <tr>
 <td>reverse(s)</td>
 <td><code>reverse('abc')</code></td>
-<td>&lsquo;cba&rsquo;</td>
+<td>'cba'</td>
 </tr>
 <tr>
 <td>to_char(数値, 書式)</td>
 <td><code>to_char(1234567, 'FM9,999,999')</code></td>
-<td>&lsquo;1,234,567&rsquo;</td>
+<td>'1,234,567'</td>
 </tr>
 </tbody>
 </table>
@@ -2033,7 +2033,7 @@ CREATE TRIGGER trg_updated BEFORE UPDATE ON products
 <tr>
 <td>timestamp - timestamp</td>
 <td><strong>interval</strong></td>
-<td>→ &lsquo;2 days 03:00:00&rsquo; など</td>
+<td>→ '2 days 03:00:00' など</td>
 </tr>
 <tr>
 <td>timestamp ± interval</td>
@@ -2058,12 +2058,12 @@ CREATE TRIGGER trg_updated BEFORE UPDATE ON products
 <td>2026</td>
 </tr>
 <tr>
-<td><strong>date_part(&lsquo;field&rsquo;, t)</strong></td>
+<td><strong>date_part('field', t)</strong></td>
 <td><code>date_part('month', date '2026-10-19')</code></td>
 <td>10</td>
 </tr>
 <tr>
-<td><strong>date_trunc(&lsquo;field&rsquo;, t)</strong></td>
+<td><strong>date_trunc('field', t)</strong></td>
 <td><code>date_trunc('month', timestamp '2026-10-19 09:30')</code></td>
 <td>2026-10-01 00:00:00（<strong>指定単位未満を切り捨て</strong>）</td>
 </tr>
@@ -2080,7 +2080,7 @@ CREATE TRIGGER trg_updated BEFORE UPDATE ON products
 <tr>
 <td><strong>to_char(t, 書式)</strong></td>
 <td><code>to_char(now(), 'YYYY/MM/DD HH24:MI')</code></td>
-<td>&lsquo;2026/10/19 09:30&rsquo;</td>
+<td>'2026/10/19 09:30'</td>
 </tr>
 <tr>
 <td><strong>to_date(s, 書式)</strong></td>
@@ -2115,7 +2115,7 @@ CREATE TRIGGER trg_updated BEFORE UPDATE ON products
 </thead>
 <tbody>
 <tr>
-<td><strong>COALESCE(a, b, &hellip;)</strong></td>
+<td><strong>COALESCE(a, b, ...)</strong></td>
 <td>引数のうち<strong>最初の NULL でない値</strong></td>
 <td><code>COALESCE(NULL, NULL, 3)</code> → 3</td>
 </tr>
@@ -2125,12 +2125,12 @@ CREATE TRIGGER trg_updated BEFORE UPDATE ON products
 <td><code>NULLIF(0, 0)</code> → NULL</td>
 </tr>
 <tr>
-<td><strong>GREATEST(a, b, &hellip;)</strong></td>
+<td><strong>GREATEST(a, b, ...)</strong></td>
 <td>最大値</td>
 <td><code>GREATEST(3, NULL, 5)</code> → 5</td>
 </tr>
 <tr>
-<td><strong>LEAST(a, b, &hellip;)</strong></td>
+<td><strong>LEAST(a, b, ...)</strong></td>
 <td>最小値</td>
 <td><code>LEAST(3, NULL, 5)</code> → 3</td>
 </tr>
@@ -2144,7 +2144,7 @@ CREATE TRIGGER trg_updated BEFORE UPDATE ON products
 <h3 id="04-関数・トランザクション-13">6. 集約関数（補足）<span class="stars" data-n="1">★</span></h3>
 <ul>
 <li>基本（count・sum・avg・max・min）と NULL の扱いは → 03章「集約関数と GROUP BY」</li>
-<li><strong>string_agg(列, 区切り文字)</strong>: 文字列を連結 → <code>string_agg(name, ',' ORDER BY name)</code> で &lsquo;みかん,りんご&rsquo;</li>
+<li><strong>string_agg(列, 区切り文字)</strong>: 文字列を連結 → <code>string_agg(name, ',' ORDER BY name)</code> で 'みかん,りんご'</li>
 <li><strong>array_agg(列)</strong>: 配列にまとめる</li>
 <li>bool_and / bool_or（every）: 真偽値の AND / OR</li>
 <li class="caution">⚠ avg を整数列に使うと結果は <strong>numeric</strong>（小数になる）。sum を integer 列に使うと <strong>bigint</strong></li>
@@ -2324,7 +2324,7 @@ COMMIT;                      -- 1 と 3 が確定
 <li class="caution">⚠ ※ SQL 標準では REPEATABLE READ でファントムリードが起きてもよいが、<strong>PostgreSQL の REPEATABLE READ では起きない</strong></li>
 <li><strong>READ COMMITTED</strong>: <strong>文ごと</strong>に、その文の開始時点でコミット済みのデータを見る</li>
 <li><strong>REPEATABLE READ / SERIALIZABLE</strong>: トランザクション内の<strong>最初の文</strong>の開始時点のデータをずっと見る</li>
-<li>REPEATABLE READ / SERIALIZABLE では、他と競合すると「could not serialize access &hellip;」のエラーになる → アプリ側で<strong>トランザクションを最初からやり直す</strong></li>
+<li>REPEATABLE READ / SERIALIZABLE では、他と競合すると「could not serialize access ...」のエラーになる → アプリ側で<strong>トランザクションを最初からやり直す</strong></li>
 </ul>
 <h4 id="04-関数・トランザクション-23">設定方法</h4>
 <pre><code class="language-sql">BEGIN ISOLATION LEVEL SERIALIZABLE;              -- 開始時に指定
@@ -2359,7 +2359,7 @@ SET TRANSACTION ISOLATION LEVEL REPEATABLE READ; -- 最初の文より前に実�
 </tr>
 <tr>
 <td>ROW SHARE</td>
-<td>SELECT &hellip; FOR UPDATE / FOR SHARE</td>
+<td>SELECT ... FOR UPDATE / FOR SHARE</td>
 </tr>
 <tr>
 <td>ROW EXCLUSIVE</td>
@@ -3098,7 +3098,7 @@ make install         # インストール（書き込み権限のあるユーザ
 <tbody>
 <tr>
 <td><strong><code>createuser [ユーザー名]</code></strong></td>
-<td>CREATE ROLE &hellip; LOGIN</td>
+<td>CREATE ROLE ... LOGIN</td>
 </tr>
 <tr>
 <td><strong><code>dropuser ユーザー名</code></strong></td>
@@ -3409,7 +3409,7 @@ ALTER ROLE alice RESET work_mem;
 <tbody>
 <tr>
 <td><strong>listen_addresses</strong></td>
-<td><strong>&lsquo;localhost&rsquo;</strong></td>
+<td><strong>'localhost'</strong></td>
 <td>postmaster</td>
 <td>接続を待ち受ける IP アドレス。<strong><code>'*'</code> で全インターフェース</strong>。空文字列で TCP/IP を受け付けない</td>
 </tr>
@@ -3433,7 +3433,7 @@ ALTER ROLE alice RESET work_mem;
 </tr>
 <tr>
 <td>unix_socket_directories</td>
-<td>&lsquo;/tmp&rsquo;（ビルドによる）</td>
+<td>'/tmp'（ビルドによる）</td>
 <td>postmaster</td>
 <td>Unix ドメインソケットの場所</td>
 </tr>
@@ -3555,7 +3555,7 @@ ALTER ROLE alice RESET work_mem;
 </tr>
 <tr>
 <td><strong>archive_command</strong></td>
-<td>&rsquo;&lsquo;（空）</td>
+<td>''（空）</td>
 <td>sighup</td>
 <td>WAL ファイルをアーカイブするシェルコマンド（→ 07章）</td>
 </tr>
@@ -3588,17 +3588,17 @@ ALTER ROLE alice RESET work_mem;
 </tr>
 <tr>
 <td><strong>log_destination</strong></td>
-<td><strong>&lsquo;stderr&rsquo;</strong></td>
+<td><strong>'stderr'</strong></td>
 <td>出力先。stderr、<strong>csvlog</strong>（logging_collector が必要）、<strong>syslog</strong>、eventlog（Windows）</td>
 </tr>
 <tr>
 <td><strong>log_directory</strong></td>
-<td><strong>&lsquo;log&rsquo;</strong></td>
+<td><strong>'log'</strong></td>
 <td>ログファイルを置くディレクトリ（相対パスはデータディレクトリから）</td>
 </tr>
 <tr>
 <td><strong>log_filename</strong></td>
-<td>&lsquo;postgresql-%Y-%m-%d_%H%M%S.log&rsquo;</td>
+<td>'postgresql-%Y-%m-%d_%H%M%S.log'</td>
 <td>ログファイル名（strftime の書式）</td>
 </tr>
 <tr>
@@ -3628,7 +3628,7 @@ ALTER ROLE alice RESET work_mem;
 </tr>
 <tr>
 <td>log_line_prefix</td>
-<td>&lsquo;%m [%p] &lsquo;</td>
+<td>'%m [%p] '</td>
 <td>各行の先頭に付ける情報（%m = 時刻、%p = PID、%u = ユーザー、%d = DB）</td>
 </tr>
 <tr>
@@ -3662,7 +3662,7 @@ ALTER ROLE alice RESET work_mem;
 <tbody>
 <tr>
 <td><strong>search_path</strong></td>
-<td><strong>&rsquo;&ldquo;$user&rdquo;, public&rsquo;</strong></td>
+<td><strong>'"$user", public'</strong></td>
 <td>スキーマの検索順（→ 03章）</td>
 </tr>
 <tr>
@@ -3672,7 +3672,7 @@ ALTER ROLE alice RESET work_mem;
 </tr>
 <tr>
 <td><strong>default_transaction_isolation</strong></td>
-<td><strong>&lsquo;read committed&rsquo;</strong></td>
+<td><strong>'read committed'</strong></td>
 <td>分離レベルのデフォルト（→ 04章）</td>
 </tr>
 <tr>
@@ -3682,7 +3682,7 @@ ALTER ROLE alice RESET work_mem;
 </tr>
 <tr>
 <td>DateStyle</td>
-<td>&lsquo;ISO, MDY&rsquo;（initdb で決まる）</td>
+<td>'ISO, MDY'（initdb で決まる）</td>
 <td>日付の表示形式</td>
 </tr>
 <tr>
@@ -4168,7 +4168,7 @@ COPY (SELECT * FROM emp WHERE dept = 10) TO '/tmp/d10.txt'; -- 問い合わせ�
 <li class="caution">⚠ ファイルは<strong>データベースサーバのマシン上</strong>のパス。読み書きするのは<strong>サーバプロセス（OS の postgres ユーザー）</strong></li>
 <li class="caution">⚠ サーバのファイルを読み書きする COPY は<strong>スーパーユーザー</strong>か、<strong>pg_read_server_files / pg_write_server_files</strong> ロールのメンバーだけが実行できる（STDIN / STDOUT は一般ユーザーも可）</li>
 <li class="caution">⚠ COPY FROM は<strong>追記</strong>（既存の行は消さない）。途中でエラーになると<strong>全行が取り消される</strong></li>
-<li><code>COPY (SELECT ...) TO</code> で問い合わせ結果を出せる。<strong>COPY (SELECT &hellip;) FROM はできない</strong></li>
+<li><code>COPY (SELECT ...) TO</code> で問い合わせ結果を出せる。<strong>COPY (SELECT ...) FROM はできない</strong></li>
 <li>COPY FROM はトリガーや制約チェックを実行する</li>
 </ul>
 <h4 id="07-バックアップ-13">主なオプション</h4>
@@ -4214,7 +4214,7 @@ COPY (SELECT * FROM emp WHERE dept = 10) TO '/tmp/d10.txt'; -- 問い合わせ�
 \copy emp FROM 'emp.csv' WITH (FORMAT csv, HEADER)
 </code></pre>
 <ul>
-<li><strong>psql を実行しているクライアントのマシン上</strong>のファイルを読み書きする（内部では COPY &hellip; FROM STDIN / TO STDOUT を使う）</li>
+<li><strong>psql を実行しているクライアントのマシン上</strong>のファイルを読み書きする（内部では COPY ... FROM STDIN / TO STDOUT を使う）</li>
 <li><strong>スーパーユーザーでなくても</strong>、テーブルの権限があれば使える</li>
 <li class="caution">⚠ メタコマンドなので<strong>1行で書く</strong>（末尾の <code>;</code> は不要）</li>
 </ul>
@@ -4423,7 +4423,7 @@ recovery_target_time = '2026-11-25 10:29:00'    # この時刻まで戻す
 <td>指定した LSN まで</td>
 </tr>
 <tr>
-<td>recovery_target = &lsquo;immediate&rsquo;</td>
+<td>recovery_target = 'immediate'</td>
 <td>ベースバックアップが<strong>一貫性のある状態になった時点</strong>で止める</td>
 </tr>
 <tr>
@@ -4635,7 +4635,7 @@ ANALYZE VERBOSE emp;
 <td>対象テーブルへの書き込みを止める</td>
 </tr>
 <tr>
-<td>REINDEX &hellip; CONCURRENTLY</td>
+<td>REINDEX ... CONCURRENTLY</td>
 <td>書き込みを止めずに作り直す（12〜）</td>
 <td></td>
 </tr>
@@ -4722,12 +4722,12 @@ CREATE ROLE staff;                    -- グループ用（ログイン不可）
 <td>NOBYPASSRLS</td>
 </tr>
 <tr>
-<td><strong>PASSWORD &lsquo;&hellip;&rsquo;</strong></td>
+<td><strong>PASSWORD '...'</strong></td>
 <td>パスワード</td>
 <td>なし</td>
 </tr>
 <tr>
-<td><strong>VALID UNTIL &lsquo;日時&rsquo;</strong></td>
+<td><strong>VALID UNTIL '日時'</strong></td>
 <td><strong>パスワード</strong>の有効期限</td>
 <td>無期限</td>
 </tr>
@@ -5090,28 +5090,28 @@ SELECT column_name, data_type FROM information_schema.columns WHERE table_name =
 </thead>
 <tbody>
 <tr>
-<td><strong>pg_database_size(&lsquo;DB名&rsquo;)</strong></td>
+<td><strong>pg_database_size('DB名')</strong></td>
 <td>データベースのサイズ（バイト）</td>
 </tr>
 <tr>
-<td><strong>pg_relation_size(&lsquo;テーブル&rsquo;)</strong></td>
+<td><strong>pg_relation_size('テーブル')</strong></td>
 <td>テーブル本体のサイズ（インデックス・TOAST を含まない）</td>
 </tr>
 <tr>
-<td><strong>pg_total_relation_size(&lsquo;テーブル&rsquo;)</strong></td>
+<td><strong>pg_total_relation_size('テーブル')</strong></td>
 <td>テーブル + <strong>インデックス + TOAST</strong> の合計</td>
 </tr>
 <tr>
-<td>pg_table_size(&lsquo;テーブル&rsquo;)</td>
+<td>pg_table_size('テーブル')</td>
 <td>テーブル + TOAST（インデックスを含まない）</td>
 </tr>
 <tr>
-<td>pg_indexes_size(&lsquo;テーブル&rsquo;)</td>
+<td>pg_indexes_size('テーブル')</td>
 <td>そのテーブルのインデックスの合計</td>
 </tr>
 <tr>
 <td><strong>pg_size_pretty(バイト数)</strong></td>
-<td><strong>&lsquo;8192 bytes&rsquo;・&lsquo;15 MB&rsquo;</strong> のような<strong>読みやすい表記</strong>に変換</td>
+<td><strong>'8192 bytes'・'15 MB'</strong> のような<strong>読みやすい表記</strong>に変換</td>
 </tr>
 </tbody>
 </table>

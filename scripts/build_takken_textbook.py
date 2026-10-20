@@ -167,9 +167,9 @@ def normalize_list_indent(md_text: str) -> str:
     return "\n".join(lines)
 
 
-def convert_md_to_html(md_text: str) -> str:
-    """Markdown→HTML変換"""
-    extensions = ["tables", "fenced_code", "nl2br", "sane_lists", "smarty"]
+def convert_md_to_html(md_text: str, smarty: bool = True) -> str:
+    """Markdown→HTML変換（smarty=False で ' や -- を約物に置換しない）"""
+    extensions = ["tables", "fenced_code", "nl2br", "sane_lists"] + (["smarty"] if smarty else [])
     return markdown.markdown(normalize_list_indent(md_text), extensions=extensions)
 
 
@@ -253,7 +253,7 @@ def build_toc(sections: dict, materials_dir: Path = MATERIALS_DIR, launchers: bo
     return toc
 
 
-def build_body(sections: dict, materials_dir: Path = MATERIALS_DIR) -> str:
+def build_body(sections: dict, materials_dir: Path = MATERIALS_DIR, smarty: bool = True) -> str:
     """本文HTMLを生成"""
     body = ""
     for sec_name, sec_data in sections.items():
@@ -267,7 +267,7 @@ def build_body(sections: dict, materials_dir: Path = MATERIALS_DIR) -> str:
                 continue
             md = fpath.read_text(encoding="utf-8")
             chap_id = slugify(fname.replace(".md", ""))
-            html = convert_md_to_html(md)
+            html = convert_md_to_html(md, smarty)
             html = shift_headings(html, 1)
             html = add_ids_to_headings(html, chap_id)
             html = decorate_html(html)

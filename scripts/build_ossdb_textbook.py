@@ -108,7 +108,8 @@ def main():
             sections[name] = {**sec, "files": files}
 
     toc = build_toc(sections, MATERIALS_DIR, launchers=False)
-    body = build_body(sections, MATERIALS_DIR)
+    # SQL の文字列リテラル（'...'）やオプション（--）を原文のまま見せるため smarty は使わない
+    body = build_body(sections, MATERIALS_DIR, smarty=False)
     html = HTML_TEMPLATE.format(toc=toc, body=body, config=TEXTBOOK_CONFIG)
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
