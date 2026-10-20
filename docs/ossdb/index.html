@@ -49,6 +49,15 @@
     <li><a href="#04-関数・トランザクション">関数・トランザクション</a></li>
   </ul>
 </div>
+<div class="toc-section">
+  <a href="#運用管理" class="toc-section-title">🛠️ 運用管理</a>
+  <ul>
+    <li><a href="#05-インストール・標準付属ツール">インストール・標準付属ツール</a></li>
+    <li><a href="#06-設定ファイル">設定ファイル</a></li>
+    <li><a href="#07-バックアップ">バックアップ</a></li>
+    <li><a href="#08-運用管理作業">運用管理作業</a></li>
+  </ul>
+</div>
 </nav>
 
 </aside>
@@ -2402,6 +2411,2712 @@ SET TRANSACTION ISOLATION LEVEL REPEATABLE READ; -- 最初の文より前に実�
 <li>検出のチェックを始めるまでの待ち時間はパラメータ <strong>deadlock_timeout</strong>（デフォルト <strong>1秒</strong>）</li>
 <li>防ぐには、複数の行・テーブルを<strong>同じ順番で</strong>ロックするようにする</li>
 <li>現在のロックの状況はシステムビュー <strong>pg_locks</strong> で確認できる</li>
+</ul>
+</article>
+</section>
+<section class="part" id="運用管理">
+<h1 class="part-title">🛠️ 運用管理</h1>
+<article class="chapter" id="05-インストール・標準付属ツール">
+<h2 id="05-インストール・標準付属ツール-1">インストール・標準付属ツール</h2>
+<blockquote>
+<p>S2.1 インストール方法（重要度2）＋ S2.2 標準付属ツールの使い方（重要度5）。合わせて7問前後。initdb・pg_ctl のオプションと、psql のメタコマンドが定番。</p>
+</blockquote>
+<h3 id="05-インストール・標準付属ツール-2">1. インストールの流れ <span class="stars" data-n="2">★★</span></h3>
+<h4 id="05-インストール・標準付属ツール-3">インストール方法の種類</h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>パッケージ</strong></td>
+<td>OS のパッケージ管理（dnf / yum、apt）や、PostgreSQL 公式リポジトリ（PGDG）のパッケージを入れる。一般的な方法</td>
+</tr>
+<tr>
+<td><strong>ソースコード</strong></td>
+<td>ソースを入手してビルドする。インストール先やビルドオプションを細かく選べる</td>
+</tr>
+<tr>
+<td>インストーラ</td>
+<td>Windows・macOS 向けのグラフィカルなインストーラ</td>
+</tr>
+</tbody>
+</table>
+<h4 id="05-インストール・標準付属ツール-4">ソースコードからのインストール</h4>
+<pre><code>./configure          # 環境チェックと Makefile の生成（--prefix でインストール先を指定）
+make                 # ビルド（GNU make が必要）
+make check           # リグレッションテスト（任意。一般ユーザーで実行する）
+make install         # インストール（書き込み権限のあるユーザーで実行）
+</code></pre>
+<ul>
+<li><strong>configure</strong> の主なオプション: <strong><code>--prefix=ディレクトリ</code></strong>（インストール先。デフォルト <strong><code>/usr/local/pgsql</code></strong>）、<code>--with-openssl</code>（SSL 対応）、<code>--without-readline</code>、<code>--without-zlib</code>、<code>--with-perl</code> / <code>--with-python</code>（PL/Perl・PL/Python）</li>
+<li class="caution">⚠ <strong>readline</strong>（psql の行編集・履歴）と <strong>zlib</strong>（pg_dump の圧縮）は<strong>デフォルトで必須</strong>。無ければ configure がエラーになる（<code>--without-〜</code> で外せる）</li>
+<li><code>make world</code> / <code>make install-world</code>: ドキュメントと <strong>contrib</strong>（追加モジュール）も含めてビルド・インストール</li>
+<li>contrib だけ追加するなら、<code>contrib/</code> ディレクトリで <code>make</code> → <code>make install</code></li>
+</ul>
+<h4 id="05-インストール・標準付属ツール-5">インストール後の作業</h4>
+<ol>
+<li>PostgreSQL 管理用の OS ユーザー（通常 <strong><code>postgres</code></strong>）を作る</li>
+<li>データベースクラスタ用のディレクトリを作り、所有者を postgres にする</li>
+<li>postgres ユーザーで <strong>initdb</strong> を実行してデータベースクラスタを作る</li>
+<li><strong>pg_ctl start</strong> でサーバを起動する</li>
+<li>必要に応じて環境変数（PATH、<strong>PGDATA</strong> など）を設定する</li>
+</ol>
+<ul>
+<li class="caution">⚠ PostgreSQL サーバは <strong>root（管理者権限）では起動できない</strong>。initdb も root では実行できない</li>
+<li>パッケージ版は systemd のサービス（例: <code>systemctl start postgresql-14</code>）で起動・停止することが多い</li>
+</ul>
+<h3 id="05-インストール・標準付属ツール-6">2. データベースクラスタと initdb <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="05-インストール・標準付属ツール-7">データベースクラスタ</h4>
+<ul>
+<li><strong>1つのサーバ（postgres プロセス群）が管理するデータベースの集まり</strong>。ディスク上では1つのディレクトリ（<strong>データディレクトリ</strong>）</li>
+<li class="caution">⚠ 「クラスタ」は複数サーバの集合のことではない。<strong>1インスタンスが管理するデータベース群</strong></li>
+<li>initdb 直後に作られるデータベース: <strong>template0</strong>、<strong>template1</strong>、<strong>postgres</strong> の3つ<ul>
+<li><strong>template1</strong>: CREATE DATABASE のデフォルトの<strong>複製元</strong>（→ 08章）</li>
+<li><strong>template0</strong>: 変更してはいけない素のテンプレート</li>
+<li><strong>postgres</strong>: 接続先がないときに使うデフォルトのデータベース</li>
+</ul>
+</li>
+</ul>
+<h4 id="05-インストール・標準付属ツール-8">initdb の主なオプション</h4>
+<table>
+<thead>
+<tr>
+<th>オプション</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>-D ディレクトリ</code></strong> / <code>--pgdata</code></td>
+<td>データベースクラスタを作る場所。省略時は環境変数 <strong>PGDATA</strong></td>
+</tr>
+<tr>
+<td><strong><code>-E エンコーディング</code></strong> / <code>--encoding</code></td>
+<td>テンプレートデータベースの<strong>文字エンコーディング</strong>（例: <code>UTF8</code>）。省略時はロケールから決まる</td>
+</tr>
+<tr>
+<td><strong><code>--locale=ロケール</code></strong></td>
+<td>ロケール（照合順序・文字種別など）をまとめて指定</td>
+</tr>
+<tr>
+<td><code>--lc-collate</code> / <code>--lc-ctype</code> 等</td>
+<td>ロケールを項目ごとに指定</td>
+</tr>
+<tr>
+<td><strong><code>--no-locale</code></strong></td>
+<td>ロケールを使わない（= <strong><code>--locale=C</code></strong>）</td>
+</tr>
+<tr>
+<td><strong><code>-U ユーザー名</code></strong> / <code>--username</code></td>
+<td>データベースのスーパーユーザー名。省略時は <strong>initdb を実行した OS ユーザー名</strong></td>
+</tr>
+<tr>
+<td><strong><code>-W</code></strong> / <code>--pwprompt</code></td>
+<td>スーパーユーザーのパスワードを対話で設定</td>
+</tr>
+<tr>
+<td><strong><code>-A 認証方式</code></strong> / <code>--auth</code></td>
+<td>pg_hba.conf に書く認証方式。省略時は <strong>trust</strong>（警告が出る）</td>
+</tr>
+<tr>
+<td><strong><code>-k</code></strong> / <code>--data-checksums</code></td>
+<td><strong>データチェックサム</strong>を有効にする（ページ破損を検出できる。後から変えるには pg_checksums が必要）</td>
+</tr>
+<tr>
+<td><code>-X ディレクトリ</code> / <code>--waldir</code></td>
+<td>WAL の格納場所を別ディレクトリにする</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <strong>-D で指定するディレクトリは空か、存在しないこと</strong>（中身があるとエラー）</li>
+<li class="caution">⚠ ロケール（特に <strong>LC_COLLATE・LC_CTYPE</strong>）は<strong>データベース作成後に変更できない</strong>。C ロケールにすると並べ替えが速く、LIKE の前方一致でインデックスを使いやすい</li>
+<li><code>pg_ctl initdb -D ディレクトリ</code> でも同じことができる</li>
+</ul>
+<h4 id="05-インストール・標準付属ツール-9">データディレクトリの中身</h4>
+<table>
+<thead>
+<tr>
+<th>ファイル / ディレクトリ</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>base/</strong></td>
+<td>データベースごとのサブディレクトリ（名前は<strong>データベースの OID</strong>）。テーブル・インデックスのファイル</td>
+</tr>
+<tr>
+<td><strong>global/</strong></td>
+<td>クラスタ全体で共有するカタログ（pg_database、pg_authid など）</td>
+</tr>
+<tr>
+<td><strong>pg_wal/</strong></td>
+<td><strong>WAL ファイル</strong>（10 より前は pg_xlog）</td>
+</tr>
+<tr>
+<td><strong>pg_xact/</strong></td>
+<td>トランザクションのコミット状態（10 より前は pg_clog）</td>
+</tr>
+<tr>
+<td><strong>pg_tblspc/</strong></td>
+<td>テーブルスペースへの<strong>シンボリックリンク</strong></td>
+</tr>
+<tr>
+<td><strong>postgresql.conf</strong></td>
+<td>メインの設定ファイル（→ 06章）</td>
+</tr>
+<tr>
+<td><strong>pg_hba.conf</strong></td>
+<td>クライアント認証の設定ファイル（→ 06章）</td>
+</tr>
+<tr>
+<td>pg_ident.conf</td>
+<td>OS ユーザー名と DB ユーザー名の対応表</td>
+</tr>
+<tr>
+<td><strong>postgresql.auto.conf</strong></td>
+<td><strong>ALTER SYSTEM</strong> が書き込む設定ファイル（手で編集しない）</td>
+</tr>
+<tr>
+<td><strong>PG_VERSION</strong></td>
+<td>メジャーバージョン番号</td>
+</tr>
+<tr>
+<td><strong>postmaster.pid</strong></td>
+<td>起動中のサーバの PID など。<strong>二重起動を防ぐ</strong>。停止すると消える</td>
+</tr>
+<tr>
+<td>postmaster.opts</td>
+<td>前回起動したときのコマンドラインオプション</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ パッケージ版では設定ファイルがデータディレクトリの外（例: Debian 系の <code>/etc/postgresql/14/main/</code>）に置かれることがある</li>
+<li><code>pg_controldata</code>: データディレクトリの制御情報（クラスタの状態、最新チェックポイントの位置、データチェックサムの有無など）を表示する</li>
+</ul>
+<h3 id="05-インストール・標準付属ツール-10">3. pg_ctl（起動・停止） <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="05-インストール・標準付属ツール-11">サブコマンド</h4>
+<table>
+<thead>
+<tr>
+<th>コマンド</th>
+<th>動作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>pg_ctl start</code></strong></td>
+<td>サーバを起動</td>
+</tr>
+<tr>
+<td><strong><code>pg_ctl stop</code></strong></td>
+<td>サーバを停止</td>
+</tr>
+<tr>
+<td><strong><code>pg_ctl restart</code></strong></td>
+<td>停止して起動し直す</td>
+</tr>
+<tr>
+<td><strong><code>pg_ctl reload</code></strong></td>
+<td>設定ファイルを<strong>再読み込み</strong>（SIGHUP を送る。サーバは止まらない）</td>
+</tr>
+<tr>
+<td><strong><code>pg_ctl status</code></strong></td>
+<td>起動しているか確認</td>
+</tr>
+<tr>
+<td><strong><code>pg_ctl promote</code></strong></td>
+<td>スタンバイサーバを<strong>昇格</strong>させる（プライマリにする）</td>
+</tr>
+<tr>
+<td><code>pg_ctl kill シグナル PID</code></td>
+<td>プロセスにシグナルを送る（Windows 用）</td>
+</tr>
+<tr>
+<td><code>pg_ctl initdb</code></td>
+<td>initdb を実行</td>
+</tr>
+</tbody>
+</table>
+<h4 id="05-インストール・標準付属ツール-12">主なオプション</h4>
+<table>
+<thead>
+<tr>
+<th>オプション</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>-D ディレクトリ</code></strong></td>
+<td>データディレクトリ（省略時は PGDATA）</td>
+</tr>
+<tr>
+<td><strong><code>-l ファイル</code></strong></td>
+<td>サーバのログ（標準出力・標準エラー）の出力先。start / restart で使う</td>
+</tr>
+<tr>
+<td><strong><code>-m モード</code></strong></td>
+<td>停止モード（smart / fast / immediate）</td>
+</tr>
+<tr>
+<td><code>-o "オプション"</code></td>
+<td>postgres コマンドへ渡すオプション（例: <code>-o "-p 5433"</code>）</td>
+</tr>
+<tr>
+<td><strong><code>-w</code></strong> / <code>-W</code></td>
+<td>処理の完了を<strong>待つ</strong> / 待たない。<strong>デフォルトは待つ</strong>（-w）</td>
+</tr>
+<tr>
+<td><code>-t 秒</code></td>
+<td>待つ最大秒数（デフォルト 60秒）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="05-インストール・標準付属ツール-13">停止モード</h4>
+<table>
+<thead>
+<tr>
+<th>モード</th>
+<th>動作</th>
+<th>シグナル</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>smart</strong></td>
+<td>新しい接続を拒否し、<strong>すべてのクライアントが切断するまで待って</strong>から停止</td>
+<td>SIGTERM</td>
+</tr>
+<tr>
+<td><strong>fast</strong>（<strong>デフォルト</strong>）</td>
+<td>実行中のトランザクションを<strong>ロールバック</strong>し、クライアントを<strong>強制切断</strong>してから正常に停止</td>
+<td>SIGINT</td>
+</tr>
+<tr>
+<td><strong>immediate</strong></td>
+<td>正常な終了処理をせず<strong>即座に終了</strong>。次回起動時に<strong>クラッシュリカバリ</strong>（WAL からの復旧）が走る</td>
+<td>SIGQUIT</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <strong>デフォルトの停止モードは fast</strong>（9.5 より前は smart だった）</li>
+<li class="caution">⚠ immediate でもコミット済みのデータは失われない（WAL から復旧する）。ただし起動に時間がかかる</li>
+<li>例: <code>pg_ctl stop -D /var/lib/pgsql/data -m smart</code></li>
+</ul>
+<h3 id="05-インストール・標準付属ツール-14">4. 接続のための環境変数と .pgpass <span class="stars" data-n="2">★★</span></h3>
+<h4 id="05-インストール・標準付属ツール-15">環境変数</h4>
+<table>
+<thead>
+<tr>
+<th>環境変数</th>
+<th>意味</th>
+<th>使うもの</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PGDATA</strong></td>
+<td>データディレクトリ</td>
+<td>initdb・pg_ctl・postgres（<strong>サーバ側</strong>）</td>
+</tr>
+<tr>
+<td><strong>PGHOST</strong></td>
+<td>接続先ホスト</td>
+<td>psql などのクライアント</td>
+</tr>
+<tr>
+<td><strong>PGPORT</strong></td>
+<td>接続先ポート番号</td>
+<td>クライアント（サーバ側でも起動ポートの既定に使う）</td>
+</tr>
+<tr>
+<td><strong>PGUSER</strong></td>
+<td>接続ユーザー名</td>
+<td>クライアント</td>
+</tr>
+<tr>
+<td><strong>PGDATABASE</strong></td>
+<td>接続先データベース名</td>
+<td>クライアント</td>
+</tr>
+<tr>
+<td>PGPASSWORD</td>
+<td>パスワード（ps で見えるおそれがあり<strong>非推奨</strong>）</td>
+<td>クライアント</td>
+</tr>
+<tr>
+<td>PGPASSFILE</td>
+<td>パスワードファイルの場所</td>
+<td>クライアント</td>
+</tr>
+<tr>
+<td>PGCLIENTENCODING</td>
+<td>クライアント側の文字エンコーディング</td>
+<td>クライアント</td>
+</tr>
+</tbody>
+</table>
+<h4 id="05-インストール・標準付属ツール-16">クライアントの接続先のデフォルト</h4>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>指定がないとき</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ホスト</td>
+<td><strong>Unix ドメインソケット</strong>（ローカル接続。Windows は localhost）</td>
+</tr>
+<tr>
+<td>ポート</td>
+<td><strong>5432</strong></td>
+</tr>
+<tr>
+<td>ユーザー名</td>
+<td><strong>OS のユーザー名</strong></td>
+</tr>
+<tr>
+<td>データベース名</td>
+<td><strong>ユーザー名と同じ名前</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ データベース名を省略すると「ユーザー名と同名のデータベース」に接続しようとする。無ければ <code>database "xxx" does not exist</code> エラー</li>
+</ul>
+<h4 id="05-インストール・標準付属ツール-17">パスワードファイル（.pgpass）</h4>
+<ul>
+<li>ホームディレクトリの <strong><code>~/.pgpass</code></strong> に書くと、パスワード入力を省略できる（Windows は <code>%APPDATA%\postgresql\pgpass.conf</code>）</li>
+<li>書式: <strong><code>ホスト名:ポート:データベース名:ユーザー名:パスワード</code></strong>（<code>*</code> で何にでも一致）</li>
+<li class="caution">⚠ パーミッションを <strong>0600</strong>（所有者だけ読み書き）にしないと<strong>無視される</strong></li>
+</ul>
+<h3 id="05-インストール・標準付属ツール-18">5. psql の起動オプション <span class="stars" data-n="3">★★★</span></h3>
+<pre><code>psql [オプション] [データベース名 [ユーザー名]]
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>オプション</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>-d データベース</code></strong></td>
+<td>接続先データベース</td>
+</tr>
+<tr>
+<td><strong><code>-U ユーザー</code></strong></td>
+<td>接続ユーザー</td>
+</tr>
+<tr>
+<td><strong><code>-h ホスト</code></strong></td>
+<td>接続先ホスト</td>
+</tr>
+<tr>
+<td><strong><code>-p ポート</code></strong></td>
+<td>接続先ポート</td>
+</tr>
+<tr>
+<td><strong><code>-c "SQL"</code></strong></td>
+<td>SQL（またはメタコマンド）を1つ実行して終了</td>
+</tr>
+<tr>
+<td><strong><code>-f ファイル</code></strong></td>
+<td>ファイルの SQL を実行して終了</td>
+</tr>
+<tr>
+<td><strong><code>-l</code></strong></td>
+<td><strong>データベースの一覧</strong>を表示して終了</td>
+</tr>
+<tr>
+<td><code>-W</code> / <code>-w</code></td>
+<td>パスワード入力を必ず求める / 求めない</td>
+</tr>
+<tr>
+<td><strong><code>-A</code></strong></td>
+<td>桁揃えしない（unaligned）出力</td>
+</tr>
+<tr>
+<td><strong><code>-t</code></strong></td>
+<td>列名・件数の行を出さず、<strong>データ行だけ</strong>出力</td>
+</tr>
+<tr>
+<td><code>-F 文字</code></td>
+<td>-A のときの列の区切り文字（デフォルトは縦棒）</td>
+</tr>
+<tr>
+<td><strong><code>-x</code></strong></td>
+<td><strong>拡張表示</strong>（1列1行の縦表示）</td>
+</tr>
+<tr>
+<td><code>-o ファイル</code></td>
+<td>結果をファイルへ出力</td>
+</tr>
+<tr>
+<td><code>-q</code></td>
+<td>メッセージを抑える</td>
+</tr>
+<tr>
+<td><code>-v 名前=値</code></td>
+<td>psql 変数を設定</td>
+</tr>
+<tr>
+<td><strong><code>-1</code></strong></td>
+<td>-f のファイル全体を<strong>1つのトランザクション</strong>で実行</td>
+</tr>
+<tr>
+<td><strong><code>-E</code></strong></td>
+<td>メタコマンドが内部で実行する <strong>SQL を表示</strong>する</td>
+</tr>
+<tr>
+<td><code>-X</code></td>
+<td>起動時に <strong>~/.psqlrc</strong> を読まない</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>例: <code>psql -U postgres -d sampledb -h 192.168.1.10 -p 5432</code></li>
+<li>例: <code>psql -At -c "SELECT count(*) FROM t" sampledb</code> → 件数の数字だけ出る（スクリプト向け）</li>
+</ul>
+<h3 id="05-インストール・標準付属ツール-19">6. psql のメタコマンド <span class="stars" data-n="3">★★★</span></h3>
+<ul>
+<li><strong><code>\</code>（バックスラッシュ）で始まる psql 独自のコマンド</strong>。SQL ではないので<strong>末尾の <code>;</code> は不要</strong></li>
+<li><strong><code>+</code></strong> を付けると詳細表示（例: <code>\dt+</code> でサイズ・説明も出る）、<strong><code>S</code></strong> を付けるとシステムオブジェクトも出す（例: <code>\dS</code>）</li>
+<li>名前のパターンを付けると絞り込める（例: <code>\dt emp*</code>）</li>
+</ul>
+<h4 id="05-インストール・標準付属ツール-20">一覧・定義の表示</h4>
+<table>
+<thead>
+<tr>
+<th>コマンド</th>
+<th>表示するもの</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>\l</code></strong></td>
+<td><strong>データベース</strong>の一覧</td>
+</tr>
+<tr>
+<td><strong><code>\d</code></strong></td>
+<td>テーブル・ビュー・シーケンスなどの一覧</td>
+</tr>
+<tr>
+<td><strong><code>\d 名前</code></strong></td>
+<td>そのテーブルなどの<strong>定義</strong>（列・型・インデックス・制約）</td>
+</tr>
+<tr>
+<td><strong><code>\dt</code></strong></td>
+<td><strong>テーブル</strong></td>
+</tr>
+<tr>
+<td><strong><code>\di</code></strong></td>
+<td><strong>インデックス</strong></td>
+</tr>
+<tr>
+<td><strong><code>\dv</code></strong></td>
+<td><strong>ビュー</strong></td>
+</tr>
+<tr>
+<td><strong><code>\ds</code></strong></td>
+<td><strong>シーケンス</strong></td>
+</tr>
+<tr>
+<td><code>\dm</code></td>
+<td>マテリアライズドビュー</td>
+</tr>
+<tr>
+<td><strong><code>\df</code></strong></td>
+<td><strong>関数</strong></td>
+</tr>
+<tr>
+<td><strong><code>\dn</code></strong></td>
+<td><strong>スキーマ</strong></td>
+</tr>
+<tr>
+<td><strong><code>\du</code></strong> / <code>\dg</code></td>
+<td><strong>ロール（ユーザー）</strong></td>
+</tr>
+<tr>
+<td><strong><code>\dp</code></strong> / <strong><code>\z</code></strong></td>
+<td>テーブルなどの<strong>アクセス権限</strong></td>
+</tr>
+<tr>
+<td><strong><code>\db</code></strong></td>
+<td><strong>テーブルスペース</strong></td>
+</tr>
+<tr>
+<td><code>\dx</code></td>
+<td>インストール済みの拡張機能</td>
+</tr>
+<tr>
+<td><code>\dT</code></td>
+<td>データ型</td>
+</tr>
+<tr>
+<td><code>\dd</code></td>
+<td>オブジェクトのコメント</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <code>\d</code> 系の頭文字: <strong>t</strong>able、<strong>i</strong>ndex、<strong>v</strong>iew、<strong>s</strong>equence、<strong>f</strong>unction、<strong>n</strong>amespace（スキーマ）、<strong>u</strong>ser、<strong>p</strong>rivilege、<strong>b</strong>（ta<strong>b</strong>lespace）。<strong><code>\ds</code> はスキーマではなくシーケンス</strong></li>
+</ul>
+<h4 id="05-インストール・標準付属ツール-21">接続・入出力・その他</h4>
+<table>
+<thead>
+<tr>
+<th>コマンド</th>
+<th>動作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>\c データベース [ユーザー]</code></strong> / <code>\connect</code></td>
+<td><strong>別のデータベース（ユーザー）に接続し直す</strong></td>
+</tr>
+<tr>
+<td><code>\conninfo</code></td>
+<td>現在の接続情報を表示</td>
+</tr>
+<tr>
+<td><strong><code>\i ファイル</code></strong></td>
+<td>ファイルの SQL を実行</td>
+</tr>
+<tr>
+<td><strong><code>\o ファイル</code></strong></td>
+<td>以降の<strong>結果をファイルへ</strong>出力（引数なしで画面に戻す）</td>
+</tr>
+<tr>
+<td><strong><code>\copy</code></strong></td>
+<td><strong>クライアント側</strong>のファイルとの間でデータをコピー（→ 07章）</td>
+</tr>
+<tr>
+<td><strong><code>\x</code></strong></td>
+<td>拡張表示の切り替え</td>
+</tr>
+<tr>
+<td><strong><code>\timing</code></strong></td>
+<td>SQL の<strong>実行時間</strong>の表示を切り替え</td>
+</tr>
+<tr>
+<td><code>\e</code></td>
+<td>エディタで直前の SQL を編集</td>
+</tr>
+<tr>
+<td><strong><code>\!</code> コマンド</strong></td>
+<td><strong>OS のシェルコマンド</strong>を実行</td>
+</tr>
+<tr>
+<td><code>\echo 文字列</code></td>
+<td>文字列を表示</td>
+</tr>
+<tr>
+<td><strong><code>\set 名前 値</code></strong></td>
+<td>psql 変数を設定（引数なしで一覧）</td>
+</tr>
+<tr>
+<td><code>\pset</code></td>
+<td>出力形式の設定（<code>\pset null '(null)'</code> など）</td>
+</tr>
+<tr>
+<td><code>\encoding</code></td>
+<td>クライアントエンコーディングの表示・変更</td>
+</tr>
+<tr>
+<td><code>\password [ユーザー]</code></td>
+<td>パスワードを変更（平文をログに残さない）</td>
+</tr>
+<tr>
+<td><strong><code>\?</code></strong></td>
+<td><strong>メタコマンド</strong>のヘルプ</td>
+</tr>
+<tr>
+<td><strong><code>\h [SQL コマンド]</code></strong></td>
+<td><strong>SQL 文</strong>の構文ヘルプ（例: <code>\h CREATE TABLE</code>）</td>
+</tr>
+<tr>
+<td><strong><code>\q</code></strong></td>
+<td>psql を終了</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <strong><code>\?</code> はメタコマンドのヘルプ、<code>\h</code> は SQL のヘルプ</strong></li>
+<li>主な psql 変数: <strong>AUTOCOMMIT</strong>（off で自動コミットしない → 04章）、<strong>ON_ERROR_STOP</strong>（on でエラー時にスクリプトを中断。デフォルトは続行）</li>
+<li>起動時に <strong><code>~/.psqlrc</code></strong> が読み込まれる（<code>\set</code> や <code>\timing</code> などを書いておける）</li>
+</ul>
+<h3 id="05-インストール・標準付属ツール-22">7. その他のコマンドラインツール <span class="stars" data-n="3">★★★</span></h3>
+<ul>
+<li>いずれも<strong>対応する SQL を実行するラッパー</strong>。接続オプション（<code>-h</code>・<code>-p</code>・<code>-U</code>・<code>-W</code>）は psql と同じ</li>
+</ul>
+<h4 id="05-インストール・標準付属ツール-23">createdb / dropdb</h4>
+<table>
+<thead>
+<tr>
+<th>コマンド</th>
+<th>対応する SQL</th>
+<th>主なオプション</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>createdb [DB名]</code></strong></td>
+<td>CREATE DATABASE</td>
+<td><code>-O 所有者</code>、<code>-E エンコーディング</code>、<code>-T テンプレート</code>、<code>-D テーブルスペース</code>、<code>-l ロケール</code></td>
+</tr>
+<tr>
+<td><strong><code>dropdb DB名</code></strong></td>
+<td>DROP DATABASE</td>
+<td><code>-i</code>（確認する）、<code>--if-exists</code>、<code>-f</code> / <code>--force</code>（接続を切断して削除。13〜）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ createdb で DB 名を省略すると、<strong>接続ユーザー名と同じ名前</strong>のデータベースを作る</li>
+<li class="caution">⚠ dropdb は DB 名の省略不可</li>
+</ul>
+<h4 id="05-インストール・標準付属ツール-24">createuser / dropuser</h4>
+<table>
+<thead>
+<tr>
+<th>コマンド</th>
+<th>対応する SQL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>createuser [ユーザー名]</code></strong></td>
+<td>CREATE ROLE &hellip; LOGIN</td>
+</tr>
+<tr>
+<td><strong><code>dropuser ユーザー名</code></strong></td>
+<td>DROP ROLE</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>createuser のオプション</th>
+<th>付与する属性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>-s</code></strong> / <code>--superuser</code></td>
+<td>SUPERUSER</td>
+</tr>
+<tr>
+<td><strong><code>-d</code></strong> / <code>--createdb</code></td>
+<td>CREATEDB</td>
+</tr>
+<tr>
+<td><strong><code>-r</code></strong> / <code>--createrole</code></td>
+<td>CREATEROLE</td>
+</tr>
+<tr>
+<td><code>-l</code> / <code>-L</code></td>
+<td>LOGIN（<strong>デフォルト</strong>）/ NOLOGIN</td>
+</tr>
+<tr>
+<td><strong><code>-P</code></strong> / <code>--pwprompt</code></td>
+<td>パスワードを対話で設定</td>
+</tr>
+<tr>
+<td><code>--replication</code></td>
+<td>REPLICATION</td>
+</tr>
+<tr>
+<td><code>--interactive</code></td>
+<td>未指定の属性（スーパーユーザーにするか等）を対話で聞く</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ createuser の <code>-s</code>・<code>-d</code>・<code>-r</code> は<strong>スーパーユーザー・DB作成・ロール作成</strong>。<code>-d</code> は「削除」ではない</li>
+<li class="caution">⚠ createuser の <strong>-U は「接続するユーザー」</strong>（作るユーザー名ではない）。作るユーザー名は最後の引数</li>
+</ul>
+<h4 id="05-インストール・標準付属ツール-25">メンテナンス系</h4>
+<table>
+<thead>
+<tr>
+<th>コマンド</th>
+<th>対応する SQL</th>
+<th>主なオプション</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>vacuumdb</code></strong></td>
+<td>VACUUM</td>
+<td><strong><code>-a</code></strong>（全データベース）、<code>-d DB</code>、<code>-t テーブル</code>、<strong><code>-f</code></strong>（FULL）、<strong><code>-z</code></strong>（VACUUM + ANALYZE）、<strong><code>-Z</code></strong>（<strong>ANALYZE のみ</strong>）、<code>-F</code>（FREEZE）、<code>-j</code>（並列）</td>
+</tr>
+<tr>
+<td><code>reindexdb</code></td>
+<td>REINDEX</td>
+<td><code>-a</code>、<code>-t</code>、<code>-i インデックス</code>、<code>-s</code>（システムカタログ）</td>
+</tr>
+<tr>
+<td><code>clusterdb</code></td>
+<td>CLUSTER</td>
+<td><code>-a</code>、<code>-t</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ vacuumdb の <strong><code>-z</code> は VACUUM と ANALYZE の両方</strong>、<strong><code>-Z</code> は ANALYZE だけ</strong>（大文字・小文字の違い）</li>
+</ul>
+<h4 id="05-インストール・標準付属ツール-26">その他</h4>
+<table>
+<thead>
+<tr>
+<th>コマンド</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>pg_dump / pg_dumpall / pg_restore</strong></td>
+<td>論理バックアップとリストア（→ 07章）</td>
+</tr>
+<tr>
+<td><strong>pg_basebackup</strong></td>
+<td>物理バックアップ（→ 07章）</td>
+</tr>
+<tr>
+<td><strong>pg_isready</strong></td>
+<td>サーバが<strong>接続を受け付けているか</strong>確認（終了ステータス 0 = 受付中、1 = 拒否中、2 = 応答なし）</td>
+</tr>
+<tr>
+<td>pg_controldata</td>
+<td>データディレクトリの制御情報を表示</td>
+</tr>
+<tr>
+<td>pg_upgrade</td>
+<td>メジャーバージョンアップ（→ 01章）</td>
+</tr>
+<tr>
+<td>pg_resetwal</td>
+<td>WAL をリセットする（壊れて起動できないときの最終手段。データを失うおそれ）</td>
+</tr>
+<tr>
+<td>pg_config</td>
+<td>インストールされた PostgreSQL のビルド情報・パスを表示</td>
+</tr>
+</tbody>
+</table>
+</article>
+<article class="chapter" id="06-設定ファイル">
+<h2 id="06-設定ファイル-1">設定ファイル</h2>
+<blockquote>
+<p>S2.3 設定ファイル（重要度5）。5問前後。パラメータの<strong>反映方法（再起動か再読み込みか）</strong>、主要パラメータのデフォルト値、pg_hba.conf の書式と評価順が定番。</p>
+</blockquote>
+<h3 id="06-設定ファイル-2">1. 設定ファイルの種類 <span class="stars" data-n="3">★★★</span></h3>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>postgresql.conf</strong></td>
+<td>サーバの<strong>動作パラメータ</strong>（メモリ・接続・ログ・WAL など）</td>
+</tr>
+<tr>
+<td><strong>postgresql.auto.conf</strong></td>
+<td><strong>ALTER SYSTEM</strong> で変更した値が書かれる。postgresql.conf より<strong>後に読まれ優先</strong>される。<strong>手で編集しない</strong></td>
+</tr>
+<tr>
+<td><strong>pg_hba.conf</strong></td>
+<td><strong>クライアント認証</strong>（どこから・誰が・どの DB に・どの方式で接続できるか）</td>
+</tr>
+<tr>
+<td>pg_ident.conf</td>
+<td>ident / peer 認証で使う、<strong>OS ユーザー名と DB ユーザー名の対応表</strong>（マップ）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>いずれも既定ではデータディレクトリ直下にある。場所はパラメータ <code>config_file</code>、<code>hba_file</code>、<code>ident_file</code> で変えられる</li>
+<li>場所の確認: <code>SHOW config_file;</code>、<code>SHOW hba_file;</code>、<code>SHOW data_directory;</code></li>
+</ul>
+<h3 id="06-設定ファイル-3">2. postgresql.conf の書式 <span class="stars" data-n="2">★★</span></h3>
+<pre><code># コメント
+listen_addresses = '*'        # 文字列は単引用符で囲む
+port = 5432
+shared_buffers = 256MB        # 単位付きで書ける
+log_min_duration_statement = 1s
+autovacuum = on
+</code></pre>
+<ul>
+<li><strong><code>パラメータ名 = 値</code></strong>（<code>=</code> は省略可）。<strong><code>#</code> 以降はコメント</strong></li>
+<li>パラメータ名は<strong>大文字・小文字を区別しない</strong></li>
+<li class="caution">⚠ 同じパラメータを複数回書くと<strong>最後に書いたもの</strong>が有効</li>
+<li>行頭を <code>#</code> でコメントアウトした（書かれていない）パラメータは<strong>デフォルト値</strong>になる</li>
+<li>値の型<ul>
+<li>真偽値: <strong>on / off</strong>、true / false、yes / no、1 / 0</li>
+<li>メモリの単位: <strong>kB、MB、GB、TB</strong>（1024 倍。<strong>大文字・小文字を区別</strong>する。<code>mb</code> は不可）</li>
+<li>時間の単位: <strong>us、ms、s、min、h、d</strong></li>
+<li>単位を省略すると、パラメータごとに決まった単位（例: shared_buffers は 8kB ブロック、work_mem は kB）</li>
+</ul>
+</li>
+<li>別ファイルの取り込み: <strong><code>include 'ファイル'</code></strong>、<code>include_if_exists 'ファイル'</code>（無くてもエラーにしない）、<code>include_dir 'ディレクトリ'</code>（中の <code>.conf</code> を名前順に読む）</li>
+</ul>
+<h3 id="06-設定ファイル-4">3. パラメータの反映方法 <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="06-設定ファイル-5">context（変更できるタイミング）</h4>
+<table>
+<thead>
+<tr>
+<th>context</th>
+<th>変更の反映</th>
+<th>例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>postmaster</strong></td>
+<td><strong>サーバの再起動</strong>が必要</td>
+<td>listen_addresses、port、max_connections、shared_buffers、wal_level、archive_mode、logging_collector</td>
+</tr>
+<tr>
+<td><strong>sighup</strong></td>
+<td><strong>設定の再読み込み</strong>（reload）で反映。セッション内の SET は不可</td>
+<td>log_<em>（多く）、archive_command、autovacuum、checkpoint_timeout、</em><em>pg_hba.conf の内容</em>*</td>
+</tr>
+<tr>
+<td>superuser</td>
+<td>スーパーユーザーなら SET で変更できる</td>
+<td>log_statement、log_min_duration_statement</td>
+</tr>
+<tr>
+<td><strong>user</strong></td>
+<td><strong>一般ユーザーも SET で変更</strong>できる</td>
+<td>work_mem、search_path、client_encoding、default_transaction_isolation、TimeZone</td>
+</tr>
+<tr>
+<td>backend / superuser-backend</td>
+<td>接続開始時にだけ設定できる</td>
+<td>log_connections（superuser-backend）</td>
+</tr>
+<tr>
+<td>internal</td>
+<td>変更不可（ビルド時に決まる）</td>
+<td>block_size、server_version</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>確認: <strong><code>SELECT name, setting, unit, context FROM pg_settings;</code></strong></li>
+<li>pg_settings の <strong>pending_restart</strong> 列: 設定ファイルは変えたが<strong>再起動しないと反映されない</strong>パラメータが true になる</li>
+<li class="caution">⚠ <strong>pg_hba.conf の変更は再読み込み（reload）で反映</strong>される（再起動は不要）</li>
+</ul>
+<h4 id="06-設定ファイル-6">再読み込みの方法</h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>pg_ctl reload</code></strong></td>
+<td>OS のコマンドから</td>
+</tr>
+<tr>
+<td><strong><code>SELECT pg_reload_conf();</code></strong></td>
+<td>SQL から（スーパーユーザーなど）</td>
+</tr>
+<tr>
+<td><code>kill -HUP &lt;postmaster の PID&gt;</code></td>
+<td>シグナルを直接送る</td>
+</tr>
+<tr>
+<td><code>systemctl reload postgresql-14</code></td>
+<td>パッケージ版のサービスから</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ 再読み込みで postmaster のパラメータを変えても<strong>反映されない</strong>（ログに「再起動が必要」と出る）</li>
+</ul>
+<h3 id="06-設定ファイル-7">4. SQL からの設定変更 <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="06-設定ファイル-8">セッション単位: SET / SHOW / RESET</h4>
+<pre><code class="language-sql">SET work_mem = '64MB';            -- このセッションだけ変更（TO も可: SET work_mem TO '64MB'）
+SHOW work_mem;                    -- 現在値を表示
+SHOW ALL;                         -- 全パラメータ
+RESET work_mem;                   -- デフォルト（設定ファイルの値）に戻す
+SET LOCAL work_mem = '128MB';     -- このトランザクションの間だけ変更
+SELECT current_setting('work_mem');          -- 関数で取得
+SELECT set_config('work_mem', '32MB', false); -- 関数で設定（true ならトランザクション内だけ）
+</code></pre>
+<ul>
+<li class="caution">⚠ SET の効果は<strong>そのセッションだけ</strong>。切断すると消え、他のセッションには影響しない</li>
+<li class="caution">⚠ <strong>SET LOCAL</strong> はトランザクションの終了で元に戻る。トランザクション外で使うと警告が出て効果なし</li>
+<li>トランザクション内で SET した後に <strong>ROLLBACK すると SET も取り消される</strong></li>
+</ul>
+<h4 id="06-設定ファイル-9">永続的な変更: ALTER SYSTEM</h4>
+<pre><code class="language-sql">ALTER SYSTEM SET work_mem = '16MB';   -- postgresql.auto.conf に書き込む
+SELECT pg_reload_conf();              -- 反映（postmaster のパラメータなら再起動）
+ALTER SYSTEM RESET work_mem;          -- auto.conf から削除
+ALTER SYSTEM RESET ALL;
+</code></pre>
+<ul>
+<li><strong>スーパーユーザー</strong>だけが実行できる</li>
+<li class="caution">⚠ ALTER SYSTEM は<strong>ファイルに書くだけ</strong>。<strong>反映には再読み込みか再起動が必要</strong></li>
+<li class="caution">⚠ <strong>トランザクションブロック内では実行できない</strong></li>
+<li class="caution">⚠ postgresql.auto.conf は postgresql.conf より後に読まれるので、<strong>同じパラメータは auto.conf の値が勝つ</strong></li>
+</ul>
+<h4 id="06-設定ファイル-10">データベース単位・ロール単位</h4>
+<pre><code class="language-sql">ALTER DATABASE sampledb SET work_mem = '32MB';
+ALTER ROLE alice SET search_path = 'app, public';
+ALTER ROLE alice IN DATABASE sampledb SET work_mem = '64MB';
+ALTER ROLE alice RESET work_mem;
+</code></pre>
+<ul>
+<li><strong>次に接続したセッションから</strong>有効（今のセッションには効かない）</li>
+<li>設定値の優先順位（後ろほど優先）</li>
+</ul>
+<pre><code>postgresql.conf → postgresql.auto.conf → サーバ起動オプション（postgres -c）
+  → ALTER DATABASE ... SET → ALTER ROLE ... SET → ALTER ROLE ... IN DATABASE ... SET
+  → クライアントの接続オプション（PGOPTIONS） → セッション内の SET
+</code></pre>
+<h3 id="06-設定ファイル-11">5. 主要パラメータ <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="06-設定ファイル-12">接続</h4>
+<table>
+<thead>
+<tr>
+<th>パラメータ</th>
+<th>デフォルト</th>
+<th>context</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>listen_addresses</strong></td>
+<td><strong>&lsquo;localhost&rsquo;</strong></td>
+<td>postmaster</td>
+<td>接続を待ち受ける IP アドレス。<strong><code>'*'</code> で全インターフェース</strong>。空文字列で TCP/IP を受け付けない</td>
+</tr>
+<tr>
+<td><strong>port</strong></td>
+<td><strong>5432</strong></td>
+<td>postmaster</td>
+<td>ポート番号</td>
+</tr>
+<tr>
+<td><strong>max_connections</strong></td>
+<td><strong>100</strong></td>
+<td>postmaster</td>
+<td>同時接続数の上限</td>
+</tr>
+<tr>
+<td>superuser_reserved_connections</td>
+<td>3</td>
+<td>postmaster</td>
+<td>max_connections のうち<strong>スーパーユーザー用に予約</strong>する数</td>
+</tr>
+<tr>
+<td>unix_socket_directories</td>
+<td>&lsquo;/tmp&rsquo;（ビルドによる）</td>
+<td>postmaster</td>
+<td>Unix ドメインソケットの場所</td>
+</tr>
+<tr>
+<td>password_encryption</td>
+<td><strong>scram-sha-256</strong></td>
+<td>user</td>
+<td>パスワードの保存形式（<strong>14 から scram-sha-256</strong>。13 までは md5）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <strong>デフォルトの listen_addresses は localhost</strong>: 他のマシンから接続するには、<strong>listen_addresses の変更（再起動）と pg_hba.conf への許可の追加（再読み込み）の両方</strong>が必要</li>
+</ul>
+<h4 id="06-設定ファイル-13">メモリ</h4>
+<table>
+<thead>
+<tr>
+<th>パラメータ</th>
+<th>デフォルト</th>
+<th>context</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>shared_buffers</strong></td>
+<td><strong>128MB</strong></td>
+<td>postmaster</td>
+<td>全プロセスで共有する<strong>データのキャッシュ</strong>（共有バッファ）。物理メモリの 25% 程度が目安</td>
+</tr>
+<tr>
+<td><strong>work_mem</strong></td>
+<td><strong>4MB</strong></td>
+<td>user</td>
+<td><strong>1回のソート・ハッシュ操作</strong>が使うメモリ。超えると一時ファイルを使う</td>
+</tr>
+<tr>
+<td><strong>maintenance_work_mem</strong></td>
+<td><strong>64MB</strong></td>
+<td>user</td>
+<td><strong>VACUUM、CREATE INDEX</strong> などメンテナンス作業用のメモリ</td>
+</tr>
+<tr>
+<td>effective_cache_size</td>
+<td>4GB</td>
+<td>user</td>
+<td>プランナが想定する OS のキャッシュを含めたキャッシュ量（実際には確保しない）</td>
+</tr>
+<tr>
+<td>wal_buffers</td>
+<td>-1（自動）</td>
+<td>postmaster</td>
+<td>WAL を書き出す前のバッファ</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ work_mem は<strong>接続ごと・操作ごと</strong>に確保される。大きくしすぎると、同時接続が多いときにメモリ不足になる</li>
+</ul>
+<h4 id="06-設定ファイル-14">WAL・チェックポイント</h4>
+<table>
+<thead>
+<tr>
+<th>パラメータ</th>
+<th>デフォルト</th>
+<th>context</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>wal_level</strong></td>
+<td><strong>replica</strong></td>
+<td>postmaster</td>
+<td>WAL に書く情報量。<strong>minimal</strong> &lt; <strong>replica</strong>（アーカイブ・レプリケーションに必要）&lt; <strong>logical</strong>（論理レプリケーション）</td>
+</tr>
+<tr>
+<td><strong>fsync</strong></td>
+<td><strong>on</strong></td>
+<td>sighup</td>
+<td>更新をディスクへ確実に書き出す。<strong>off にするとクラッシュでデータが壊れうる</strong></td>
+</tr>
+<tr>
+<td><strong>synchronous_commit</strong></td>
+<td><strong>on</strong></td>
+<td>user</td>
+<td>コミット時に <strong>WAL のディスク書き込みを待つ</strong>か。off なら速いが、クラッシュ時に直前のコミットが失われうる（<strong>不整合にはならない</strong>）</td>
+</tr>
+<tr>
+<td>checkpoint_timeout</td>
+<td><strong>5min</strong></td>
+<td>sighup</td>
+<td>自動チェックポイントの間隔</td>
+</tr>
+<tr>
+<td><strong>max_wal_size</strong></td>
+<td><strong>1GB</strong></td>
+<td>sighup</td>
+<td>この量の WAL がたまるとチェックポイントを実行</td>
+</tr>
+<tr>
+<td>min_wal_size</td>
+<td>80MB</td>
+<td>sighup</td>
+<td>再利用のために残しておく WAL 量</td>
+</tr>
+<tr>
+<td>checkpoint_completion_target</td>
+<td>0.9</td>
+<td>sighup</td>
+<td>チェックポイントの書き出しを間隔のどの割合まで分散させるか</td>
+</tr>
+<tr>
+<td><strong>archive_mode</strong></td>
+<td><strong>off</strong></td>
+<td>postmaster</td>
+<td>WAL アーカイブを有効にする（→ 07章）</td>
+</tr>
+<tr>
+<td><strong>archive_command</strong></td>
+<td>&rsquo;&lsquo;（空）</td>
+<td>sighup</td>
+<td>WAL ファイルをアーカイブするシェルコマンド（→ 07章）</td>
+</tr>
+<tr>
+<td>max_wal_senders</td>
+<td>10</td>
+<td>postmaster</td>
+<td>WAL 送信プロセス（レプリケーション・pg_basebackup）の上限</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>チェックポイント</strong>: 共有バッファ上の変更済みページ（ダーティページ）を<strong>データファイルへ書き出す</strong>処理。それ以前の WAL はクラッシュリカバリに不要になる。<strong><code>CHECKPOINT</code></strong> コマンドで手動実行もできる</li>
+<li class="caution">⚠ fsync = off と synchronous_commit = off の違い: <strong>fsync off はデータ破損のおそれ</strong>、synchronous_commit off は<strong>直近のコミットを失うおそれ（整合性は保たれる）</strong></li>
+</ul>
+<h4 id="06-設定ファイル-15">ログ</h4>
+<table>
+<thead>
+<tr>
+<th>パラメータ</th>
+<th>デフォルト</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>logging_collector</strong></td>
+<td><strong>off</strong></td>
+<td>ログ収集プロセスを使い、ログを<strong>ファイルに</strong>書く（postmaster。変更は再起動）</td>
+</tr>
+<tr>
+<td><strong>log_destination</strong></td>
+<td><strong>&lsquo;stderr&rsquo;</strong></td>
+<td>出力先。stderr、<strong>csvlog</strong>（logging_collector が必要）、<strong>syslog</strong>、eventlog（Windows）</td>
+</tr>
+<tr>
+<td><strong>log_directory</strong></td>
+<td><strong>&lsquo;log&rsquo;</strong></td>
+<td>ログファイルを置くディレクトリ（相対パスはデータディレクトリから）</td>
+</tr>
+<tr>
+<td><strong>log_filename</strong></td>
+<td>&lsquo;postgresql-%Y-%m-%d_%H%M%S.log&rsquo;</td>
+<td>ログファイル名（strftime の書式）</td>
+</tr>
+<tr>
+<td>log_rotation_age / log_rotation_size</td>
+<td>1d / 10MB</td>
+<td>ログファイルを切り替える時間 / サイズ</td>
+</tr>
+<tr>
+<td><strong>log_min_messages</strong></td>
+<td><strong>warning</strong></td>
+<td><strong>サーバログに出す最低レベル</strong></td>
+</tr>
+<tr>
+<td>client_min_messages</td>
+<td>notice</td>
+<td><strong>クライアントに返す</strong>最低レベル</td>
+</tr>
+<tr>
+<td><strong>log_min_duration_statement</strong></td>
+<td><strong>-1</strong>（無効）</td>
+<td><strong>指定時間以上かかった SQL</strong> をログに出す（0 で全 SQL）。スロークエリの調査に使う</td>
+</tr>
+<tr>
+<td><strong>log_statement</strong></td>
+<td><strong>none</strong></td>
+<td>SQL をログに出す範囲: <strong>none / ddl / mod / all</strong></td>
+</tr>
+<tr>
+<td>log_line_prefix</td>
+<td>&lsquo;%m [%p] &lsquo;</td>
+<td>各行の先頭に付ける情報（%m = 時刻、%p = PID、%u = ユーザー、%d = DB）</td>
+</tr>
+<tr>
+<td>log_connections / log_disconnections</td>
+<td>off</td>
+<td>接続・切断をログに出す</td>
+</tr>
+<tr>
+<td>log_lock_waits</td>
+<td>off</td>
+<td>deadlock_timeout を超えたロック待ちをログに出す</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>メッセージのレベル（低 → 高）: DEBUG5〜DEBUG1 → INFO → <strong>NOTICE</strong> → <strong>WARNING</strong> → <strong>ERROR</strong> → LOG → <strong>FATAL</strong> → <strong>PANIC</strong><ul>
+<li>log_min_messages で指定したレベル<strong>以上</strong>が出力される（サーバログでは LOG は ERROR より上の扱い）</li>
+</ul>
+</li>
+<li class="caution">⚠ log_statement の <strong>mod</strong> は ddl に加えて <strong>INSERT・UPDATE・DELETE・TRUNCATE</strong> なども出す（「ddl ⊂ mod ⊂ all」）</li>
+</ul>
+<h4 id="06-設定ファイル-16">クライアント接続時のデフォルト</h4>
+<table>
+<thead>
+<tr>
+<th>パラメータ</th>
+<th>デフォルト</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>search_path</strong></td>
+<td><strong>&rsquo;&ldquo;$user&rdquo;, public&rsquo;</strong></td>
+<td>スキーマの検索順（→ 03章）</td>
+</tr>
+<tr>
+<td><strong>client_encoding</strong></td>
+<td>DB のエンコーディング</td>
+<td>クライアント側の文字コード（サーバ側で自動変換）</td>
+</tr>
+<tr>
+<td><strong>default_transaction_isolation</strong></td>
+<td><strong>&lsquo;read committed&rsquo;</strong></td>
+<td>分離レベルのデフォルト（→ 04章）</td>
+</tr>
+<tr>
+<td><strong>TimeZone</strong></td>
+<td>initdb 時の OS の設定</td>
+<td>タイムゾーン</td>
+</tr>
+<tr>
+<td>DateStyle</td>
+<td>&lsquo;ISO, MDY&rsquo;（initdb で決まる）</td>
+<td>日付の表示形式</td>
+</tr>
+<tr>
+<td>lc_messages</td>
+<td>initdb 時のロケール</td>
+<td>メッセージの言語</td>
+</tr>
+<tr>
+<td>statement_timeout</td>
+<td>0（無効）</td>
+<td>指定時間を超えた SQL を中断する</td>
+</tr>
+<tr>
+<td>deadlock_timeout</td>
+<td>1s</td>
+<td>デッドロック検出を始めるまでの待ち時間（→ 04章）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="06-設定ファイル-17">autovacuum</h4>
+<ul>
+<li>autovacuum（デフォルト <strong>on</strong>）、autovacuum_naptime（<strong>1min</strong>）など → 08章</li>
+</ul>
+<h3 id="06-設定ファイル-18">6. pg_hba.conf（クライアント認証） <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="06-設定ファイル-19">書式</h4>
+<pre><code># TYPE    DATABASE   USER       ADDRESS           METHOD
+local     all        postgres                     peer
+local     all        all                          scram-sha-256
+host      all        all        127.0.0.1/32      scram-sha-256
+host      sampledb   +staff     192.168.1.0/24    scram-sha-256
+hostssl   all        all        0.0.0.0/0         scram-sha-256
+host      all        all        ::1/128           scram-sha-256
+host      replication  repuser  192.168.1.20/32   scram-sha-256
+host      all        all        0.0.0.0/0         reject
+</code></pre>
+<ul>
+<li>1行1ルール。<strong><code>接続タイプ データベース ユーザー [アドレス] 認証方式 [オプション]</code></strong></li>
+<li><strong>上から順に評価し、最初に一致した行だけを使う</strong></li>
+<li class="caution">⚠ 一致した行の認証に<strong>失敗しても、次の行は試さない</strong>（そのまま接続拒否）</li>
+<li class="caution">⚠ <strong>どの行にも一致しなければ拒否</strong></li>
+<li class="caution">⚠ 書く順番が大事: 例外的なルール（特定ユーザーの許可・拒否）は<strong>上</strong>に、一般的なルールは<strong>下</strong>に書く</li>
+<li>変更は <strong>再読み込み（pg_ctl reload / pg_reload_conf()）</strong> で反映</li>
+<li>中身の確認: システムビュー <strong>pg_hba_file_rules</strong>（書式エラーの行も分かる）</li>
+</ul>
+<h4 id="06-設定ファイル-20">接続タイプ（TYPE）</h4>
+<table>
+<thead>
+<tr>
+<th>タイプ</th>
+<th>対象</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>local</strong></td>
+<td><strong>Unix ドメインソケット</strong>の接続（アドレス欄は書かない）</td>
+</tr>
+<tr>
+<td><strong>host</strong></td>
+<td><strong>TCP/IP</strong> の接続（SSL・非 SSL の<strong>両方</strong>）</td>
+</tr>
+<tr>
+<td><strong>hostssl</strong></td>
+<td>TCP/IP のうち <strong>SSL を使う</strong>接続だけ</td>
+</tr>
+<tr>
+<td><strong>hostnossl</strong></td>
+<td>TCP/IP のうち <strong>SSL を使わない</strong>接続だけ</td>
+</tr>
+<tr>
+<td>hostgssenc / hostnogssenc</td>
+<td>GSSAPI 暗号化の有無</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <code>psql -h localhost</code> は <strong>TCP/IP（host 行）</strong>、<code>-h</code> なしは <strong>Unix ドメインソケット（local 行）</strong> になる</li>
+</ul>
+<h4 id="06-設定ファイル-21">データベース（DATABASE）とユーザー（USER）</h4>
+<table>
+<thead>
+<tr>
+<th>書き方</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>all</strong></td>
+<td>すべて。⚠ DATABASE の all に <strong>replication は含まれない</strong></td>
+</tr>
+<tr>
+<td><strong>sameuser</strong></td>
+<td><strong>ユーザー名と同じ名前</strong>のデータベース</td>
+</tr>
+<tr>
+<td>samerole</td>
+<td>ユーザーが<strong>同名のロールのメンバー</strong>であるデータベース</td>
+</tr>
+<tr>
+<td><strong>replication</strong></td>
+<td><strong>物理レプリケーション接続</strong>（pg_basebackup など）</td>
+</tr>
+<tr>
+<td>名前</td>
+<td>そのデータベース / ユーザー。カンマ区切りで複数可</td>
+</tr>
+<tr>
+<td><strong><code>+ロール名</code></strong>（USER 欄）</td>
+<td><strong>そのロールのメンバー</strong>全員</td>
+</tr>
+<tr>
+<td><code>@ファイル名</code></td>
+<td>ファイルに書いた名前の一覧</td>
+</tr>
+</tbody>
+</table>
+<h4 id="06-設定ファイル-22">アドレス（ADDRESS）</h4>
+<ul>
+<li><strong>CIDR 形式</strong>: <code>192.168.1.0/24</code>（ネットワーク）、<code>192.168.1.10/32</code>（1台）、<code>0.0.0.0/0</code>（IPv4 すべて）、<code>::1/128</code>（IPv6 のループバック）</li>
+<li>IP アドレスとネットマスクを2列に分けて書いてもよい（<code>192.168.1.0 255.255.255.0</code>）</li>
+<li><strong>samehost</strong>（サーバ自身のアドレス）、<strong>samenet</strong>（サーバと同じサブネット）、ホスト名も書ける</li>
+</ul>
+<h4 id="06-設定ファイル-23">認証方式（METHOD）</h4>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>動作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>trust</strong></td>
+<td><strong>無条件で許可</strong>（パスワード不要）</td>
+</tr>
+<tr>
+<td><strong>reject</strong></td>
+<td><strong>無条件で拒否</strong></td>
+</tr>
+<tr>
+<td><strong>scram-sha-256</strong></td>
+<td><strong>SCRAM-SHA-256 のパスワード認証</strong>（最も安全なパスワード方式）</td>
+</tr>
+<tr>
+<td><strong>md5</strong></td>
+<td>MD5 のチャレンジ・レスポンス認証。保存されたパスワードが SCRAM 形式なら<strong>自動で SCRAM 認証</strong>になる</td>
+</tr>
+<tr>
+<td><strong>password</strong></td>
+<td>パスワードを<strong>平文で</strong>送る（SSL なしでは非推奨）</td>
+</tr>
+<tr>
+<td><strong>peer</strong></td>
+<td><strong>OS のユーザー名</strong>をカーネルから取得し、DB ユーザー名と同じなら許可。<strong>local 接続専用</strong></td>
+</tr>
+<tr>
+<td><strong>ident</strong></td>
+<td>ident サーバに問い合わせて OS ユーザー名を得る（<strong>TCP/IP 用</strong>。local 指定時は peer になる）</td>
+</tr>
+<tr>
+<td>ldap / radius / pam / gss / sspi / cert</td>
+<td>外部の認証基盤・証明書による認証</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <strong>trust はパスワードなしで誰でも入れる</strong>。initdb のデフォルト（-A 省略時）は trust</li>
+<li class="caution">⚠ md5 方式でも、<strong>password_encryption = scram-sha-256（14 のデフォルト）で設定したパスワードなら SCRAM で認証される</strong>。逆に、<strong>MD5 形式で保存されたパスワードは scram-sha-256 方式では認証できない</strong></li>
+<li class="caution">⚠ <strong>peer は local 接続でしか使えない</strong></li>
+<li>オプション: <code>map=マップ名</code> で <strong>pg_ident.conf</strong> のマップを使い、OS ユーザー名と違う DB ユーザー名を許可できる</li>
+</ul>
+<pre><code># pg_ident.conf
+# MAPNAME   SYSTEM-USERNAME   PG-USERNAME
+mymap       taro              app_user
+</code></pre>
+<pre><code># pg_hba.conf
+local   all   app_user   peer   map=mymap
+</code></pre>
+</article>
+<article class="chapter" id="07-バックアップ">
+<h2 id="07-バックアップ-1">バックアップ</h2>
+<blockquote>
+<p>S2.4 バックアップ方法（重要度<strong>7</strong>）。7問前後で、運用管理で最大の山。pg_dump の出力形式とリストア方法の組み合わせ、COPY と \copy の違い、PITR の手順が定番。</p>
+</blockquote>
+<h3 id="07-バックアップ-2">1. バックアップ方法の全体像 <span class="stars" data-n="3">★★★</span></h3>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>種類</th>
+<th>サーバ</th>
+<th>単位</th>
+<th>主なツール</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>論理バックアップ</strong></td>
+<td>SQL やデータの形でダンプ</td>
+<td><strong>起動したまま</strong></td>
+<td><strong>データベース / テーブル</strong></td>
+<td><strong>pg_dump</strong>、<strong>pg_dumpall</strong></td>
+</tr>
+<tr>
+<td><strong>物理バックアップ（オフライン）</strong></td>
+<td>データディレクトリのファイルをコピー</td>
+<td><strong>停止して</strong></td>
+<td><strong>クラスタ全体</strong></td>
+<td>cp、tar、rsync</td>
+</tr>
+<tr>
+<td><strong>物理バックアップ（オンライン）</strong></td>
+<td>起動したままファイルをコピー</td>
+<td><strong>起動したまま</strong></td>
+<td><strong>クラスタ全体</strong></td>
+<td><strong>pg_basebackup</strong>、低レベル API</td>
+</tr>
+<tr>
+<td><strong>PITR</strong></td>
+<td>オンライン物理バックアップ + <strong>WAL アーカイブ</strong></td>
+<td>起動したまま</td>
+<td>クラスタ全体</td>
+<td>上記 + archive_command</td>
+</tr>
+<tr>
+<td>COPY</td>
+<td>テーブルのデータだけをファイルへ</td>
+<td>起動したまま</td>
+<td>テーブル</td>
+<td>COPY、\copy</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <strong>論理バックアップは別のメジャーバージョン・別の OS / CPU アーキテクチャへ移せる</strong>。物理バックアップは<strong>同じメジャーバージョン・同じアーキテクチャ</strong>でしか使えない</li>
+<li class="caution">⚠ <strong>論理バックアップは取得した時点にしか戻せない</strong>。任意の時点に戻せるのは <strong>PITR</strong></li>
+<li>物理バックアップは<strong>テーブル単位では戻せない</strong>（クラスタ全体を戻す）</li>
+</ul>
+<h3 id="07-バックアップ-3">2. pg_dump <span class="stars" data-n="3">★★★</span></h3>
+<pre><code>pg_dump [接続オプション] [オプション] データベース名
+</code></pre>
+<ul>
+<li><strong>1つのデータベース</strong>を論理バックアップする。<strong>サーバを起動したまま</strong>取得でき、取得中も他のユーザーは<strong>読み書きできる</strong></li>
+<li>取得開始時点の<strong>一貫したスナップショット</strong>を出力する（途中の更新は含まない）</li>
+<li class="caution">⚠ pg_dump は対象テーブルに ACCESS SHARE ロックを取るので、取得中は <strong>DROP TABLE や ALTER TABLE など（ACCESS EXCLUSIVE）が待たされる</strong></li>
+<li>実行するユーザーには対象の<strong>読み取り権限</strong>が必要（通常はスーパーユーザーで実行）</li>
+</ul>
+<h4 id="07-バックアップ-4">出力形式（-F）</h4>
+<table>
+<thead>
+<tr>
+<th>オプション</th>
+<th>形式</th>
+<th>リストア方法</th>
+<th>特徴</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>-Fp</code></strong>（<strong>デフォルト</strong>）</td>
+<td><strong>プレーンテキスト</strong>（SQL スクリプト）</td>
+<td><strong>psql</strong></td>
+<td>中身を読める・編集できる</td>
+</tr>
+<tr>
+<td><strong><code>-Fc</code></strong></td>
+<td><strong>カスタム形式</strong></td>
+<td><strong>pg_restore</strong></td>
+<td><strong>デフォルトで圧縮</strong>。リストア時にオブジェクトを選べる・並べ替えられる</td>
+</tr>
+<tr>
+<td><strong><code>-Fd</code></strong></td>
+<td><strong>ディレクトリ形式</strong></td>
+<td><strong>pg_restore</strong></td>
+<td>テーブルごとにファイル。<strong>並列ダンプ（-j）できる唯一の形式</strong></td>
+</tr>
+<tr>
+<td><strong><code>-Ft</code></strong></td>
+<td><strong>tar 形式</strong></td>
+<td><strong>pg_restore</strong></td>
+<td>圧縮はできない</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <strong>プレーンテキストは pg_restore では戻せない</strong>（psql で流す）。<strong>それ以外の3形式は psql では戻せない</strong>（pg_restore を使う）</li>
+<li class="caution">⚠ <strong>pg_dump の並列実行（-j）はディレクトリ形式だけ</strong>。pg_restore の -j は<strong>カスタム形式とディレクトリ形式</strong>で使える</li>
+</ul>
+<h4 id="07-バックアップ-5">主なオプション</h4>
+<table>
+<thead>
+<tr>
+<th>オプション</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>-f ファイル</code></strong></td>
+<td>出力先（省略時は<strong>標準出力</strong>。ディレクトリ形式では必須）</td>
+</tr>
+<tr>
+<td><strong><code>-F 形式</code></strong></td>
+<td>出力形式（p / c / d / t）</td>
+</tr>
+<tr>
+<td><strong><code>-t テーブル</code></strong> / <code>-T テーブル</code></td>
+<td>そのテーブルだけ / そのテーブルを除いて出力</td>
+</tr>
+<tr>
+<td><strong><code>-n スキーマ</code></strong> / <code>-N スキーマ</code></td>
+<td>そのスキーマだけ / 除いて出力</td>
+</tr>
+<tr>
+<td><strong><code>-s</code></strong> / <code>--schema-only</code></td>
+<td><strong>定義（スキーマ）だけ</strong>出力（データなし）</td>
+</tr>
+<tr>
+<td><strong><code>-a</code></strong> / <code>--data-only</code></td>
+<td><strong>データだけ</strong>出力（定義なし）</td>
+</tr>
+<tr>
+<td><strong><code>-c</code></strong> / <code>--clean</code></td>
+<td>オブジェクトを作る前に <strong>DROP 文</strong>を出力</td>
+</tr>
+<tr>
+<td><strong><code>-C</code></strong> / <code>--create</code></td>
+<td><strong>CREATE DATABASE 文</strong>とその DB への接続（<code>\connect</code>）を出力</td>
+</tr>
+<tr>
+<td><code>--if-exists</code></td>
+<td>-c の DROP に IF EXISTS を付ける</td>
+</tr>
+<tr>
+<td><strong><code>--inserts</code></strong> / <code>--column-inserts</code></td>
+<td>データを COPY ではなく <strong>INSERT 文</strong>で出力（遅いが他の DBMS へ移しやすい）</td>
+</tr>
+<tr>
+<td><code>-O</code> / <code>--no-owner</code></td>
+<td>所有者を設定する文を出力しない</td>
+</tr>
+<tr>
+<td><code>-x</code> / <code>--no-privileges</code></td>
+<td>GRANT / REVOKE を出力しない</td>
+</tr>
+<tr>
+<td><code>-Z 0〜9</code></td>
+<td>圧縮レベル</td>
+</tr>
+<tr>
+<td><strong><code>-j 数</code></strong></td>
+<td>並列数（<strong>-Fd のみ</strong>）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <strong>-s（schema-only）の「schema」はスキーマ（名前空間）ではなく「定義」</strong>。スキーマを選ぶのは <strong>-n</strong></li>
+<li class="caution">⚠ データはデフォルトで <strong>COPY 文</strong>として出力される</li>
+</ul>
+<h4 id="07-バックアップ-6">pg_dump が出力しないもの</h4>
+<ul>
+<li class="caution">⚠ <strong>ロール（ユーザー）とテーブルスペース</strong>は<strong>クラスタ全体のオブジェクト（グローバルオブジェクト）</strong>なので、<strong>pg_dump では出力されない</strong> → <strong>pg_dumpall</strong> を使う</li>
+<li>データベース自体の作成文（CREATE DATABASE）も、<strong>-C を付けない限り出力しない</strong></li>
+</ul>
+<h3 id="07-バックアップ-7">3. pg_dumpall <span class="stars" data-n="3">★★★</span></h3>
+<pre><code>pg_dumpall [接続オプション] [オプション] &gt; all.sql
+psql -f all.sql postgres                  # リストア
+</code></pre>
+<ul>
+<li><strong>クラスタ内のすべてのデータベース</strong>と、<strong>ロール・テーブルスペースなどのグローバルオブジェクト</strong>を出力する</li>
+<li class="caution">⚠ 出力は<strong>プレーンテキストだけ</strong>（-F オプションがない）→ リストアは <strong>psql</strong></li>
+<li>各データベースに接続して取得するので、<strong>スーパーユーザー</strong>で実行するのが普通</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>オプション</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>-g</code></strong> / <code>--globals-only</code></td>
+<td><strong>グローバルオブジェクト（ロール・テーブルスペース）だけ</strong></td>
+</tr>
+<tr>
+<td><strong><code>-r</code></strong> / <code>--roles-only</code></td>
+<td><strong>ロールだけ</strong></td>
+</tr>
+<tr>
+<td><strong><code>-t</code></strong> / <code>--tablespaces-only</code></td>
+<td><strong>テーブルスペースだけ</strong></td>
+</tr>
+<tr>
+<td><code>-s</code> / <code>-a</code> / <code>-c</code></td>
+<td>定義だけ / データだけ / DROP 文を付ける（pg_dump と同じ）</td>
+</tr>
+<tr>
+<td><code>-f ファイル</code></td>
+<td>出力先</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <strong>pg_dumpall の -t はテーブルスペース</strong>（pg_dump の -t はテーブル）</li>
+<li>よくある組み合わせ: <code>pg_dumpall -g</code> でロール等を取り、DB ごとに <code>pg_dump -Fc</code> で取る</li>
+</ul>
+<h3 id="07-バックアップ-8">4. リストア（psql と pg_restore） <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="07-バックアップ-9">プレーンテキストのリストア</h4>
+<pre><code>psql -d newdb -f sample.sql
+psql newdb &lt; sample.sql
+</code></pre>
+<ul>
+<li>戻し先のデータベースを<strong>先に作っておく</strong>（<code>createdb newdb</code>）。ダンプ時に -C を付けていれば、別の DB（postgres など）に接続して流せば CREATE DATABASE から実行される</li>
+<li>psql はエラーが起きても<strong>続行</strong>する。止めたいときは <code>-v ON_ERROR_STOP=1</code>、全体を1トランザクションにするなら <strong><code>-1</code></strong></li>
+</ul>
+<h4 id="07-バックアップ-10">pg_restore</h4>
+<pre><code>pg_restore -d newdb sample.dump              # newdb へ戻す
+pg_restore -C -d postgres sample.dump        # DB を作ってから戻す（-d は接続用の既存 DB）
+pg_restore -l sample.dump &gt; list.txt         # 中身の一覧（目次）を出力
+pg_restore -L list.txt -d newdb sample.dump  # 一覧で選んだものだけ戻す
+pg_restore -f out.sql sample.dump            # SQL スクリプトに変換して出力
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>オプション</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>-d データベース</code></strong></td>
+<td><strong>接続して戻す先</strong>。⚠ <strong>省略すると SQL を標準出力（または -f のファイル）に出す</strong>だけ</td>
+</tr>
+<tr>
+<td><strong><code>-C</code></strong></td>
+<td>CREATE DATABASE してから戻す（-d には接続用の別 DB を指定）</td>
+</tr>
+<tr>
+<td><strong><code>-c</code></strong></td>
+<td>戻す前に既存のオブジェクトを DROP する</td>
+</tr>
+<tr>
+<td><strong><code>-t</code></strong> / <code>-n</code> / <code>-I</code></td>
+<td>指定したテーブル / スキーマ / インデックスだけ戻す</td>
+</tr>
+<tr>
+<td><strong><code>-s</code></strong> / <strong><code>-a</code></strong></td>
+<td>定義だけ / データだけ戻す</td>
+</tr>
+<tr>
+<td><strong><code>-l</code></strong></td>
+<td>アーカイブの<strong>目次を表示</strong></td>
+</tr>
+<tr>
+<td><strong><code>-L ファイル</code></strong></td>
+<td>目次ファイルに書かれた項目だけを、その<strong>順番で</strong>戻す</td>
+</tr>
+<tr>
+<td><strong><code>-j 数</code></strong></td>
+<td><strong>並列リストア</strong>（カスタム形式・ディレクトリ形式）</td>
+</tr>
+<tr>
+<td><code>-1</code></td>
+<td>1つのトランザクションで戻す（-j とは併用不可）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ pg_restore は <strong>プレーンテキスト以外</strong>（カスタム・ディレクトリ・tar）専用</li>
+</ul>
+<h3 id="07-バックアップ-11">5. COPY と \copy <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="07-バックアップ-12">COPY（サーバ側）</h4>
+<pre><code class="language-sql">COPY emp TO '/tmp/emp.csv' WITH (FORMAT csv, HEADER);   -- テーブル → ファイル
+COPY emp FROM '/tmp/emp.csv' WITH (FORMAT csv, HEADER); -- ファイル → テーブル（追加）
+COPY emp (id, name) TO STDOUT;                          -- 列を指定、標準出力へ
+COPY (SELECT * FROM emp WHERE dept = 10) TO '/tmp/d10.txt'; -- 問い合わせ結果を出力
+</code></pre>
+<ul>
+<li><strong>TO</strong> = テーブルから<strong>書き出す</strong>、<strong>FROM</strong> = テーブルへ<strong>読み込む</strong></li>
+<li class="caution">⚠ ファイルは<strong>データベースサーバのマシン上</strong>のパス。読み書きするのは<strong>サーバプロセス（OS の postgres ユーザー）</strong></li>
+<li class="caution">⚠ サーバのファイルを読み書きする COPY は<strong>スーパーユーザー</strong>か、<strong>pg_read_server_files / pg_write_server_files</strong> ロールのメンバーだけが実行できる（STDIN / STDOUT は一般ユーザーも可）</li>
+<li class="caution">⚠ COPY FROM は<strong>追記</strong>（既存の行は消さない）。途中でエラーになると<strong>全行が取り消される</strong></li>
+<li><code>COPY (SELECT ...) TO</code> で問い合わせ結果を出せる。<strong>COPY (SELECT &hellip;) FROM はできない</strong></li>
+<li>COPY FROM はトリガーや制約チェックを実行する</li>
+</ul>
+<h4 id="07-バックアップ-13">主なオプション</h4>
+<table>
+<thead>
+<tr>
+<th>オプション</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>FORMAT</strong></td>
+<td><strong>text</strong>（<strong>デフォルト</strong>）/ <strong>csv</strong> / binary</td>
+</tr>
+<tr>
+<td><strong>DELIMITER</strong></td>
+<td>区切り文字。デフォルトは <strong>text = タブ</strong>、<strong>csv = カンマ</strong></td>
+</tr>
+<tr>
+<td><strong>NULL</strong></td>
+<td>NULL を表す文字列。デフォルトは <strong>text = <code>\N</code></strong>、<strong>csv = 引用符なしの空文字列</strong></td>
+</tr>
+<tr>
+<td><strong>HEADER</strong></td>
+<td>先頭行を列名の行にする（14 では <strong>csv 形式のみ</strong>）</td>
+</tr>
+<tr>
+<td>QUOTE / ESCAPE</td>
+<td>csv の引用符（デフォルト <code>"</code>）/ エスケープ文字</td>
+</tr>
+<tr>
+<td>ENCODING</td>
+<td>ファイルの文字エンコーディング</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>古い書き方 <code>COPY emp TO '/tmp/emp.csv' CSV HEADER;</code> も使える</li>
+</ul>
+<h4 id="07-バックアップ-14">\copy（psql のメタコマンド、クライアント側）</h4>
+<pre><code>\copy emp TO 'emp.csv' WITH (FORMAT csv, HEADER)
+\copy emp FROM 'emp.csv' WITH (FORMAT csv, HEADER)
+</code></pre>
+<ul>
+<li><strong>psql を実行しているクライアントのマシン上</strong>のファイルを読み書きする（内部では COPY &hellip; FROM STDIN / TO STDOUT を使う）</li>
+<li><strong>スーパーユーザーでなくても</strong>、テーブルの権限があれば使える</li>
+<li class="caution">⚠ メタコマンドなので<strong>1行で書く</strong>（末尾の <code>;</code> は不要）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>COPY</th>
+<th>\copy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>種類</td>
+<td><strong>SQL コマンド</strong></td>
+<td><strong>psql のメタコマンド</strong></td>
+</tr>
+<tr>
+<td>ファイルの場所</td>
+<td><strong>サーバ側</strong></td>
+<td><strong>クライアント側</strong></td>
+</tr>
+<tr>
+<td>ファイルを読み書きする OS ユーザー</td>
+<td>サーバプロセス（postgres）</td>
+<td>psql を実行したユーザー</td>
+</tr>
+<tr>
+<td>必要な権限</td>
+<td>スーパーユーザー等（ファイルの場合）</td>
+<td>テーブルの権限だけ</td>
+</tr>
+</tbody>
+</table>
+<h3 id="07-バックアップ-15">6. 物理バックアップ <span class="stars" data-n="2">★★</span></h3>
+<h4 id="07-バックアップ-16">オフラインバックアップ（コールドバックアップ）</h4>
+<ol>
+<li><strong>サーバを停止</strong>する（pg_ctl stop）</li>
+<li><strong>データディレクトリ全体</strong>（テーブルスペースを使っていればその実体も）を tar や cp でコピーする</li>
+<li>サーバを起動する</li>
+</ol>
+<ul>
+<li class="caution">⚠ <strong>起動したまま</strong>データディレクトリを単純コピーしても、一貫したバックアップにはならない</li>
+<li class="caution">⚠ 一部のデータベース・テーブルだけを戻すことはできない（クラスタ全体を戻す）</li>
+</ul>
+<h4 id="07-バックアップ-17">pg_basebackup（オンラインバックアップ）</h4>
+<pre><code>pg_basebackup -D /backup/base -Fp -X stream -P -U repuser -h 192.168.1.10
+</code></pre>
+<ul>
+<li><strong>サーバを起動したまま</strong>、<strong>クラスタ全体</strong>の物理バックアップを取る（<strong>レプリケーション接続</strong>を使う）</li>
+<li>ストリーミングレプリケーションのスタンバイ構築にも使う</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>オプション</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>-D ディレクトリ</code></strong></td>
+<td>出力先（必須）。⚠ 空か存在しないこと</td>
+</tr>
+<tr>
+<td><strong><code>-F p</code> / <code>-F t</code></strong></td>
+<td><strong>plain</strong>（データディレクトリと同じ構成。<strong>デフォルト</strong>）/ <strong>tar</strong></td>
+</tr>
+<tr>
+<td><strong><code>-X 方式</code></strong></td>
+<td>バックアップ中の WAL の取得方法: <strong>stream</strong>（<strong>デフォルト</strong>。並行して転送）/ fetch（最後にまとめて）/ none</td>
+</tr>
+<tr>
+<td><strong><code>-z</code></strong></td>
+<td>gzip 圧縮（tar 形式）</td>
+</tr>
+<tr>
+<td><strong><code>-P</code></strong></td>
+<td>進捗を表示</td>
+</tr>
+<tr>
+<td><strong><code>-R</code></strong></td>
+<td>スタンバイ用の設定（<strong>standby.signal</strong> と、postgresql.auto.conf への <strong>primary_conninfo</strong>）を書き出す</td>
+</tr>
+<tr>
+<td><code>-c fast</code> / <code>-c spread</code></td>
+<td>開始時のチェックポイントを即時 / 分散（<strong>デフォルト spread</strong>）</td>
+</tr>
+<tr>
+<td><code>-l ラベル</code></td>
+<td>バックアップのラベル</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>必要な条件<ul>
+<li><strong>wal_level が replica 以上</strong>（デフォルトの replica で OK）</li>
+<li><strong>max_wal_senders が 1 以上</strong>（デフォルト 10）</li>
+<li>接続ロールに <strong>REPLICATION 属性</strong>（またはスーパーユーザー）</li>
+<li><strong>pg_hba.conf に DATABASE = <code>replication</code> の行</strong></li>
+</ul>
+</li>
+<li class="caution">⚠ pg_hba.conf の DATABASE 欄が <strong>all でもレプリケーション接続には一致しない</strong>。<code>replication</code> と書く</li>
+</ul>
+<h4 id="07-バックアップ-18">低レベル API（PostgreSQL 14）</h4>
+<pre><code class="language-sql">SELECT pg_start_backup('label');   -- バックアップ開始（チェックポイントを実行）
+-- この間に OS のコマンドでデータディレクトリをコピー
+SELECT pg_stop_backup();           -- バックアップ終了（必要な WAL のアーカイブを待つ）
+</code></pre>
+<ul>
+<li>開始すると、データディレクトリに <strong>backup_label</strong> ファイル（開始位置などの情報）ができる（排他モードの場合）</li>
+<li class="caution">⚠ <strong>15 で pg_backup_start() / pg_backup_stop() に改名</strong>され、排他モードは廃止。試験（14 基準）は<strong>旧名</strong>で答える</li>
+</ul>
+<h3 id="07-バックアップ-19">7. WAL とアーカイブ <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="07-バックアップ-20">WAL の基本</h4>
+<ul>
+<li><strong>WAL（Write Ahead Log、先行書き込みログ）</strong>: データを変更する前に、<strong>変更内容をログに書く</strong>仕組み</li>
+<li>コミット時は WAL をディスクに書けばよく、データファイルへの反映は<strong>チェックポイント</strong>でまとめて行う</li>
+<li>WAL ファイルは <strong>pg_wal/</strong> に置かれ、1ファイル（<strong>WAL セグメント</strong>）は <strong>16MB</strong>（initdb の <code>--wal-segsize</code> で変更可）</li>
+<li>ファイル名は <strong>24桁の16進数</strong>（タイムライン ID 8桁 + 論理位置 16桁）。例: <code>000000010000000000000003</code></li>
+<li>WAL 内の位置は <strong>LSN</strong>（Log Sequence Number）。<code>SELECT pg_current_wal_lsn();</code> で確認</li>
+<li>使い終わった WAL は、チェックポイント後に<strong>削除または再利用</strong>される → PITR には<strong>アーカイブ</strong>して残しておく必要がある</li>
+<li><strong><code>SELECT pg_switch_wal();</code></strong>: 現在の WAL ファイルを閉じて<strong>次のファイルへ切り替える</strong>（すぐにアーカイブさせたいとき。10 より前は pg_switch_xlog）</li>
+</ul>
+<h4 id="07-バックアップ-21">WAL アーカイブの設定（postgresql.conf）</h4>
+<pre><code>wal_level = replica                       # minimal では不可
+archive_mode = on                         # 変更は再起動が必要
+archive_command = 'cp %p /archive/%f'     # 変更は再読み込みで反映
+archive_timeout = 60                      # 任意。この秒数ごとに強制的に WAL を切り替える
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>記号</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>%p</code></strong></td>
+<td>アーカイブする WAL ファイルの<strong>パス</strong>（データディレクトリからの相対パス）</td>
+</tr>
+<tr>
+<td><strong><code>%f</code></strong></td>
+<td>WAL ファイルの<strong>ファイル名だけ</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>archive_command は <strong>WAL ファイルが一杯になる（切り替わる）たびに</strong>実行される</li>
+<li class="caution">⚠ コマンドが<strong>終了ステータス 0 を返したときだけ成功</strong>とみなす。失敗した WAL は pg_wal に残り、<strong>成功するまで再試行</strong>される（pg_wal があふれるおそれ）</li>
+<li class="caution">⚠ <strong>archive_mode の変更は再起動</strong>、archive_command の変更は<strong>再読み込み</strong>で反映</li>
+<li>アーカイブの状況はシステムビュー <strong>pg_stat_archiver</strong> で確認できる</li>
+</ul>
+<h3 id="07-バックアップ-22">8. PITR（ポイントインタイムリカバリ） <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="07-バックアップ-23">仕組み</h4>
+<ul>
+<li><strong>ベースバックアップ</strong>（オンライン物理バックアップ）を戻し、その後の <strong>アーカイブ WAL を再生（ロールフォワード）</strong> して、<strong>任意の時点</strong>まで復旧する</li>
+<li>例: 誤って DROP TABLE した<strong>直前の時刻</strong>まで戻せる</li>
+</ul>
+<h4 id="07-バックアップ-24">事前準備</h4>
+<ol>
+<li><strong>WAL アーカイブを有効</strong>にする（wal_level・archive_mode・archive_command）</li>
+<li>定期的に <strong>ベースバックアップ</strong>（pg_basebackup など）を取る</li>
+</ol>
+<h4 id="07-バックアップ-25">リカバリの手順（PostgreSQL 12 以降）</h4>
+<ol>
+<li><strong>サーバを停止</strong>する</li>
+<li>現在のデータディレクトリを退避し、<strong>ベースバックアップを戻す</strong></li>
+<li>退避した <strong>pg_wal/ のうち、まだアーカイブされていない WAL</strong> を新しい pg_wal/ にコピーする（最新まで戻すため）</li>
+<li><strong>postgresql.conf</strong>（または postgresql.auto.conf）に <strong>restore_command</strong> と、必要なら<strong>リカバリ目標</strong>を書く</li>
+<li>データディレクトリに <strong>recovery.signal</strong> ファイル（空でよい）を作る</li>
+<li><strong>サーバを起動</strong>する → WAL を再生してリカバリ → 完了すると通常運転になる（<strong>recovery.signal は自動で削除</strong>される）</li>
+</ol>
+<pre><code>restore_command = 'cp /archive/%f %p'          # アーカイブから WAL を取り出すコマンド
+recovery_target_time = '2026-11-25 10:29:00'    # この時刻まで戻す
+</code></pre>
+<ul>
+<li class="caution">⚠ <strong>12 以降は recovery.conf が廃止</strong>され、設定は <strong>postgresql.conf</strong> に、リカバリ開始の合図は <strong>recovery.signal</strong> ファイルになった（recovery.conf があると<strong>起動しない</strong>）</li>
+<li><strong>standby.signal</strong>: リカバリ後もスタンバイとして WAL の再生を続ける（ストリーミングレプリケーション用）</li>
+<li>リカバリが完了すると<strong>新しいタイムライン</strong>が始まる（WAL ファイル名の先頭8桁が増える）。過去の時点に戻した後の歴史を、元の歴史と区別するため</li>
+</ul>
+<h4 id="07-バックアップ-26">リカバリ目標のパラメータ</h4>
+<table>
+<thead>
+<tr>
+<th>パラメータ</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>recovery_target_time</strong></td>
+<td><strong>指定した時刻</strong>まで</td>
+</tr>
+<tr>
+<td><strong>recovery_target_xid</strong></td>
+<td><strong>指定したトランザクション ID</strong> まで</td>
+</tr>
+<tr>
+<td><strong>recovery_target_name</strong></td>
+<td><strong><code>pg_create_restore_point('名前')</code></strong> で作った<strong>復元ポイント</strong>まで</td>
+</tr>
+<tr>
+<td>recovery_target_lsn</td>
+<td>指定した LSN まで</td>
+</tr>
+<tr>
+<td>recovery_target = &lsquo;immediate&rsquo;</td>
+<td>ベースバックアップが<strong>一貫性のある状態になった時点</strong>で止める</td>
+</tr>
+<tr>
+<td>recovery_target_inclusive</td>
+<td>目標の<strong>ちょうどその点を含めるか</strong>（デフォルト <strong>on</strong> = 含める）</td>
+</tr>
+<tr>
+<td>recovery_target_timeline</td>
+<td>どのタイムラインに沿って戻すか（<strong>12 からデフォルト latest</strong>）</td>
+</tr>
+<tr>
+<td><strong>recovery_target_action</strong></td>
+<td>目標に達した後の動作: <strong>pause</strong>（<strong>デフォルト</strong>）/ promote / shutdown</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ 目標を何も指定しないと、<strong>アーカイブの最後（最新）まで</strong>再生する</li>
+<li class="caution">⚠ 目標のパラメータは<strong>1つだけ</strong>指定できる（複数書くとエラー）</li>
+<li>pause で止まったら、内容を確認してから <strong><code>SELECT pg_wal_replay_resume();</code></strong> でリカバリを終えて通常運転にする</li>
+</ul>
+</article>
+<article class="chapter" id="08-運用管理作業">
+<h2 id="08-運用管理作業-1">運用管理作業</h2>
+<blockquote>
+<p>S2.5 基本的な運用管理作業（重要度<strong>7</strong>）。7問前後。VACUUM と VACUUM FULL の違い、autovacuum、ロールと GRANT / REVOKE、テーブルスペース、システムカタログが定番。</p>
+</blockquote>
+<h3 id="08-運用管理作業-2">1. VACUUM <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="08-運用管理作業-3">なぜ必要か</h4>
+<ul>
+<li>PostgreSQL は <strong>MVCC</strong>: UPDATE は「古い行を無効にして新しい行を追加」、DELETE は「行を無効にする」だけで、<strong>古い行（不要タプル / dead tuple）が物理的に残る</strong></li>
+<li>放っておくとテーブルが膨れ（肥大化）、検索が遅くなる → <strong>VACUUM</strong> で不要な行の領域を回収する</li>
+<li>VACUUM の役割<ol>
+<li>不要タプルの領域を<strong>再利用できるようにする</strong></li>
+<li><strong>可視性マップ</strong>を更新する（Index Only Scan を速くする）</li>
+<li><strong>トランザクション ID の周回（wraparound）を防ぐ</strong>（古い行を凍結 = FREEZE する）</li>
+<li>ANALYZE を付ければ統計情報も更新</li>
+</ol>
+</li>
+</ul>
+<h4 id="08-運用管理作業-4">VACUUM と VACUUM FULL</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>VACUUM</strong>（通常）</th>
+<th><strong>VACUUM FULL</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>動作</td>
+<td>不要領域を<strong>再利用可能にする</strong></td>
+<td>テーブルを<strong>新しいファイルに書き直して詰める</strong></td>
+</tr>
+<tr>
+<td>ディスク容量</td>
+<td><strong>OS には基本返さない</strong>（末尾の空きページだけ返す）</td>
+<td><strong>OS に返す</strong>（ファイルが小さくなる）</td>
+</tr>
+<tr>
+<td>ロック</td>
+<td>SHARE UPDATE EXCLUSIVE（<strong>読み書きと並行して実行できる</strong>）</td>
+<td><strong>ACCESS EXCLUSIVE</strong>（<strong>SELECT も含めて全操作が止まる</strong>）</td>
+</tr>
+<tr>
+<td>必要な空き容量</td>
+<td>ほぼ不要</td>
+<td>テーブルの<strong>コピーを作る分の空き容量が必要</strong></td>
+</tr>
+<tr>
+<td>時間</td>
+<td>短い</td>
+<td>長い</td>
+</tr>
+<tr>
+<td>実行頻度</td>
+<td>日常的に（autovacuum が自動で行う）</td>
+<td>極端に肥大化したときだけ</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ <strong>VACUUM FULL はテーブルを排他ロックする</strong>。運用中に実行すると業務が止まる</li>
+<li class="caution">⚠ <strong>autovacuum は VACUUM FULL を実行しない</strong></li>
+</ul>
+<h4 id="08-運用管理作業-5">書き方</h4>
+<pre><code class="language-sql">VACUUM;                         -- 現在のデータベースの全テーブル
+VACUUM emp;                     -- テーブルを指定
+VACUUM FULL emp;
+VACUUM ANALYZE emp;             -- VACUUM の後に ANALYZE
+VACUUM VERBOSE emp;             -- 処理の詳細を表示
+VACUUM FREEZE emp;              -- 行を積極的に凍結
+VACUUM (FULL, VERBOSE, ANALYZE) emp;   -- 括弧でまとめて指定
+</code></pre>
+<ul>
+<li class="caution">⚠ <strong>VACUUM はトランザクションブロック内で実行できない</strong>（→ 04章）</li>
+<li>テーブルの所有者・DB の所有者・スーパーユーザーが実行できる（権限のないテーブルは警告を出して飛ばす）</li>
+<li>OS のコマンドからは <strong>vacuumdb</strong>（→ 05章）</li>
+</ul>
+<h4 id="08-運用管理作業-6">トランザクション ID の周回</h4>
+<ul>
+<li>トランザクション ID（XID）は <strong>32ビット</strong>（約42億）で、使い切ると一周する。行の新旧を比べられるのは前後約 <strong>20億</strong>まで</li>
+<li>古い行を <strong>凍結（FREEZE）</strong> して「どのトランザクションから見ても過去」の印を付けないと、<strong>古いデータが見えなくなる</strong>（データ消失に見える）</li>
+<li>そのため、autovacuum を off にしていても、周回が近づくと<strong>周回防止のための autovacuum が強制的に実行</strong>される（autovacuum_freeze_max_age、デフォルト <strong>2億</strong>トランザクション）</li>
+</ul>
+<h3 id="08-運用管理作業-7">2. ANALYZE <span class="stars" data-n="3">★★★</span></h3>
+<pre><code class="language-sql">ANALYZE;              -- 現在のデータベースの全テーブル
+ANALYZE emp;
+ANALYZE emp (name);   -- 列を指定
+ANALYZE VERBOSE emp;
+</code></pre>
+<ul>
+<li>テーブルの<strong>統計情報</strong>（行数、列の値の分布、NULL の割合など）を集め、システムカタログ <strong>pg_statistic</strong> に保存する（見やすい形のビューは <strong>pg_stats</strong>）</li>
+<li>統計情報は<strong>プランナ（実行計画を立てる部分）</strong>が使う。古いと<strong>遅い実行計画</strong>が選ばれる</li>
+<li>テーブル全体ではなく<strong>サンプリング</strong>した行を読む（大きいテーブルでも速い）</li>
+<li>ロックは SHARE UPDATE EXCLUSIVE（読み書きと並行できる）</li>
+<li class="caution">⚠ ANALYZE は<strong>トランザクションブロック内でも実行できる</strong>（VACUUM はできない）</li>
+<li>大量のデータを入れた後（COPY、大きな INSERT）は ANALYZE を実行すると良い</li>
+</ul>
+<h3 id="08-運用管理作業-8">3. autovacuum（自動バキューム） <span class="stars" data-n="3">★★★</span></h3>
+<ul>
+<li><strong>autovacuum ランチャー</strong>が定期的に起動し、<strong>autovacuum ワーカー</strong>が必要なテーブルに <strong>VACUUM と ANALYZE を自動実行</strong>する</li>
+<li><strong>デフォルトで有効</strong>（autovacuum = <strong>on</strong>）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>パラメータ</th>
+<th>デフォルト</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>autovacuum</strong></td>
+<td><strong>on</strong></td>
+<td>autovacuum を使う（sighup）</td>
+</tr>
+<tr>
+<td><strong>track_counts</strong></td>
+<td><strong>on</strong></td>
+<td>テーブルの更新件数などの統計を集める。⚠ <strong>off にすると autovacuum が動かない</strong></td>
+</tr>
+<tr>
+<td><strong>autovacuum_naptime</strong></td>
+<td><strong>1min</strong></td>
+<td>各データベースをチェックする間隔</td>
+</tr>
+<tr>
+<td><strong>autovacuum_max_workers</strong></td>
+<td><strong>3</strong></td>
+<td>同時に動くワーカーの最大数（postmaster）</td>
+</tr>
+<tr>
+<td>autovacuum_vacuum_threshold</td>
+<td>50</td>
+<td>VACUUM するための最小の不要タプル数</td>
+</tr>
+<tr>
+<td><strong>autovacuum_vacuum_scale_factor</strong></td>
+<td><strong>0.2</strong></td>
+<td>テーブルの行数に対する割合（20%）</td>
+</tr>
+<tr>
+<td>autovacuum_analyze_threshold</td>
+<td>50</td>
+<td>ANALYZE するための最小の変更行数</td>
+</tr>
+<tr>
+<td>autovacuum_analyze_scale_factor</td>
+<td>0.1</td>
+<td>テーブルの行数に対する割合（10%）</td>
+</tr>
+<tr>
+<td>autovacuum_freeze_max_age</td>
+<td>2億</td>
+<td>周回防止の VACUUM を強制する XID の年齢</td>
+</tr>
+<tr>
+<td>log_autovacuum_min_duration</td>
+<td>-1（無効）</td>
+<td>指定時間以上かかった autovacuum をログに出す</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>VACUUM が実行される条件: <strong>不要タプル数 &gt; autovacuum_vacuum_threshold + autovacuum_vacuum_scale_factor × 行数</strong><ul>
+<li>例: 1万行のテーブル → 50 + 0.2 × 10000 = <strong>2,050行</strong>を超えると VACUUM</li>
+</ul>
+</li>
+<li>ANALYZE も同様（50 + 0.1 × 行数 を超える変更）</li>
+<li>テーブルごとに変えられる: <code>ALTER TABLE emp SET (autovacuum_vacuum_scale_factor = 0.05);</code>、<code>ALTER TABLE emp SET (autovacuum_enabled = false);</code></li>
+<li>実行状況は <strong>pg_stat_user_tables</strong> で確認: <code>n_live_tup</code>（有効な行数）、<strong><code>n_dead_tup</code>（不要タプル数）</strong>、<code>last_vacuum</code> / <strong><code>last_autovacuum</code></strong>、<code>last_analyze</code> / <code>last_autoanalyze</code></li>
+</ul>
+<h3 id="08-運用管理作業-9">4. その他のメンテナンス <span class="stars" data-n="2">★★</span></h3>
+<table>
+<thead>
+<tr>
+<th>コマンド</th>
+<th>動作</th>
+<th>ロック</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>REINDEX</strong></td>
+<td><strong>インデックスを作り直す</strong>（肥大化・破損したインデックスの修復）</td>
+<td>対象テーブルへの書き込みを止める</td>
+</tr>
+<tr>
+<td>REINDEX &hellip; CONCURRENTLY</td>
+<td>書き込みを止めずに作り直す（12〜）</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>CLUSTER</strong></td>
+<td>テーブルを<strong>インデックスの順に並べ直して</strong>書き直す</td>
+<td><strong>ACCESS EXCLUSIVE</strong></td>
+</tr>
+<tr>
+<td><strong>CHECKPOINT</strong></td>
+<td>すぐにチェックポイントを実行（スーパーユーザー）</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-sql">REINDEX INDEX emp_name_idx;
+REINDEX TABLE emp;          -- テーブルの全インデックス
+REINDEX DATABASE sampledb;  -- データベース内の全インデックス（現在のDBのみ指定可）
+REINDEX SYSTEM sampledb;    -- システムカタログのインデックス
+CLUSTER emp USING emp_name_idx;
+CLUSTER emp;                -- 前回と同じインデックスで
+</code></pre>
+<ul>
+<li class="caution">⚠ CLUSTER の並べ替えは<strong>その時だけ</strong>。その後の INSERT / UPDATE では順序は保たれない（自動では維持されない）</li>
+<li class="caution">⚠ CLUSTER もテーブルを書き直すので、VACUUM FULL と同様に<strong>不要領域も回収</strong>される</li>
+</ul>
+<h3 id="08-運用管理作業-10">5. ロール（ユーザー）の管理 <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="08-運用管理作業-11">ロールとは</h4>
+<ul>
+<li>PostgreSQL では<strong>ユーザーとグループを区別せず「ロール」</strong>として扱う</li>
+<li><strong>ログインできるロール = ユーザー</strong>、他のロールをメンバーにまとめるロール = グループ</li>
+<li class="caution">⚠ ロールは<strong>クラスタ全体</strong>で共通（データベースごとではない）。pg_dump では出力されない（→ 07章）</li>
+</ul>
+<h4 id="08-運用管理作業-12">CREATE ROLE / CREATE USER</h4>
+<pre><code class="language-sql">CREATE ROLE alice LOGIN PASSWORD 'secret';
+CREATE USER bob PASSWORD 'secret' CREATEDB VALID UNTIL '2027-03-31';
+CREATE ROLE staff;                    -- グループ用（ログイン不可）
+</code></pre>
+<ul>
+<li class="caution">⚠ <strong>CREATE USER は LOGIN 付きの CREATE ROLE</strong>。<strong>CREATE ROLE のデフォルトは NOLOGIN</strong>（ログインできない）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>意味</th>
+<th>デフォルト</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SUPERUSER</strong> / NOSUPERUSER</td>
+<td><strong>すべての権限チェックを飛ばす</strong></td>
+<td>NOSUPERUSER</td>
+</tr>
+<tr>
+<td><strong>CREATEDB</strong> / NOCREATEDB</td>
+<td>データベースを作れる</td>
+<td>NOCREATEDB</td>
+</tr>
+<tr>
+<td><strong>CREATEROLE</strong> / NOCREATEROLE</td>
+<td>ロールを作成・変更・削除できる</td>
+<td>NOCREATEROLE</td>
+</tr>
+<tr>
+<td><strong>LOGIN</strong> / NOLOGIN</td>
+<td>ログインできる</td>
+<td>CREATE ROLE は NOLOGIN、CREATE USER は LOGIN</td>
+</tr>
+<tr>
+<td>REPLICATION / NOREPLICATION</td>
+<td>レプリケーション接続・pg_basebackup ができる</td>
+<td>NOREPLICATION</td>
+</tr>
+<tr>
+<td><strong>INHERIT</strong> / NOINHERIT</td>
+<td>メンバーになっているロールの権限を<strong>自動で引き継ぐ</strong></td>
+<td>INHERIT</td>
+</tr>
+<tr>
+<td>BYPASSRLS</td>
+<td>行単位セキュリティを無視する</td>
+<td>NOBYPASSRLS</td>
+</tr>
+<tr>
+<td><strong>PASSWORD &lsquo;&hellip;&rsquo;</strong></td>
+<td>パスワード</td>
+<td>なし</td>
+</tr>
+<tr>
+<td><strong>VALID UNTIL &lsquo;日時&rsquo;</strong></td>
+<td><strong>パスワード</strong>の有効期限</td>
+<td>無期限</td>
+</tr>
+<tr>
+<td>CONNECTION LIMIT n</td>
+<td>同時接続数の上限</td>
+<td>-1（無制限）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ VALID UNTIL は<strong>パスワードの期限</strong>（ロール自体が消えるわけではない。peer 認証などでは影響しない）</li>
+</ul>
+<h4 id="08-運用管理作業-13">ALTER ROLE / DROP ROLE</h4>
+<pre><code class="language-sql">ALTER ROLE alice CREATEDB;
+ALTER ROLE alice PASSWORD 'newpass';
+ALTER ROLE alice RENAME TO alice2;     -- MD5 パスワードは名前を含むので消える
+ALTER ROLE alice SET work_mem = '16MB';  -- 接続時のパラメータ（→ 06章）
+DROP ROLE alice;
+DROP ROLE IF EXISTS alice;
+</code></pre>
+<ul>
+<li class="caution">⚠ <strong>オブジェクトを所有している、または権限を与えられているロールは DROP ROLE できない</strong>（エラー）。先に次を実行する<ul>
+<li><strong><code>REASSIGN OWNED BY alice TO bob;</code></strong>: alice が所有するオブジェクトの<strong>所有者を bob に変える</strong></li>
+<li><strong><code>DROP OWNED BY alice;</code></strong>: alice が所有するオブジェクトを<strong>削除</strong>し、alice に与えた権限も取り消す</li>
+<li class="caution">⚠ どちらも<strong>今のデータベースの中だけ</strong>が対象。他のデータベースでも実行する必要がある</li>
+</ul>
+</li>
+</ul>
+<h4 id="08-運用管理作業-14">ロールのメンバーシップ（グループ）</h4>
+<pre><code class="language-sql">GRANT staff TO alice;          -- alice を staff のメンバーにする
+REVOKE staff FROM alice;
+SET ROLE staff;                -- staff として振る舞う（RESET ROLE で戻る）
+</code></pre>
+<ul>
+<li>INHERIT（デフォルト）なら、alice は<strong>何もしなくても staff の権限を使える</strong>。NOINHERIT なら SET ROLE が必要</li>
+<li class="caution">⚠ <strong>SUPERUSER・CREATEDB などの属性はメンバーシップで継承されない</strong>（権限だけが継承される）。使うには SET ROLE が必要</li>
+</ul>
+<h4 id="08-運用管理作業-15">定義済みロール</h4>
+<table>
+<thead>
+<tr>
+<th>ロール</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>pg_read_all_data</strong></td>
+<td>すべてのテーブルを読める（14〜）</td>
+</tr>
+<tr>
+<td><strong>pg_write_all_data</strong></td>
+<td>すべてのテーブルに書ける（14〜）</td>
+</tr>
+<tr>
+<td>pg_read_all_settings / pg_read_all_stats</td>
+<td>全設定 / 全統計情報を見られる</td>
+</tr>
+<tr>
+<td>pg_monitor</td>
+<td>監視用（上の2つなどを含む）</td>
+</tr>
+<tr>
+<td>pg_read_server_files / pg_write_server_files</td>
+<td>サーバのファイルを COPY で読める / 書ける</td>
+</tr>
+<tr>
+<td>pg_signal_backend</td>
+<td>他のセッションのキャンセル・終了ができる</td>
+</tr>
+</tbody>
+</table>
+<h3 id="08-運用管理作業-16">6. 権限（GRANT / REVOKE） <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="08-運用管理作業-17">基本</h4>
+<ul>
+<li>オブジェクトを作ったロールが<strong>所有者</strong>になり、<strong>所有者はすべての権限</strong>を持つ（ALTER・DROP できるのは所有者とスーパーユーザーだけ）</li>
+<li>他のロールは、<strong>GRANT で権限を与えられないと</strong>使えない</li>
+<li><strong>スーパーユーザーは権限チェックを受けない</strong></li>
+</ul>
+<pre><code class="language-sql">GRANT SELECT, INSERT ON emp TO alice;
+GRANT ALL PRIVILEGES ON emp TO alice;       -- PRIVILEGES は省略可
+GRANT SELECT ON ALL TABLES IN SCHEMA app TO alice;  -- スキーマ内の既存の全テーブル
+GRANT SELECT (id, name) ON emp TO bob;      -- 列単位
+GRANT UPDATE (salary) ON emp TO bob;
+GRANT SELECT ON emp TO PUBLIC;              -- 全ロール
+GRANT SELECT ON emp TO alice WITH GRANT OPTION;  -- alice も他人に与えられる
+REVOKE INSERT ON emp FROM alice;
+REVOKE ALL ON emp FROM PUBLIC;
+REVOKE GRANT OPTION FOR SELECT ON emp FROM alice;  -- 再付与の権利だけ取り消す
+ALTER TABLE emp OWNER TO bob;               -- 所有者の変更
+</code></pre>
+<ul>
+<li><strong>PUBLIC</strong>: <strong>すべてのロール</strong>（今後作られるロールも含む）を表す特別な名前</li>
+<li class="caution">⚠ <strong>WITH GRANT OPTION</strong> で受け取った権限を他人に与えていた場合、元の権限を REVOKE するには <strong>CASCADE</strong> が必要（付けないとエラー）</li>
+<li class="caution">⚠ PUBLIC から REVOKE しても、<strong>個別に GRANT された権限は残る</strong></li>
+<li class="caution">⚠ <code>ON ALL TABLES IN SCHEMA</code> は<strong>今あるテーブルだけ</strong>。今後作るテーブルにも与えるには <strong><code>ALTER DEFAULT PRIVILEGES</code></strong></li>
+<li>確認: psql の <strong><code>\dp</code></strong> / <strong><code>\z</code></strong>（例: <code>alice=arw/postgres</code> = postgres が alice に a・r・w を与えた）</li>
+</ul>
+<h4 id="08-運用管理作業-18">主な権限</h4>
+<table>
+<thead>
+<tr>
+<th>対象</th>
+<th>権限</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>テーブル</strong></td>
+<td><strong>SELECT</strong>（r）、<strong>INSERT</strong>（a）、<strong>UPDATE</strong>（w）、<strong>DELETE</strong>（d）、<strong>TRUNCATE</strong>（D）、<strong>REFERENCES</strong>（x。外部キーで参照する）、<strong>TRIGGER</strong>（t）</td>
+</tr>
+<tr>
+<td>列</td>
+<td>SELECT、INSERT、UPDATE、REFERENCES</td>
+</tr>
+<tr>
+<td>シーケンス</td>
+<td><strong>USAGE</strong>（nextval・currval）、SELECT（currval）、UPDATE（nextval・setval）</td>
+</tr>
+<tr>
+<td><strong>データベース</strong></td>
+<td><strong>CONNECT</strong>（接続）、<strong>CREATE</strong>（スキーマを作る）、<strong>TEMPORARY</strong>（一時テーブルを作る）</td>
+</tr>
+<tr>
+<td><strong>スキーマ</strong></td>
+<td><strong>USAGE</strong>（中のオブジェクトにアクセス）、<strong>CREATE</strong>（中にオブジェクトを作る）</td>
+</tr>
+<tr>
+<td>関数・プロシージャ</td>
+<td><strong>EXECUTE</strong></td>
+</tr>
+<tr>
+<td>テーブルスペース</td>
+<td>CREATE</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li class="caution">⚠ テーブルの SELECT 権限があっても、<strong>そのスキーマの USAGE 権限がないとアクセスできない</strong></li>
+<li class="caution">⚠ UPDATE・DELETE で WHERE を使うと、条件の列を読むため <strong>SELECT 権限も必要</strong></li>
+<li class="caution">⚠ 外部キーを作るには、参照先テーブルの <strong>REFERENCES</strong> 権限が必要</li>
+</ul>
+<h4 id="08-運用管理作業-19">PUBLIC にデフォルトで与えられている権限（14）</h4>
+<ul>
+<li>データベース: <strong>CONNECT</strong>、<strong>TEMPORARY</strong></li>
+<li>関数: <strong>EXECUTE</strong></li>
+<li><strong>public スキーマ: USAGE と CREATE</strong>（⚠ 15 で CREATE は外された。試験は 14 基準）</li>
+<li class="caution">⚠ <strong>テーブル・ビュー・シーケンスには何も与えられていない</strong>（所有者以外は GRANT が必要）</li>
+<li>特定のデータベースへの接続を制限するには <code>REVOKE CONNECT ON DATABASE sampledb FROM PUBLIC;</code> してから、必要なロールに GRANT CONNECT する（pg_hba.conf でも制限できる）</li>
+</ul>
+<h3 id="08-運用管理作業-20">7. データベースの作成・削除 <span class="stars" data-n="3">★★★</span></h3>
+<pre><code class="language-sql">CREATE DATABASE sampledb;
+CREATE DATABASE sampledb
+  OWNER alice
+  TEMPLATE template0
+  ENCODING 'UTF8'
+  LC_COLLATE 'C'
+  LC_CTYPE 'C'
+  TABLESPACE fastspace
+  CONNECTION LIMIT 50;
+ALTER DATABASE sampledb RENAME TO sample2;
+ALTER DATABASE sampledb OWNER TO bob;
+DROP DATABASE sampledb;
+DROP DATABASE IF EXISTS sampledb;
+DROP DATABASE sampledb WITH (FORCE);   -- 接続中のセッションを切断して削除（13〜）
+</code></pre>
+<ul>
+<li><strong>CREATE DATABASE は既存のデータベースを複製</strong>して作る。デフォルトの複製元は <strong>template1</strong><ul>
+<li>template1 に入れたテーブルや拡張機能は、<strong>以後作るデータベースにも入る</strong></li>
+<li><strong>template0</strong> は initdb 直後の素の状態。<strong>template1 と違うエンコーディング・ロケールで作るときは template0 を指定</strong>する（template1 のままだとエラー）</li>
+</ul>
+</li>
+<li>実行できるのは <strong>CREATEDB 属性</strong>を持つロールかスーパーユーザー</li>
+<li class="caution">⚠ <strong>複製元のデータベースに他のセッションが接続していると CREATE DATABASE は失敗</strong>する</li>
+<li class="caution">⚠ <strong>DROP DATABASE は、そのデータベースに誰か接続していると失敗</strong>する（自分が接続中のデータベースも削除できない）。13 以降は WITH (FORCE) で切断して削除できる</li>
+<li class="caution">⚠ CREATE DATABASE / DROP DATABASE は<strong>トランザクションブロック内で実行できない</strong></li>
+<li>DROP DATABASE できるのは<strong>所有者</strong>とスーパーユーザー</li>
+</ul>
+<h3 id="08-運用管理作業-21">8. テーブルスペース <span class="stars" data-n="3">★★★</span></h3>
+<ul>
+<li><strong>データファイルを置くディレクトリに名前を付けたもの</strong>。容量が足りないとき、速いディスクに特定のテーブルを置きたいときに使う</li>
+</ul>
+<pre><code class="language-sql">CREATE TABLESPACE fastspace LOCATION '/ssd/pgdata';
+CREATE TABLESPACE fastspace OWNER alice LOCATION '/ssd/pgdata';
+CREATE TABLE logs (...) TABLESPACE fastspace;
+CREATE INDEX ... ON logs (...) TABLESPACE fastspace;
+ALTER TABLE logs SET TABLESPACE pg_default;   -- 移動（ACCESS EXCLUSIVE ロック）
+SET default_tablespace = fastspace;           -- テーブルスペース省略時の作成先
+DROP TABLESPACE fastspace;
+</code></pre>
+<ul>
+<li class="caution">⚠ LOCATION は<strong>絶対パス</strong>。ディレクトリは<strong>あらかじめ存在し、空で、OS の postgres ユーザーが所有</strong>していること（作ってはくれない）</li>
+<li class="caution">⚠ CREATE TABLESPACE は<strong>スーパーユーザー</strong>だけが実行できる。トランザクションブロック内では実行できない</li>
+<li class="caution">⚠ <strong>中にオブジェクトが残っているテーブルスペースは DROP できない</strong>（全データベースで空にする必要がある）</li>
+<li>データディレクトリの <strong>pg_tblspc/</strong> に、テーブルスペースの OID の名前で<strong>シンボリックリンク</strong>ができる</li>
+<li>初めからある2つ</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>テーブルスペース</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>pg_default</strong></td>
+<td>データベースの<strong>デフォルト</strong>（template1・template0 の格納先）。実体は <strong>base/</strong></td>
+</tr>
+<tr>
+<td><strong>pg_global</strong></td>
+<td><strong>クラスタ共通のシステムカタログ</strong>用。実体は <strong>global/</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>テーブルスペースは<strong>クラスタ全体</strong>で共通（pg_dump では出力されない → pg_dumpall）</li>
+<li>確認: psql の <strong><code>\db</code></strong>、システムカタログ <strong>pg_tablespace</strong></li>
+</ul>
+<h3 id="08-運用管理作業-22">9. システムカタログと情報スキーマ <span class="stars" data-n="3">★★★</span></h3>
+<h4 id="08-運用管理作業-23">システムカタログ</h4>
+<ul>
+<li>PostgreSQL が自分の管理情報（テーブル・列・ロールなどの定義）を入れているテーブル。<strong>pg_catalog スキーマ</strong>にあり、名前は <strong>pg_</strong> で始まる</li>
+<li>search_path に書かなくても、<strong>pg_catalog は常に最初に検索</strong>される</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>カタログ / ビュー</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>pg_database</strong></td>
+<td><strong>データベース</strong>の一覧（クラスタ共通）</td>
+</tr>
+<tr>
+<td><strong>pg_class</strong></td>
+<td><strong>テーブル・インデックス・シーケンス・ビューなど</strong>（リレーション）。<strong>relkind</strong> 列で種類を区別</td>
+</tr>
+<tr>
+<td><strong>pg_attribute</strong></td>
+<td>テーブルの<strong>列</strong></td>
+</tr>
+<tr>
+<td><strong>pg_namespace</strong></td>
+<td><strong>スキーマ</strong></td>
+</tr>
+<tr>
+<td>pg_index</td>
+<td>インデックスの詳細</td>
+</tr>
+<tr>
+<td>pg_proc</td>
+<td>関数・プロシージャ</td>
+</tr>
+<tr>
+<td>pg_type</td>
+<td>データ型</td>
+</tr>
+<tr>
+<td><strong>pg_authid</strong></td>
+<td><strong>ロール</strong>（パスワードを含む。スーパーユーザーのみ読める）</td>
+</tr>
+<tr>
+<td><strong>pg_roles</strong></td>
+<td>ロール（pg_authid のパスワードを伏せたビュー。誰でも読める）</td>
+</tr>
+<tr>
+<td>pg_user</td>
+<td>LOGIN できるロールのビュー</td>
+</tr>
+<tr>
+<td>pg_tablespace</td>
+<td>テーブルスペース</td>
+</tr>
+<tr>
+<td><strong>pg_tables</strong> / pg_indexes / pg_views</td>
+<td>テーブル / インデックス / ビューを見やすくしたビュー</td>
+</tr>
+<tr>
+<td><strong>pg_settings</strong></td>
+<td><strong>パラメータの現在値</strong>（→ 06章）</td>
+</tr>
+<tr>
+<td>pg_statistic / <strong>pg_stats</strong></td>
+<td>統計情報（→ ANALYZE）</td>
+</tr>
+<tr>
+<td><strong>pg_locks</strong></td>
+<td>現在の<strong>ロック</strong>（→ 04章）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>pg_class の relkind</strong>: <strong><code>r</code></strong> = テーブル、<strong><code>i</code></strong> = インデックス、<strong><code>S</code></strong> = シーケンス、<strong><code>v</code></strong> = ビュー、<code>m</code> = マテリアライズドビュー、<code>t</code> = TOAST テーブル、<code>f</code> = 外部テーブル、<code>p</code> = パーティションテーブル、<code>c</code> = 複合型</li>
+<li>多くのオブジェクトは <strong>OID</strong>（オブジェクト識別子）で識別される。<code>SELECT oid, datname FROM pg_database;</code></li>
+</ul>
+<h4 id="08-運用管理作業-24">統計情報ビュー</h4>
+<table>
+<thead>
+<tr>
+<th>ビュー</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>pg_stat_activity</strong></td>
+<td><strong>今の接続（セッション）</strong>と実行中の SQL（pid、usename、datname、<strong>state</strong>、<strong>query</strong>、client_addr）</td>
+</tr>
+<tr>
+<td><strong>pg_stat_user_tables</strong></td>
+<td>テーブルごとのアクセス件数・不要タプル数・VACUUM / ANALYZE の実行時刻</td>
+</tr>
+<tr>
+<td>pg_stat_user_indexes</td>
+<td>インデックスごとの使用回数</td>
+</tr>
+<tr>
+<td>pg_stat_database</td>
+<td>データベースごとのコミット数・ロールバック数・キャッシュヒット数</td>
+</tr>
+<tr>
+<td>pg_stat_archiver</td>
+<td>WAL アーカイブの状況（→ 07章）</td>
+</tr>
+<tr>
+<td>pg_stat_replication</td>
+<td>レプリケーションの状況</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>実行中の処理を止める関数<ul>
+<li><strong><code>pg_cancel_backend(pid)</code></strong>: その<strong>問い合わせを中止</strong>する（<strong>セッションは残る</strong>）</li>
+<li><strong><code>pg_terminate_backend(pid)</code></strong>: その<strong>セッションを切断</strong>する</li>
+</ul>
+</li>
+<li>統計をリセット: <code>SELECT pg_stat_reset();</code>（現在のデータベース）</li>
+</ul>
+<h4 id="08-運用管理作業-25">情報スキーマ（information_schema）</h4>
+<ul>
+<li><strong>SQL 標準</strong>で定められたビューの集まり。<strong>他の DBMS でも同じ問い合わせ</strong>が使える（移植性が高い）</li>
+<li>例: <code>information_schema.tables</code>、<code>information_schema.columns</code>、<code>information_schema.views</code>、<code>information_schema.table_privileges</code></li>
+<li class="caution">⚠ PostgreSQL 独自の情報（インデックスなど）は含まない。それらは<strong>システムカタログ</strong>で見る</li>
+</ul>
+<pre><code class="language-sql">SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';
+SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'emp';
+</code></pre>
+<h4 id="08-運用管理作業-26">サイズを調べる関数</h4>
+<table>
+<thead>
+<tr>
+<th>関数</th>
+<th>返す値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>pg_database_size(&lsquo;DB名&rsquo;)</strong></td>
+<td>データベースのサイズ（バイト）</td>
+</tr>
+<tr>
+<td><strong>pg_relation_size(&lsquo;テーブル&rsquo;)</strong></td>
+<td>テーブル本体のサイズ（インデックス・TOAST を含まない）</td>
+</tr>
+<tr>
+<td><strong>pg_total_relation_size(&lsquo;テーブル&rsquo;)</strong></td>
+<td>テーブル + <strong>インデックス + TOAST</strong> の合計</td>
+</tr>
+<tr>
+<td>pg_table_size(&lsquo;テーブル&rsquo;)</td>
+<td>テーブル + TOAST（インデックスを含まない）</td>
+</tr>
+<tr>
+<td>pg_indexes_size(&lsquo;テーブル&rsquo;)</td>
+<td>そのテーブルのインデックスの合計</td>
+</tr>
+<tr>
+<td><strong>pg_size_pretty(バイト数)</strong></td>
+<td><strong>&lsquo;8192 bytes&rsquo;・&lsquo;15 MB&rsquo;</strong> のような<strong>読みやすい表記</strong>に変換</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>例: <code>SELECT pg_size_pretty(pg_database_size('sampledb'));</code></li>
 </ul>
 </article>
 </section>
