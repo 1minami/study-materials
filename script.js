@@ -1029,14 +1029,17 @@
     return lines.map(line => {
       let html = escapeHtml(line);
       html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+      // inner はエスケープ・<code> 変換済み。答えは ` を外した平文なので <code> を除いて比較する
+      const answerHtml = escapeHtml(answer);
       html = html.replace(/\*\*([^*]+?)\*\*/g, function(_, inner) {
-        if (masked && inner === answer) {
+        const isAnswer = inner.replace(/<\/?code>/g, '') === answerHtml;
+        if (masked && isAnswer) {
           return '<input type="text" class="fillin-input" autocomplete="off" autocapitalize="off" spellcheck="false">';
         }
-        if (!masked && inner === answer) {
-          return '<strong class="fillin-answer-hl">' + escapeHtml(inner) + '</strong>';
+        if (!masked && isAnswer) {
+          return '<strong class="fillin-answer-hl">' + inner + '</strong>';
         }
-        return '<strong>' + escapeHtml(inner) + '</strong>';
+        return '<strong>' + inner + '</strong>';
       });
       const listM = html.match(/^(\s*)(?:[-*]|\d+\.)\s+(.*)$/);
       if (listM) {

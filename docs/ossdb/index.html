@@ -30,6 +30,9 @@
   </div>
 </div>
 <div class="toc-section">
+  <a href="#" class="toc-section-title fillin-launcher" onclick="openFillin();return false;">✍️ 穴埋め演習</a>
+</div>
+<div class="toc-section">
   <a href="#試験概要" class="toc-section-title">📋 試験概要</a>
   <ul>
     <li><a href="#00-試験概要">試験概要</a></li>
@@ -5129,6 +5132,21 @@ SELECT column_name, data_type FROM information_schema.columns WHERE table_name =
   <textarea class="right-sidebar-textarea" id="note-textarea" placeholder="この章のメモを入力..."></textarea>
   <div class="right-sidebar-status" id="note-status"></div>
 </aside>
+
+<div class="quiz-overlay" id="fillin-overlay">
+  <div class="quiz-modal" onclick="event.stopPropagation()">
+    <div class="quiz-header">
+      <div class="quiz-title">✍️ 穴埋め演習</div>
+      <div class="quiz-progress" id="fillin-progress"></div>
+      <button class="quiz-close" onclick="closeFillin()" aria-label="閉じる">✕</button>
+    </div>
+    <div class="quiz-body" id="fillin-body"></div>
+    <div class="quiz-footer">
+      <button class="quiz-btn quiz-btn-primary" id="fillin-submit-btn" onclick="submitFillin()" disabled>採点する</button>
+      <button class="quiz-btn quiz-btn-primary" id="fillin-next-btn" onclick="nextFillin()" hidden>次の問題 ▶</button>
+    </div>
+  </div>
+</div>
 
 <button class="back-top" onclick="scrollTo({top:0,behavior:'smooth'})" title="トップへ戻る">↑</button>
 

@@ -213,8 +213,16 @@ def decorate_html(html: str) -> str:
     return CAUTION_RE.sub(r'<\1 class="caution">', html)
 
 
-def build_toc(sections: dict, materials_dir: Path = MATERIALS_DIR, launchers: bool = True) -> str:
-    """目次HTMLを生成（launchers=False で演習モーダルの起動リンクを出さない）"""
+# 目次上部に出す演習モーダルの起動リンク
+LAUNCHERS = {
+    "quiz": '<a href="#" class="toc-section-title quiz-launcher" onclick="openQuiz();return false;">📝 ランダム問題演習</a>',
+    "marubatsu": '<a href="#" class="toc-section-title marubatsu-launcher" onclick="openMarubatsu();return false;">⭕ 一問一答</a>',
+    "fillin": '<a href="#" class="toc-section-title fillin-launcher" onclick="openFillin();return false;">✍️ 穴埋め演習</a>',
+}
+
+
+def build_toc(sections: dict, materials_dir: Path = MATERIALS_DIR, launchers: tuple = tuple(LAUNCHERS)) -> str:
+    """目次HTMLを生成（launchers で出す演習モーダルの起動リンクを選ぶ。空なら出さない）"""
     toc = '<nav id="toc" class="toc">\n<h2>目次</h2>\n'
     toc += '<div class="toc-search" id="searchbar">\n'
     toc += '  <input type="search" id="search-input" placeholder="🔍 テキスト内を検索" autocomplete="off" spellcheck="false" aria-label="テキスト内を検索">\n'
@@ -225,15 +233,9 @@ def build_toc(sections: dict, materials_dir: Path = MATERIALS_DIR, launchers: bo
     toc += '    <button class="toc-search-btn" id="search-close" title="クリア (Esc)" aria-label="クリア">✕</button>\n'
     toc += '  </div>\n'
     toc += '</div>\n'
-    if launchers:
+    for name in launchers:
         toc += '<div class="toc-section">\n'
-        toc += '  <a href="#" class="toc-section-title quiz-launcher" onclick="openQuiz();return false;">📝 ランダム問題演習</a>\n'
-        toc += '</div>\n'
-        toc += '<div class="toc-section">\n'
-        toc += '  <a href="#" class="toc-section-title marubatsu-launcher" onclick="openMarubatsu();return false;">⭕ 一問一答</a>\n'
-        toc += '</div>\n'
-        toc += '<div class="toc-section">\n'
-        toc += '  <a href="#" class="toc-section-title fillin-launcher" onclick="openFillin();return false;">✍️ 穴埋め演習</a>\n'
+        toc += f'  {LAUNCHERS[name]}\n'
         toc += '</div>\n'
     for sec_name, sec_data in sections.items():
         sec_id = slugify(sec_name)
@@ -645,7 +647,8 @@ def parse_fillin_from_md(md_text: str, file_label: str, category: str, index_ter
             continue
         # 太字抽出
         bolds = BOLD_RE.findall(para)
-        valid = [b.strip() for b in bolds if _is_valid_bold(b)]
+        # `code` 付き太字はタイプ入力できるよう ` を外した形を答えにする
+        valid = [b.replace("`", "").strip() for b in bolds if _is_valid_bold(b.replace("`", ""))]
         if not valid:
             continue
         # 段落の属するセクション/見出しと★数（前セクションの見出し漏れを防止）

@@ -23,11 +23,11 @@ docs/
   ├── quiz.json        # 4択演習問題データ（ビルド時に自動生成）
   ├── marubatsu.json   # 一問一答データ（docs/ 直接管理・唯一の正）
   ├── fillin.json      # 穴埋め問題データ（ビルド時に自動生成）
-  └── ossdb/           # OSS-DB テキスト（index.html / style.css / script.js。build_ossdb_textbook.py で生成）
+  └── ossdb/           # OSS-DB テキスト（index.html / style.css / script.js / fillin.json。build_ossdb_textbook.py で生成）
 scripts/
   ├── fetch_egov.py           # e-Gov 法令取得スクリプト（3試験統合版）
   ├── build_takken_textbook.py  # 宅建教材 → HTML テキストブック + quiz.json 変換
-  ├── build_ossdb_textbook.py   # OSS-DB 教材 → HTML テキストブック（本文のみ。変換関数は宅建版を共用）
+  ├── build_ossdb_textbook.py   # OSS-DB 教材 → HTML テキストブック（本文 + 穴埋め。変換・穴埋め抽出は宅建版の関数を共用）
   ├── sync_marubatsu.py         # docs/marubatsu.json → ルートの複製へ同期（検証付き）
   ├── apply_mb_importance.py    # docs/marubatsu.json の importance 未設定問題へ section 既定値（A/B/C）を付与
   └── audit_quiz.py             # quiz.json の「正解が1つに定まらない問題」「解説の逃げ口上」を検出（要修正時 exit 1）
@@ -194,12 +194,13 @@ git add docs/ && git commit -m "update textbook" && git push
 
 **URL**: https://1minami.github.io/study-materials/ossdb/
 
-- OSS-DB Silver Ver.3.0（PostgreSQL 14 基準）の要点整理テキスト。**本文のみ**（4択・一問一答・穴埋めは無し。演習は ping-t で行う）
+- OSS-DB Silver Ver.3.0（PostgreSQL 14 基準）の要点整理テキスト。本文 + **穴埋め演習**（4択・一問一答は無し。演習の主力は ping-t）
+- 穴埋め演習: 宅建版と同じモーダル・抽出ルール。対象は 01〜08 章（試験概要は除外）、カテゴリはセクション（一般知識 / 開発/SQL / 運用管理）。`` `code` `` 付き太字は `` ` `` を外した語が答え（例: `pg_dump`）。用語索引は無いので重要度は見出しの★と数字のみ
 - 検索・学習メモ・読み上げ・ダークモードは宅建版と同じ `templates/` を使う
 - 章は出題範囲（S1〜S3）に対応。学習計画（`knowledge/dev/oss-db-plan.md`）の週に先行して追加する。未作成の章はビルド時にスキップされる
 
 ```bash
-python scripts/build_ossdb_textbook.py   # materials/ossdb/ → docs/ossdb/
+python scripts/build_ossdb_textbook.py   # materials/ossdb/ → docs/ossdb/（fillin.json も再生成）
 ```
 
 ### 試験ごとの設定（`window.TEXTBOOK_CONFIG`）
@@ -211,7 +212,7 @@ python scripts/build_ossdb_textbook.py   # materials/ossdb/ → docs/ossdb/
 | `storagePrefix` | `takken` | `ossdb` | localStorage のキーの接頭辞（学習メモ・一問一答の履歴・読み上げ速度）。github.io 上で同一オリジンになるため試験ごとに分ける |
 | `ttsChapters` | `[0, 18]` | `[0, 98]` | 読み上げ ▶ を出す章番号の範囲 |
 
-- 演習モーダル（4択・一問一答・穴埋め）を持たないページでも動くよう、`closeQuiz` / `closeMarubatsu` / `closeFillin` は要素が無ければ何もしない
+- 演習モーダル（4択・一問一答）を持たないページでも動くよう、`closeQuiz` / `closeMarubatsu` / `closeFillin` は要素が無ければ何もしない
 - 読み辞書 `TTS_READINGS` は宅建向けだが共用している（OSS-DB の本文で誤爆する語は今のところ無い）
 
 ## 使い方
