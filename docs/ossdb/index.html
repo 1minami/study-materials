@@ -2264,17 +2264,17 @@ COMMIT;                      -- 1 と 3 が確定
 <tbody>
 <tr>
 <td><strong>ダーティリード</strong></td>
-<td>Dirty Read（P1）、汚読</td>
+<td>Dirty Read（P1）</td>
 <td>他のトランザクションが<strong>コミットしていない</strong>変更が読めてしまう</td>
 </tr>
 <tr>
 <td><strong>ノンリピータブルリード</strong></td>
-<td>Non-Repeatable Read、<strong>ファジーリード（Fuzzy Read）</strong>（P2）、反復不能読み取り</td>
+<td>Non-Repeatable Read、<strong>ファジーリード（Fuzzy Read）</strong>（P2）</td>
 <td>同じ行を2回読むと、間に他がコミットした<strong>更新・削除</strong>のせいで値が変わる</td>
 </tr>
 <tr>
 <td><strong>ファントムリード</strong></td>
-<td>Phantom Read（P3）、幽霊読み</td>
+<td>Phantom Read（P3）</td>
 <td>同じ条件で2回検索すると、間に他がコミットした<strong>追加</strong>のせいで行が増える（減る）</td>
 </tr>
 <tr>
