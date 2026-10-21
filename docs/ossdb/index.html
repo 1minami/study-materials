@@ -2257,28 +2257,38 @@ COMMIT;                      -- 1 と 3 が確定
 <thead>
 <tr>
 <th>現象</th>
+<th>別名・英語表記</th>
 <th>内容</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>ダーティリード</strong></td>
+<td>Dirty Read（P1）、汚読</td>
 <td>他のトランザクションが<strong>コミットしていない</strong>変更が読めてしまう</td>
 </tr>
 <tr>
-<td><strong>ノンリピータブルリード</strong>（反復不能読み取り）</td>
+<td><strong>ノンリピータブルリード</strong></td>
+<td>Non-Repeatable Read、<strong>ファジーリード（Fuzzy Read）</strong>（P2）、反復不能読み取り</td>
 <td>同じ行を2回読むと、間に他がコミットした<strong>更新・削除</strong>のせいで値が変わる</td>
 </tr>
 <tr>
 <td><strong>ファントムリード</strong></td>
+<td>Phantom Read（P3）、幽霊読み</td>
 <td>同じ条件で2回検索すると、間に他がコミットした<strong>追加</strong>のせいで行が増える（減る）</td>
 </tr>
 <tr>
 <td><strong>直列化異常</strong></td>
+<td>Serialization Anomaly</td>
 <td>同時に実行した結果が、どの順番で1つずつ実行した結果とも一致しない</td>
 </tr>
 </tbody>
 </table>
+<ul>
+<li class="caution">⚠ 「ファジーリード」と「ノンリピータブルリード」は同じ現象。選択肢で別々の現象のように並んでいても混同しない</li>
+<li>ノンリピータブルリードは「同じ行の値が変わる」、ファントムリードは「行の集合が変わる」で区別する</li>
+<li>P0〜P3 は論文（Berenson ほか 1995「A Critique of ANSI SQL Isolation Levels」）での番号。P0 はダーティライト（未コミットの変更を上書き）で、PostgreSQL ではどの分離レベルでも起きない</li>
+</ul>
 <h4 id="04-関数・トランザクション-22">分離レベルと PostgreSQL の動作</h4>
 <table>
 <thead>
