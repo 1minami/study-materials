@@ -139,6 +139,31 @@ CREATE TABLE order_items (
 cat_id integer REFERENCES categories (id) ON DELETE CASCADE ON UPDATE CASCADE
 ```
 
+### ドメイン（CREATE DOMAIN）
+
+データ型に制約・デフォルト値を付けて名前を付けたもの（ユーザー定義型の一種）。同じ制約を多くの列で使い回せる。
+
+```sql
+CREATE DOMAIN price_t AS integer
+    DEFAULT 0
+    NOT NULL
+    CHECK (VALUE >= 0);                    -- VALUE は検査対象の値
+
+CREATE TABLE products (
+    id    integer PRIMARY KEY,
+    price price_t                           -- データ型の代わりに使う
+);
+```
+
+- 付けられるのは **NOT NULL / NULL・CHECK・DEFAULT** だけ
+- ⚠ **UNIQUE・PRIMARY KEY・FOREIGN KEY はドメインに付けられない**（列・表の制約として書く）
+- CHECK の中では、検査する値を **VALUE** で表す（列名は書かない）
+- 列に DEFAULT を書くと、**列の DEFAULT がドメインの DEFAULT より優先**される
+- ⚠ ドメインの制約は列側で**外せない**（列側で制約を追加するのはできる）
+- 変更は **ALTER DOMAIN**（`SET DEFAULT` / `DROP DEFAULT`・`SET NOT NULL` / `DROP NOT NULL`・`ADD CONSTRAINT` / `DROP CONSTRAINT`・`RENAME TO`）。制約を追加すると**既存データも検査**され、違反があればエラー
+- `DROP DOMAIN d;` ⚠ 使っている列があると**エラー**。**`CASCADE` ならその列も削除**される
+- psql の一覧表示は **`\dD`**
+
 ## 4. テーブル定義の変更（ALTER TABLE）★★★
 
 | 操作 | 構文 |

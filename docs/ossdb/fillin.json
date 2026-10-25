@@ -1015,6 +1015,72 @@
     "id": "02-SQL①定義・更新-16",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
+    "section": "制約",
+    "heading": "ドメイン（CREATE DOMAIN）",
+    "answer": "VALUE",
+    "blank_count": 1,
+    "importance": 3,
+    "paragraph": "- 付けられるのは **NOT NULL / NULL・CHECK・DEFAULT** だけ\n- ⚠ **UNIQUE・PRIMARY KEY・FOREIGN KEY はドメインに付けられない**（列・表の制約として書く）\n- CHECK の中では、検査する値を **VALUE** で表す（列名は書かない）\n- 列に DEFAULT を書くと、**列の DEFAULT がドメインの DEFAULT より優先**される\n- ⚠ ドメインの制約は列側で**外せない**（列側で制約を追加するのはできる）\n- 変更は **ALTER DOMAIN**（`SET DEFAULT` / `DROP DEFAULT`・`SET NOT NULL` / `DROP NOT NULL`・`ADD CONSTRAINT` / `DROP CONSTRAINT`・`RENAME TO`）。制約を追加すると**既存データも検査**され、違反があればエラー\n- `DROP DOMAIN d;` ⚠ 使っている列があると**エラー**。**`CASCADE` ならその列も削除**される\n- psql の一覧表示は **`\\dD`**"
+  },
+  {
+    "id": "02-SQL①定義・更新-17",
+    "chapter": "02-SQL①定義・更新",
+    "category": "開発/SQL",
+    "section": "制約",
+    "heading": "ドメイン（CREATE DOMAIN）",
+    "answer": "外せない",
+    "blank_count": 1,
+    "importance": 3,
+    "paragraph": "- 付けられるのは **NOT NULL / NULL・CHECK・DEFAULT** だけ\n- ⚠ **UNIQUE・PRIMARY KEY・FOREIGN KEY はドメインに付けられない**（列・表の制約として書く）\n- CHECK の中では、検査する値を **VALUE** で表す（列名は書かない）\n- 列に DEFAULT を書くと、**列の DEFAULT がドメインの DEFAULT より優先**される\n- ⚠ ドメインの制約は列側で**外せない**（列側で制約を追加するのはできる）\n- 変更は **ALTER DOMAIN**（`SET DEFAULT` / `DROP DEFAULT`・`SET NOT NULL` / `DROP NOT NULL`・`ADD CONSTRAINT` / `DROP CONSTRAINT`・`RENAME TO`）。制約を追加すると**既存データも検査**され、違反があればエラー\n- `DROP DOMAIN d;` ⚠ 使っている列があると**エラー**。**`CASCADE` ならその列も削除**される\n- psql の一覧表示は **`\\dD`**"
+  },
+  {
+    "id": "02-SQL①定義・更新-18",
+    "chapter": "02-SQL①定義・更新",
+    "category": "開発/SQL",
+    "section": "制約",
+    "heading": "ドメイン（CREATE DOMAIN）",
+    "answer": "ALTER DOMAIN",
+    "blank_count": 1,
+    "importance": 3,
+    "paragraph": "- 付けられるのは **NOT NULL / NULL・CHECK・DEFAULT** だけ\n- ⚠ **UNIQUE・PRIMARY KEY・FOREIGN KEY はドメインに付けられない**（列・表の制約として書く）\n- CHECK の中では、検査する値を **VALUE** で表す（列名は書かない）\n- 列に DEFAULT を書くと、**列の DEFAULT がドメインの DEFAULT より優先**される\n- ⚠ ドメインの制約は列側で**外せない**（列側で制約を追加するのはできる）\n- 変更は **ALTER DOMAIN**（`SET DEFAULT` / `DROP DEFAULT`・`SET NOT NULL` / `DROP NOT NULL`・`ADD CONSTRAINT` / `DROP CONSTRAINT`・`RENAME TO`）。制約を追加すると**既存データも検査**され、違反があればエラー\n- `DROP DOMAIN d;` ⚠ 使っている列があると**エラー**。**`CASCADE` ならその列も削除**される\n- psql の一覧表示は **`\\dD`**"
+  },
+  {
+    "id": "02-SQL①定義・更新-19",
+    "chapter": "02-SQL①定義・更新",
+    "category": "開発/SQL",
+    "section": "制約",
+    "heading": "ドメイン（CREATE DOMAIN）",
+    "answer": "既存データも検査",
+    "blank_count": 1,
+    "importance": 3,
+    "paragraph": "- 付けられるのは **NOT NULL / NULL・CHECK・DEFAULT** だけ\n- ⚠ **UNIQUE・PRIMARY KEY・FOREIGN KEY はドメインに付けられない**（列・表の制約として書く）\n- CHECK の中では、検査する値を **VALUE** で表す（列名は書かない）\n- 列に DEFAULT を書くと、**列の DEFAULT がドメインの DEFAULT より優先**される\n- ⚠ ドメインの制約は列側で**外せない**（列側で制約を追加するのはできる）\n- 変更は **ALTER DOMAIN**（`SET DEFAULT` / `DROP DEFAULT`・`SET NOT NULL` / `DROP NOT NULL`・`ADD CONSTRAINT` / `DROP CONSTRAINT`・`RENAME TO`）。制約を追加すると**既存データも検査**され、違反があればエラー\n- `DROP DOMAIN d;` ⚠ 使っている列があると**エラー**。**`CASCADE` ならその列も削除**される\n- psql の一覧表示は **`\\dD`**"
+  },
+  {
+    "id": "02-SQL①定義・更新-20",
+    "chapter": "02-SQL①定義・更新",
+    "category": "開発/SQL",
+    "section": "制約",
+    "heading": "ドメイン（CREATE DOMAIN）",
+    "answer": "エラー",
+    "blank_count": 1,
+    "importance": 3,
+    "paragraph": "- 付けられるのは **NOT NULL / NULL・CHECK・DEFAULT** だけ\n- ⚠ **UNIQUE・PRIMARY KEY・FOREIGN KEY はドメインに付けられない**（列・表の制約として書く）\n- CHECK の中では、検査する値を **VALUE** で表す（列名は書かない）\n- 列に DEFAULT を書くと、**列の DEFAULT がドメインの DEFAULT より優先**される\n- ⚠ ドメインの制約は列側で**外せない**（列側で制約を追加するのはできる）\n- 変更は **ALTER DOMAIN**（`SET DEFAULT` / `DROP DEFAULT`・`SET NOT NULL` / `DROP NOT NULL`・`ADD CONSTRAINT` / `DROP CONSTRAINT`・`RENAME TO`）。制約を追加すると**既存データも検査**され、違反があればエラー\n- `DROP DOMAIN d;` ⚠ 使っている列があると**エラー**。**`CASCADE` ならその列も削除**される\n- psql の一覧表示は **`\\dD`**"
+  },
+  {
+    "id": "02-SQL①定義・更新-21",
+    "chapter": "02-SQL①定義・更新",
+    "category": "開発/SQL",
+    "section": "制約",
+    "heading": "ドメイン（CREATE DOMAIN）",
+    "answer": "\\dD",
+    "blank_count": 1,
+    "importance": 3,
+    "paragraph": "- 付けられるのは **NOT NULL / NULL・CHECK・DEFAULT** だけ\n- ⚠ **UNIQUE・PRIMARY KEY・FOREIGN KEY はドメインに付けられない**（列・表の制約として書く）\n- CHECK の中では、検査する値を **VALUE** で表す（列名は書かない）\n- 列に DEFAULT を書くと、**列の DEFAULT がドメインの DEFAULT より優先**される\n- ⚠ ドメインの制約は列側で**外せない**（列側で制約を追加するのはできる）\n- 変更は **ALTER DOMAIN**（`SET DEFAULT` / `DROP DEFAULT`・`SET NOT NULL` / `DROP NOT NULL`・`ADD CONSTRAINT` / `DROP CONSTRAINT`・`RENAME TO`）。制約を追加すると**既存データも検査**され、違反があればエラー\n- `DROP DOMAIN d;` ⚠ 使っている列があると**エラー**。**`CASCADE` ならその列も削除**される\n- psql の一覧表示は **`\\dD`**"
+  },
+  {
+    "id": "02-SQL①定義・更新-22",
+    "chapter": "02-SQL①定義・更新",
+    "category": "開発/SQL",
     "section": "テーブル定義の変更（ALTER TABLE）",
     "heading": "",
     "answer": "その値",
@@ -1023,7 +1089,7 @@
     "paragraph": "- 追加した列の既存行の値は、DEFAULT 指定があれば**その値**、なければ **NULL**\n- ⚠ NULL を含む列に `SET NOT NULL` すると**エラー**。既存データが制約に違反する `ADD CONSTRAINT` も同様\n- ⚠ 列名変更は `RENAME COLUMN`、型変更は `ALTER COLUMN ... TYPE`。`MODIFY`（Oracle / MySQL の構文）は**使えない**\n- カンマで区切れば1文で複数の変更ができる（`ALTER TABLE t ADD COLUMN a int, ADD COLUMN b int;`）"
   },
   {
-    "id": "02-SQL①定義・更新-17",
+    "id": "02-SQL①定義・更新-23",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブル定義の変更（ALTER TABLE）",
@@ -1034,7 +1100,7 @@
     "paragraph": "- 追加した列の既存行の値は、DEFAULT 指定があれば**その値**、なければ **NULL**\n- ⚠ NULL を含む列に `SET NOT NULL` すると**エラー**。既存データが制約に違反する `ADD CONSTRAINT` も同様\n- ⚠ 列名変更は `RENAME COLUMN`、型変更は `ALTER COLUMN ... TYPE`。`MODIFY`（Oracle / MySQL の構文）は**使えない**\n- カンマで区切れば1文で複数の変更ができる（`ALTER TABLE t ADD COLUMN a int, ADD COLUMN b int;`）"
   },
   {
-    "id": "02-SQL①定義・更新-18",
+    "id": "02-SQL①定義・更新-24",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブル定義の変更（ALTER TABLE）",
@@ -1045,7 +1111,7 @@
     "paragraph": "- 追加した列の既存行の値は、DEFAULT 指定があれば**その値**、なければ **NULL**\n- ⚠ NULL を含む列に `SET NOT NULL` すると**エラー**。既存データが制約に違反する `ADD CONSTRAINT` も同様\n- ⚠ 列名変更は `RENAME COLUMN`、型変更は `ALTER COLUMN ... TYPE`。`MODIFY`（Oracle / MySQL の構文）は**使えない**\n- カンマで区切れば1文で複数の変更ができる（`ALTER TABLE t ADD COLUMN a int, ADD COLUMN b int;`）"
   },
   {
-    "id": "02-SQL①定義・更新-19",
+    "id": "02-SQL①定義・更新-25",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブル定義の変更（ALTER TABLE）",
@@ -1056,7 +1122,7 @@
     "paragraph": "- 追加した列の既存行の値は、DEFAULT 指定があれば**その値**、なければ **NULL**\n- ⚠ NULL を含む列に `SET NOT NULL` すると**エラー**。既存データが制約に違反する `ADD CONSTRAINT` も同様\n- ⚠ 列名変更は `RENAME COLUMN`、型変更は `ALTER COLUMN ... TYPE`。`MODIFY`（Oracle / MySQL の構文）は**使えない**\n- カンマで区切れば1文で複数の変更ができる（`ALTER TABLE t ADD COLUMN a int, ADD COLUMN b int;`）"
   },
   {
-    "id": "02-SQL①定義・更新-20",
+    "id": "02-SQL①定義・更新-26",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1067,7 +1133,7 @@
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
-    "id": "02-SQL①定義・更新-21",
+    "id": "02-SQL①定義・更新-27",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1078,7 +1144,7 @@
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
-    "id": "02-SQL①定義・更新-22",
+    "id": "02-SQL①定義・更新-28",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1089,7 +1155,7 @@
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
-    "id": "02-SQL①定義・更新-23",
+    "id": "02-SQL①定義・更新-29",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1100,7 +1166,7 @@
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
-    "id": "02-SQL①定義・更新-24",
+    "id": "02-SQL①定義・更新-30",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1111,7 +1177,7 @@
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
-    "id": "02-SQL①定義・更新-25",
+    "id": "02-SQL①定義・更新-31",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1122,7 +1188,7 @@
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
-    "id": "02-SQL①定義・更新-26",
+    "id": "02-SQL①定義・更新-32",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1133,7 +1199,7 @@
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
-    "id": "02-SQL①定義・更新-27",
+    "id": "02-SQL①定義・更新-33",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1144,7 +1210,7 @@
     "paragraph": "- `TRUNCATE t;` テーブルの**全行を高速に削除**（定義は残る）\n- `DELETE`（WHERE なし）との違い"
   },
   {
-    "id": "02-SQL①定義・更新-28",
+    "id": "02-SQL①定義・更新-34",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1155,7 +1221,7 @@
     "paragraph": "- `RESTART IDENTITY`: 列に紐づくシーケンスを初期値に戻す（デフォルトは `CONTINUE IDENTITY` で戻さない）\n- ⚠ 外部キーで**参照されているテーブル**は、`CASCADE` を付けるか参照元も同時に指定しないと TRUNCATE できない（参照元が空でもエラー）"
   },
   {
-    "id": "02-SQL①定義・更新-29",
+    "id": "02-SQL①定義・更新-35",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "データの追加（INSERT）",
@@ -1166,7 +1232,7 @@
     "paragraph": "- 列リストで**省略した列にはデフォルト値**（なければ NULL）が入る\n- 列名を省略すると定義順に先頭から当てはめる。値の数が列数より少なければ、残りの列はデフォルト値\n- ⚠ `INSERT ... SELECT` に **VALUES は付けない**"
   },
   {
-    "id": "02-SQL①定義・更新-30",
+    "id": "02-SQL①定義・更新-36",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "データの追加（INSERT）",
@@ -1177,7 +1243,7 @@
     "paragraph": "- 追加・更新・削除した行の値を**その場で返す**（INSERT / UPDATE / DELETE で使える）\n- `INSERT INTO products (name) VALUES ('かき') RETURNING id;` → 自動採番された id を取得"
   },
   {
-    "id": "02-SQL①定義・更新-31",
+    "id": "02-SQL①定義・更新-37",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "データの追加（INSERT）",
@@ -1188,7 +1254,7 @@
     "paragraph": "- **`EXCLUDED`** は「追加しようとして衝突した行」を指す\n- ⚠ `DO UPDATE` では衝突対象（`(id)` や `ON CONSTRAINT 制約名`）の指定が**必須**。`DO NOTHING` は省略できる"
   },
   {
-    "id": "02-SQL①定義・更新-32",
+    "id": "02-SQL①定義・更新-38",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "データの追加（INSERT）",
@@ -1199,7 +1265,7 @@
     "paragraph": "- **`EXCLUDED`** は「追加しようとして衝突した行」を指す\n- ⚠ `DO UPDATE` では衝突対象（`(id)` や `ON CONSTRAINT 制約名`）の指定が**必須**。`DO NOTHING` は省略できる"
   },
   {
-    "id": "02-SQL①定義・更新-33",
+    "id": "02-SQL①定義・更新-39",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "データの更新・削除（UPDATE / DELETE）",
@@ -1210,7 +1276,7 @@
     "paragraph": "- ⚠ **WHERE を省略すると全行が対象**（エラーにも警告にもならない）\n- SET の右辺はすべて**更新前の値**で計算される（`SET a = b, b = a` で値が入れ替わる）\n- 該当行が0件でもエラーにならない（`UPDATE 0` / `DELETE 0` と表示）\n- 制約に違反する更新・削除は**文全体がエラー**になり、1行も変わらない"
   },
   {
-    "id": "02-SQL①定義・更新-34",
+    "id": "02-SQL①定義・更新-40",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "データの更新・削除（UPDATE / DELETE）",
