@@ -390,3 +390,82 @@ CREATE TRIGGER trg_updated BEFORE UPDATE ON products
 - ⚠ BEFORE の行トリガーが **NULL を返すと、その行の操作は行われない**。NEW を書き換えて返すと、書き換えた値で保存される
 - AFTER トリガーや文単位トリガーの戻り値は無視される
 - `EXECUTE PROCEDURE` は古い書き方（意味は同じ）。`DROP TRIGGER trg_updated ON products;`
+
+## 14. JSON の操作 ★
+
+### 演算子
+
+```sql
+-- data は jsonb 列: {"name": "pen", "tags": ["red", "blue"], "spec": {"len": 14}}
+SELECT data -> 'name'          FROM items;   -- "pen"（jsonb のまま）
+SELECT data ->> 'name'         FROM items;   -- pen（text）
+SELECT data -> 'tags' ->> 0    FROM items;   -- red（配列の添字は 0 始まり）
+SELECT data #>> '{spec,len}'   FROM items;   -- 14（パスを配列で指定。text）
+SELECT * FROM items WHERE data @> '{"name": "pen"}';   -- 包含（jsonb のみ）
+SELECT * FROM items WHERE data ? 'spec';               -- キーの存在（jsonb のみ）
+```
+
+| 演算子 | 意味 |
+|---|---|
+| **`->`** | キー（または添字）で取り出す。結果は **json / jsonb** |
+| **`->>`** | キー（または添字）で取り出す。結果は **text** |
+| **`#>`** / **`#>>`** | パス（`'{a,b}'`）で取り出す。`#>` は json / jsonb、`#>>` は text |
+| **`@>`** | 左が右を**含む**か（jsonb のみ） |
+| **`?`** | キーが存在するか（jsonb のみ） |
+
+- 複数キーの存在は `?|`（どれか1つ）/ `?&`（全部）。`'{a,b}'` のような配列で渡す
+- ⚠ `->` の結果は JSON のまま → 文字列と比較・連結するなら **`->>`** を使う
+- ⚠ 配列の添字は **0 始まり**（PostgreSQL の配列型は 1 始まりなので混同注意）
+- json と jsonb の違い: **json** は入力をそのまま保存（空白・キーの順序・重複キーも残る）。**jsonb** は分解して保存（空白を除き、キーの順序は保たれず、**重複キーは最後の値だけ**残る）
+- jsonb には **GIN インデックス**を作れる（`@>` や `?` の検索が速くなる）
+
+### JSON パス（jsonpath）
+
+JSON の中の位置や条件を、専用の言語（SQL/JSON パス言語）で書く。
+
+```sql
+SELECT jsonb_path_query('{"items": [{"p": 100}, {"p": 300}]}',
+                        '$.items[*] ? (@.p > 200)');     -- {"p": 300}
+SELECT data @? '$.tags[*] ? (@ == "red")' FROM items;  -- true（該当する要素があるか）
+SELECT data @@ '$.spec.len > 10'          FROM items;  -- true（条件の判定結果）
+```
+
+| 記号 | 意味 |
+|---|---|
+| **`$`** | 検査対象の JSON 全体（ルート） |
+| **`.キー`** / **`[n]`** / **`[*]`** | キー・添字で辿る。`[*]` は配列の全要素 |
+| **`? (条件)`** | フィルタ。条件を満たす要素だけ残す |
+| **`@`** | フィルタの中で、いま検査している要素 |
+
+- 演算子 **`@?`**: パスに当てはまる要素が**あるか**。**`@@`**: パスで書いた**条件が真か**
+- 関数: **jsonb_path_query**（当てはまる要素を全部返す）、jsonb_path_query_first（最初の1つ）、jsonb_path_exists（あるか）
+- ⚠ 比較は `==`（`=` ではない）。文字列はダブルクォート（`"red"`）
+
+## 15. 論理レプリケーション ★
+
+```sql
+-- 送る側（パブリッシャー）
+CREATE PUBLICATION pub1 FOR TABLE products, orders;   -- FOR ALL TABLES で全テーブル
+
+-- 受ける側（サブスクライバー）。先に同じ定義のテーブルを作っておく
+CREATE SUBSCRIPTION sub1
+    CONNECTION 'host=192.168.1.10 dbname=shop user=repuser'
+    PUBLICATION pub1;
+```
+
+- テーブル単位で、行の変更（**INSERT / UPDATE / DELETE / TRUNCATE**）を別のサーバへ送る仕組み
+- パブリッシャー: **パブリケーション**（何を送るか）を作る。サブスクライバー: **サブスクリプション**（どこから受けるか）を作る
+- ⚠ パブリッシャーは **`wal_level = logical`** が必要（デフォルトの replica では不可。変更には再起動が必要）
+- ⚠ **DDL（テーブル定義の変更）とシーケンスは送られない** → サブスクライバー側に**テーブルを先に作っておく**（`pg_dump -s` で定義だけ移すなど）
+- 作成時に既存データも**最初にコピー**される（`WITH (copy_data = false)` で止められる）
+- UPDATE / DELETE を送るには、テーブルに**主キー**（レプリカアイデンティティ）が必要
+- 変更: `ALTER PUBLICATION pub1 ADD TABLE t;` → 受ける側で `ALTER SUBSCRIPTION sub1 REFRESH PUBLICATION;`。`ALTER SUBSCRIPTION sub1 DISABLE;` / `ENABLE;` で一時停止・再開
+
+| | 物理（ストリーミング）レプリケーション | 論理レプリケーション |
+|---|---|---|
+| 単位 | **クラスタ全体** | **テーブル単位**（選べる） |
+| 受ける側 | スタンバイ。**読み取り専用** | 普通のサーバ。**書き込みもできる** |
+| メジャーバージョン | 同じでないと不可 | **異なっていてもよい** |
+| 必要な wal_level | replica 以上 | **logical** |
+
+- ⚠ pg_hba.conf の DATABASE 欄の `replication` は**物理レプリケーション用**。論理レプリケーションの接続は**普通のデータベース名**で照合される
