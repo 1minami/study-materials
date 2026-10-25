@@ -198,6 +198,7 @@ SELECT cat_id, count(*) FROM expensive GROUP BY cat_id;
 | 操作 | 構文 |
 |---|---|
 | 作成 | `CREATE SCHEMA s;`（`AUTHORIZATION ユーザー名` で所有者を指定） |
+| 変更 | `ALTER SCHEMA s RENAME TO s2;` / `ALTER SCHEMA s OWNER TO alice;` |
 | 削除 | `DROP SCHEMA s;`（中にオブジェクトがあればエラー。`CASCADE` で中身ごと削除） |
 
 ### search_path
@@ -218,6 +219,7 @@ SELECT id, name, price FROM products WHERE price >= 1000;
 
 - SELECT 文に名前を付けたもの。**データは持たず**、参照するたびに元の SELECT を実行する
 - **`CREATE OR REPLACE VIEW`**: 既存のビューを置き換える。⚠ ただし**列の削除・名前変更・型変更はできず、末尾への列追加だけ**できる
+- `ALTER VIEW v RENAME TO v2;`（名前・所有者などの変更）。⚠ **定義（SELECT 文）は ALTER VIEW で変えられない** → `CREATE OR REPLACE VIEW` か作り直し
 - `DROP VIEW v;`
 - ⚠ ビューが参照しているテーブルは、`DROP TABLE ... CASCADE` でないと削除できない（CASCADE ならビューも消える）
 
@@ -253,6 +255,7 @@ DROP INDEX idx_products_name;
 - **部分インデックス**: 条件に合う行だけを索引に入れる
 - **`CREATE INDEX CONCURRENTLY`**: テーブルへの書き込みを**止めずに**作成（時間はかかる。トランザクションブロック内では実行できない）
 - `REINDEX INDEX 名前;` / `REINDEX TABLE t;` でインデックスを作り直す
+- `ALTER INDEX 名前 RENAME TO 新名;` / `ALTER INDEX 名前 SET TABLESPACE ts;`。⚠ 対象の列や式は ALTER INDEX で変えられない → 作り直す
 - ⚠ `LIKE 'abc%'`（前方一致）は B-tree が使える場合があるが、**`LIKE '%abc'`（後方・中間一致）は B-tree を使えない**
 - ⚠ インデックスはテーブルに属し、**DROP TABLE で一緒に削除**される
 
@@ -276,6 +279,8 @@ SELECT setval('seq_order', 500);  -- 次の nextval は 510
 | **setval('名前', n)** | 現在値を n にする → **次の nextval は n + 増分**。`setval('名前', n, false)` なら次の nextval は **n** |
 
 - オプション: `START`（初期値・デフォルト1）、`INCREMENT`（増分・負も可）、`MINVALUE`、`MAXVALUE`、`CYCLE`（最大値に達したら最小値に戻る。デフォルトは NO CYCLE で、達するとエラー）、`CACHE`
+- 変更は `ALTER SEQUENCE`（`INCREMENT` などのオプションを変える）。**`ALTER SEQUENCE seq RESTART WITH 1;`** で番号を振り直す（WITH 省略なら START の値から）
+- `DROP SEQUENCE seq;`
 - ⚠ **nextval はロールバックしても戻らない** → 番号に**欠番**が出る
 - 複数のセッションが同時に nextval しても、**同じ値は返らない**
 
@@ -313,6 +318,18 @@ CREATE TABLE sales_2026 PARTITION OF sales
 - 方式: **RANGE**（範囲）、**LIST**（値の列挙: `FOR VALUES IN ('東京', '大阪')`）、**HASH**（ハッシュ値で均等に分散）
 - ⚠ RANGE の `FROM ... TO ...` は **FROM を含み、TO を含まない**
 - 親テーブルに INSERT すると、適切なパーティションに自動で振り分けられる。行き先のパーティションがなければエラー（`DEFAULT` パーティションを作れば受け止められる）
+
+### パーティションの付け外し（ATTACH / DETACH）
+
+```sql
+ALTER TABLE sales ATTACH PARTITION sales_2027
+    FOR VALUES FROM ('2027-01-01') TO ('2028-01-01');   -- 既存テーブルを子にする
+ALTER TABLE sales DETACH PARTITION sales_2026;          -- 子を切り離す
+```
+
+- **ATTACH**: 作ってある普通のテーブルをパーティションとして組み込む。⚠ 範囲に合わない行があると**エラー**（組み込む前に全行を検査する）
+- **DETACH**: パーティションを親から外す。⚠ 外したテーブルは**独立したテーブルとして残る**（データは消えない。消したいなら DROP TABLE）
+- 古いデータの切り離し → 退避・削除が、DELETE より速く済む
 
 ## 13. 関数・プロシージャ・トリガー ★★
 

@@ -164,6 +164,24 @@ CREATE TABLE products (
 - `DROP DOMAIN d;` ⚠ 使っている列があると**エラー**。**`CASCADE` ならその列も削除**される
 - psql の一覧表示は **`\dD`**
 
+### 列挙型・複合型（CREATE TYPE）
+
+```sql
+CREATE TYPE mood AS ENUM ('sad', 'ok', 'happy');   -- 列挙型
+CREATE TYPE address AS (city text, zip text);      -- 複合型（AS の後ろが括弧）
+
+CREATE TABLE people (name text, feel mood, addr address);
+INSERT INTO people VALUES ('A', 'happy', ROW('Tokyo', '100-0001'));
+SELECT (addr).city FROM people;                    -- 複合型の要素は括弧で囲んで参照
+```
+
+- **列挙型（ENUM）**: 決められた値だけを入れられる型。⚠ 大小比較は**定義した順**（文字コード順ではない。上の例では `'sad' < 'happy'`）
+- 値の追加は `ALTER TYPE mood ADD VALUE 'angry';`（`BEFORE` / `AFTER` で位置指定可）。⚠ **値の削除はできない**
+- **複合型**: 複数の項目をまとめた型。値は `ROW(...)` で作る。⚠ 要素の参照は **`(列名).要素`**（括弧がないとテーブル名と解釈されエラー）
+- ⚠ 複合型には**制約を付けられない**（制約を付けたいならドメイン）
+- テーブルを作ると、**同じ名前の複合型が自動で作られる**
+- `DROP TYPE mood;`（使っている列があればエラー。`CASCADE` で列ごと削除）。psql の一覧表示は **`\dT`**
+
 ## 4. テーブル定義の変更（ALTER TABLE）★★★
 
 | 操作 | 構文 |

@@ -1032,7 +1032,23 @@ CREATE TABLE products (
 <li><code>DROP DOMAIN d;</code> ⚠ 使っている列があると<strong>エラー</strong>。<strong><code>CASCADE</code> ならその列も削除</strong>される</li>
 <li>psql の一覧表示は <strong><code>\dD</code></strong></li>
 </ul>
-<h3 id="02-SQL①定義・更新-14">4. テーブル定義の変更（ALTER TABLE）<span class="stars" data-n="3">★★★</span></h3>
+<h4 id="02-SQL①定義・更新-14">列挙型・複合型（CREATE TYPE）</h4>
+<pre><code class="language-sql">CREATE TYPE mood AS ENUM ('sad', 'ok', 'happy');   -- 列挙型
+CREATE TYPE address AS (city text, zip text);      -- 複合型（AS の後ろが括弧）
+
+CREATE TABLE people (name text, feel mood, addr address);
+INSERT INTO people VALUES ('A', 'happy', ROW('Tokyo', '100-0001'));
+SELECT (addr).city FROM people;                    -- 複合型の要素は括弧で囲んで参照
+</code></pre>
+<ul>
+<li><strong>列挙型（ENUM）</strong>: 決められた値だけを入れられる型。⚠ 大小比較は<strong>定義した順</strong>（文字コード順ではない。上の例では <code>'sad' &lt; 'happy'</code>）</li>
+<li>値の追加は <code>ALTER TYPE mood ADD VALUE 'angry';</code>（<code>BEFORE</code> / <code>AFTER</code> で位置指定可）。⚠ <strong>値の削除はできない</strong></li>
+<li><strong>複合型</strong>: 複数の項目をまとめた型。値は <code>ROW(...)</code> で作る。⚠ 要素の参照は <strong><code>(列名).要素</code></strong>（括弧がないとテーブル名と解釈されエラー）</li>
+<li class="caution">⚠ 複合型には<strong>制約を付けられない</strong>（制約を付けたいならドメイン）</li>
+<li>テーブルを作ると、<strong>同じ名前の複合型が自動で作られる</strong></li>
+<li><code>DROP TYPE mood;</code>（使っている列があればエラー。<code>CASCADE</code> で列ごと削除）。psql の一覧表示は <strong><code>\dT</code></strong></li>
+</ul>
+<h3 id="02-SQL①定義・更新-15">4. テーブル定義の変更（ALTER TABLE）<span class="stars" data-n="3">★★★</span></h3>
 <table>
 <thead>
 <tr>
@@ -1085,8 +1101,8 @@ CREATE TABLE products (
 <li class="caution">⚠ 列名変更は <code>RENAME COLUMN</code>、型変更は <code>ALTER COLUMN ... TYPE</code>。<code>MODIFY</code>（Oracle / MySQL の構文）は<strong>使えない</strong></li>
 <li>カンマで区切れば1文で複数の変更ができる（<code>ALTER TABLE t ADD COLUMN a int, ADD COLUMN b int;</code>）</li>
 </ul>
-<h3 id="02-SQL①定義・更新-15">5. テーブルの削除（DROP / TRUNCATE）<span class="stars" data-n="2">★★</span></h3>
-<h4 id="02-SQL①定義・更新-16">DROP TABLE</h4>
+<h3 id="02-SQL①定義・更新-16">5. テーブルの削除（DROP / TRUNCATE）<span class="stars" data-n="2">★★</span></h3>
+<h4 id="02-SQL①定義・更新-17">DROP TABLE</h4>
 <ul>
 <li><code>DROP TABLE t;</code> テーブルの<strong>定義ごと</strong>削除。複数をカンマで並べられる</li>
 <li><code>DROP TABLE IF EXISTS t;</code> 存在しなくてもエラーにしない</li>
@@ -1094,7 +1110,7 @@ CREATE TABLE products (
 <li><strong>CASCADE</strong>: 依存するオブジェクトも削除</li>
 <li class="caution">⚠ CASCADE で消えるのは<strong>ビュー</strong>や、参照元テーブルの<strong>外部キー制約</strong>。参照元の<strong>テーブル自体は消えない</strong></li>
 </ul>
-<h4 id="02-SQL①定義・更新-17">TRUNCATE</h4>
+<h4 id="02-SQL①定義・更新-18">TRUNCATE</h4>
 <ul>
 <li><code>TRUNCATE t;</code> テーブルの<strong>全行を高速に削除</strong>（定義は残る）</li>
 <li><code>DELETE</code>（WHERE なし）との違い</li>
@@ -1139,7 +1155,7 @@ CREATE TABLE products (
 <li><code>RESTART IDENTITY</code>: 列に紐づくシーケンスを初期値に戻す（デフォルトは <code>CONTINUE IDENTITY</code> で戻さない）</li>
 <li class="caution">⚠ 外部キーで<strong>参照されているテーブル</strong>は、<code>CASCADE</code> を付けるか参照元も同時に指定しないと TRUNCATE できない（参照元が空でもエラー）</li>
 </ul>
-<h3 id="02-SQL①定義・更新-18">6. データの追加（INSERT）<span class="stars" data-n="3">★★★</span></h3>
+<h3 id="02-SQL①定義・更新-19">6. データの追加（INSERT）<span class="stars" data-n="3">★★★</span></h3>
 <pre><code class="language-sql">INSERT INTO products (id, name, price) VALUES (1, 'りんご', 120);
 INSERT INTO products VALUES (2, 'みかん', 80, NULL);              -- 列名省略: 全列を定義順に
 INSERT INTO products (id, name) VALUES (3, 'ぶどう'), (4, 'もも');  -- 複数行を一度に
@@ -1152,12 +1168,12 @@ INSERT INTO logs DEFAULT VALUES;                                     -- 全列�
 <li>列名を省略すると定義順に先頭から当てはめる。値の数が列数より少なければ、残りの列はデフォルト値</li>
 <li class="caution">⚠ <code>INSERT ... SELECT</code> に <strong>VALUES は付けない</strong></li>
 </ul>
-<h4 id="02-SQL①定義・更新-19">RETURNING</h4>
+<h4 id="02-SQL①定義・更新-20">RETURNING</h4>
 <ul>
 <li>追加・更新・削除した行の値を<strong>その場で返す</strong>（INSERT / UPDATE / DELETE で使える）</li>
 <li><code>INSERT INTO products (name) VALUES ('かき') RETURNING id;</code> → 自動採番された id を取得</li>
 </ul>
-<h4 id="02-SQL①定義・更新-20">ON CONFLICT（UPSERT）</h4>
+<h4 id="02-SQL①定義・更新-21">ON CONFLICT（UPSERT）</h4>
 <p>一意制約に違反したときの動作を指定する。</p>
 <pre><code class="language-sql">INSERT INTO products (id, name, price) VALUES (1, 'りんご', 150)
 ON CONFLICT (id) DO UPDATE SET price = EXCLUDED.price;   -- あれば更新、なければ追加
@@ -1169,7 +1185,7 @@ ON CONFLICT DO NOTHING;                                   -- あれば何もし�
 <li><strong><code>EXCLUDED</code></strong> は「追加しようとして衝突した行」を指す</li>
 <li class="caution">⚠ <code>DO UPDATE</code> では衝突対象（<code>(id)</code> や <code>ON CONSTRAINT 制約名</code>）の指定が<strong>必須</strong>。<code>DO NOTHING</code> は省略できる</li>
 </ul>
-<h3 id="02-SQL①定義・更新-21">7. データの更新・削除（UPDATE / DELETE）<span class="stars" data-n="3">★★★</span></h3>
+<h3 id="02-SQL①定義・更新-22">7. データの更新・削除（UPDATE / DELETE）<span class="stars" data-n="3">★★★</span></h3>
 <pre><code class="language-sql">UPDATE products SET price = price * 1.1, name = 'ふじ' WHERE id = 1;
 DELETE FROM products WHERE price IS NULL;
 </code></pre>
@@ -1179,7 +1195,7 @@ DELETE FROM products WHERE price IS NULL;
 <li>該当行が0件でもエラーにならない（<code>UPDATE 0</code> / <code>DELETE 0</code> と表示）</li>
 <li>制約に違反する更新・削除は<strong>文全体がエラー</strong>になり、1行も変わらない</li>
 </ul>
-<h4 id="02-SQL①定義・更新-22">他のテーブルを参照して更新・削除</h4>
+<h4 id="02-SQL①定義・更新-23">他のテーブルを参照して更新・削除</h4>
 <pre><code class="language-sql">-- UPDATE は FROM
 UPDATE products p SET price = s.price
 FROM sale_prices s WHERE p.id = s.product_id;
@@ -1562,6 +1578,10 @@ SELECT cat_id, count(*) FROM expensive GROUP BY cat_id;
 <td><code>CREATE SCHEMA s;</code>（<code>AUTHORIZATION ユーザー名</code> で所有者を指定）</td>
 </tr>
 <tr>
+<td>変更</td>
+<td><code>ALTER SCHEMA s RENAME TO s2;</code> / <code>ALTER SCHEMA s OWNER TO alice;</code></td>
+</tr>
+<tr>
 <td>削除</td>
 <td><code>DROP SCHEMA s;</code>（中にオブジェクトがあればエラー。<code>CASCADE</code> で中身ごと削除）</td>
 </tr>
@@ -1583,6 +1603,7 @@ SELECT id, name, price FROM products WHERE price &gt;= 1000;
 <ul>
 <li>SELECT 文に名前を付けたもの。<strong>データは持たず</strong>、参照するたびに元の SELECT を実行する</li>
 <li><strong><code>CREATE OR REPLACE VIEW</code></strong>: 既存のビューを置き換える。⚠ ただし<strong>列の削除・名前変更・型変更はできず、末尾への列追加だけ</strong>できる</li>
+<li><code>ALTER VIEW v RENAME TO v2;</code>（名前・所有者などの変更）。⚠ <strong>定義（SELECT 文）は ALTER VIEW で変えられない</strong> → <code>CREATE OR REPLACE VIEW</code> か作り直し</li>
 <li><code>DROP VIEW v;</code></li>
 <li class="caution">⚠ ビューが参照しているテーブルは、<code>DROP TABLE ... CASCADE</code> でないと削除できない（CASCADE ならビューも消える）</li>
 </ul>
@@ -1618,6 +1639,7 @@ DROP INDEX idx_products_name;
 <li><strong>部分インデックス</strong>: 条件に合う行だけを索引に入れる</li>
 <li><strong><code>CREATE INDEX CONCURRENTLY</code></strong>: テーブルへの書き込みを<strong>止めずに</strong>作成（時間はかかる。トランザクションブロック内では実行できない）</li>
 <li><code>REINDEX INDEX 名前;</code> / <code>REINDEX TABLE t;</code> でインデックスを作り直す</li>
+<li><code>ALTER INDEX 名前 RENAME TO 新名;</code> / <code>ALTER INDEX 名前 SET TABLESPACE ts;</code>。⚠ 対象の列や式は ALTER INDEX で変えられない → 作り直す</li>
 <li class="caution">⚠ <code>LIKE 'abc%'</code>（前方一致）は B-tree が使える場合があるが、<strong><code>LIKE '%abc'</code>（後方・中間一致）は B-tree を使えない</strong></li>
 <li class="caution">⚠ インデックスはテーブルに属し、<strong>DROP TABLE で一緒に削除</strong>される</li>
 </ul>
@@ -1657,6 +1679,8 @@ SELECT setval('seq_order', 500);  -- 次の nextval は 510
 </table>
 <ul>
 <li>オプション: <code>START</code>（初期値・デフォルト1）、<code>INCREMENT</code>（増分・負も可）、<code>MINVALUE</code>、<code>MAXVALUE</code>、<code>CYCLE</code>（最大値に達したら最小値に戻る。デフォルトは NO CYCLE で、達するとエラー）、<code>CACHE</code></li>
+<li>変更は <code>ALTER SEQUENCE</code>（<code>INCREMENT</code> などのオプションを変える）。<strong><code>ALTER SEQUENCE seq RESTART WITH 1;</code></strong> で番号を振り直す（WITH 省略なら START の値から）</li>
+<li><code>DROP SEQUENCE seq;</code></li>
 <li class="caution">⚠ <strong>nextval はロールバックしても戻らない</strong> → 番号に<strong>欠番</strong>が出る</li>
 <li>複数のセッションが同時に nextval しても、<strong>同じ値は返らない</strong></li>
 </ul>
@@ -1689,8 +1713,18 @@ CREATE TABLE sales_2026 PARTITION OF sales
 <li class="caution">⚠ RANGE の <code>FROM ... TO ...</code> は <strong>FROM を含み、TO を含まない</strong></li>
 <li>親テーブルに INSERT すると、適切なパーティションに自動で振り分けられる。行き先のパーティションがなければエラー（<code>DEFAULT</code> パーティションを作れば受け止められる）</li>
 </ul>
-<h3 id="03-SQL②検索・オブジェクト-30">13. 関数・プロシージャ・トリガー <span class="stars" data-n="2">★★</span></h3>
-<h4 id="03-SQL②検索・オブジェクト-31">ユーザー定義関数</h4>
+<h4 id="03-SQL②検索・オブジェクト-30">パーティションの付け外し（ATTACH / DETACH）</h4>
+<pre><code class="language-sql">ALTER TABLE sales ATTACH PARTITION sales_2027
+    FOR VALUES FROM ('2027-01-01') TO ('2028-01-01');   -- 既存テーブルを子にする
+ALTER TABLE sales DETACH PARTITION sales_2026;          -- 子を切り離す
+</code></pre>
+<ul>
+<li><strong>ATTACH</strong>: 作ってある普通のテーブルをパーティションとして組み込む。⚠ 範囲に合わない行があると<strong>エラー</strong>（組み込む前に全行を検査する）</li>
+<li><strong>DETACH</strong>: パーティションを親から外す。⚠ 外したテーブルは<strong>独立したテーブルとして残る</strong>（データは消えない。消したいなら DROP TABLE）</li>
+<li>古いデータの切り離し → 退避・削除が、DELETE より速く済む</li>
+</ul>
+<h3 id="03-SQL②検索・オブジェクト-31">13. 関数・プロシージャ・トリガー <span class="stars" data-n="2">★★</span></h3>
+<h4 id="03-SQL②検索・オブジェクト-32">ユーザー定義関数</h4>
 <pre><code class="language-sql">CREATE FUNCTION tax_in(price integer) RETURNS integer AS $$
     SELECT (price * 1.1)::integer;
 $$ LANGUAGE sql;
@@ -1705,7 +1739,7 @@ SELECT tax_in(100);   -- 110
 <li>同じ名前でも<strong>引数の型・数が違えば別の関数</strong>として作れる（オーバーロード）。削除時は <code>DROP FUNCTION tax_in(integer);</code> のように引数の型で区別する</li>
 <li><strong>プロシージャ</strong>: <code>CREATE PROCEDURE</code> で作り <strong><code>CALL</code></strong> で実行。戻り値を持たず、<strong>中で COMMIT / ROLLBACK できる</strong>（関数はできない）</li>
 </ul>
-<h4 id="03-SQL②検索・オブジェクト-32">PL/pgSQL の基本形</h4>
+<h4 id="03-SQL②検索・オブジェクト-33">PL/pgSQL の基本形</h4>
 <pre><code class="language-sql">CREATE FUNCTION grade(score integer) RETURNS text AS $$
 DECLARE
     result text;
@@ -1719,7 +1753,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 </code></pre>
-<h4 id="03-SQL②検索・オブジェクト-33">トリガー</h4>
+<h4 id="03-SQL②検索・オブジェクト-34">トリガー</h4>
 <p>テーブルへの INSERT / UPDATE / DELETE（/ TRUNCATE）をきっかけに、関数を自動実行する。</p>
 <pre><code class="language-sql">CREATE FUNCTION set_updated() RETURNS trigger AS $$
 BEGIN

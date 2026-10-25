@@ -1081,6 +1081,83 @@
     "id": "02-SQL①定義・更新-22",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
+    "section": "制約",
+    "heading": "列挙型・複合型（CREATE TYPE）",
+    "answer": "列挙型（ENUM）",
+    "blank_count": 1,
+    "importance": 3,
+    "paragraph": "- **列挙型（ENUM）**: 決められた値だけを入れられる型。⚠ 大小比較は**定義した順**（文字コード順ではない。上の例では `'sad' < 'happy'`）\n- 値の追加は `ALTER TYPE mood ADD VALUE 'angry';`（`BEFORE` / `AFTER` で位置指定可）。⚠ **値の削除はできない**\n- **複合型**: 複数の項目をまとめた型。値は `ROW(...)` で作る。⚠ 要素の参照は **`(列名).要素`**（括弧がないとテーブル名と解釈されエラー）\n- ⚠ 複合型には**制約を付けられない**（制約を付けたいならドメイン）\n- テーブルを作ると、**同じ名前の複合型が自動で作られる**\n- `DROP TYPE mood;`（使っている列があればエラー。`CASCADE` で列ごと削除）。psql の一覧表示は **`\\dT`**"
+  },
+  {
+    "id": "02-SQL①定義・更新-23",
+    "chapter": "02-SQL①定義・更新",
+    "category": "開発/SQL",
+    "section": "制約",
+    "heading": "列挙型・複合型（CREATE TYPE）",
+    "answer": "定義した順",
+    "blank_count": 1,
+    "importance": 3,
+    "paragraph": "- **列挙型（ENUM）**: 決められた値だけを入れられる型。⚠ 大小比較は**定義した順**（文字コード順ではない。上の例では `'sad' < 'happy'`）\n- 値の追加は `ALTER TYPE mood ADD VALUE 'angry';`（`BEFORE` / `AFTER` で位置指定可）。⚠ **値の削除はできない**\n- **複合型**: 複数の項目をまとめた型。値は `ROW(...)` で作る。⚠ 要素の参照は **`(列名).要素`**（括弧がないとテーブル名と解釈されエラー）\n- ⚠ 複合型には**制約を付けられない**（制約を付けたいならドメイン）\n- テーブルを作ると、**同じ名前の複合型が自動で作られる**\n- `DROP TYPE mood;`（使っている列があればエラー。`CASCADE` で列ごと削除）。psql の一覧表示は **`\\dT`**"
+  },
+  {
+    "id": "02-SQL①定義・更新-24",
+    "chapter": "02-SQL①定義・更新",
+    "category": "開発/SQL",
+    "section": "制約",
+    "heading": "列挙型・複合型（CREATE TYPE）",
+    "answer": "値の削除はできない",
+    "blank_count": 1,
+    "importance": 3,
+    "paragraph": "- **列挙型（ENUM）**: 決められた値だけを入れられる型。⚠ 大小比較は**定義した順**（文字コード順ではない。上の例では `'sad' < 'happy'`）\n- 値の追加は `ALTER TYPE mood ADD VALUE 'angry';`（`BEFORE` / `AFTER` で位置指定可）。⚠ **値の削除はできない**\n- **複合型**: 複数の項目をまとめた型。値は `ROW(...)` で作る。⚠ 要素の参照は **`(列名).要素`**（括弧がないとテーブル名と解釈されエラー）\n- ⚠ 複合型には**制約を付けられない**（制約を付けたいならドメイン）\n- テーブルを作ると、**同じ名前の複合型が自動で作られる**\n- `DROP TYPE mood;`（使っている列があればエラー。`CASCADE` で列ごと削除）。psql の一覧表示は **`\\dT`**"
+  },
+  {
+    "id": "02-SQL①定義・更新-25",
+    "chapter": "02-SQL①定義・更新",
+    "category": "開発/SQL",
+    "section": "制約",
+    "heading": "列挙型・複合型（CREATE TYPE）",
+    "answer": "複合型",
+    "blank_count": 1,
+    "importance": 3,
+    "paragraph": "- **列挙型（ENUM）**: 決められた値だけを入れられる型。⚠ 大小比較は**定義した順**（文字コード順ではない。上の例では `'sad' < 'happy'`）\n- 値の追加は `ALTER TYPE mood ADD VALUE 'angry';`（`BEFORE` / `AFTER` で位置指定可）。⚠ **値の削除はできない**\n- **複合型**: 複数の項目をまとめた型。値は `ROW(...)` で作る。⚠ 要素の参照は **`(列名).要素`**（括弧がないとテーブル名と解釈されエラー）\n- ⚠ 複合型には**制約を付けられない**（制約を付けたいならドメイン）\n- テーブルを作ると、**同じ名前の複合型が自動で作られる**\n- `DROP TYPE mood;`（使っている列があればエラー。`CASCADE` で列ごと削除）。psql の一覧表示は **`\\dT`**"
+  },
+  {
+    "id": "02-SQL①定義・更新-26",
+    "chapter": "02-SQL①定義・更新",
+    "category": "開発/SQL",
+    "section": "制約",
+    "heading": "列挙型・複合型（CREATE TYPE）",
+    "answer": "(列名).要素",
+    "blank_count": 1,
+    "importance": 3,
+    "paragraph": "- **列挙型（ENUM）**: 決められた値だけを入れられる型。⚠ 大小比較は**定義した順**（文字コード順ではない。上の例では `'sad' < 'happy'`）\n- 値の追加は `ALTER TYPE mood ADD VALUE 'angry';`（`BEFORE` / `AFTER` で位置指定可）。⚠ **値の削除はできない**\n- **複合型**: 複数の項目をまとめた型。値は `ROW(...)` で作る。⚠ 要素の参照は **`(列名).要素`**（括弧がないとテーブル名と解釈されエラー）\n- ⚠ 複合型には**制約を付けられない**（制約を付けたいならドメイン）\n- テーブルを作ると、**同じ名前の複合型が自動で作られる**\n- `DROP TYPE mood;`（使っている列があればエラー。`CASCADE` で列ごと削除）。psql の一覧表示は **`\\dT`**"
+  },
+  {
+    "id": "02-SQL①定義・更新-27",
+    "chapter": "02-SQL①定義・更新",
+    "category": "開発/SQL",
+    "section": "制約",
+    "heading": "列挙型・複合型（CREATE TYPE）",
+    "answer": "制約を付けられない",
+    "blank_count": 1,
+    "importance": 3,
+    "paragraph": "- **列挙型（ENUM）**: 決められた値だけを入れられる型。⚠ 大小比較は**定義した順**（文字コード順ではない。上の例では `'sad' < 'happy'`）\n- 値の追加は `ALTER TYPE mood ADD VALUE 'angry';`（`BEFORE` / `AFTER` で位置指定可）。⚠ **値の削除はできない**\n- **複合型**: 複数の項目をまとめた型。値は `ROW(...)` で作る。⚠ 要素の参照は **`(列名).要素`**（括弧がないとテーブル名と解釈されエラー）\n- ⚠ 複合型には**制約を付けられない**（制約を付けたいならドメイン）\n- テーブルを作ると、**同じ名前の複合型が自動で作られる**\n- `DROP TYPE mood;`（使っている列があればエラー。`CASCADE` で列ごと削除）。psql の一覧表示は **`\\dT`**"
+  },
+  {
+    "id": "02-SQL①定義・更新-28",
+    "chapter": "02-SQL①定義・更新",
+    "category": "開発/SQL",
+    "section": "制約",
+    "heading": "列挙型・複合型（CREATE TYPE）",
+    "answer": "\\dT",
+    "blank_count": 1,
+    "importance": 3,
+    "paragraph": "- **列挙型（ENUM）**: 決められた値だけを入れられる型。⚠ 大小比較は**定義した順**（文字コード順ではない。上の例では `'sad' < 'happy'`）\n- 値の追加は `ALTER TYPE mood ADD VALUE 'angry';`（`BEFORE` / `AFTER` で位置指定可）。⚠ **値の削除はできない**\n- **複合型**: 複数の項目をまとめた型。値は `ROW(...)` で作る。⚠ 要素の参照は **`(列名).要素`**（括弧がないとテーブル名と解釈されエラー）\n- ⚠ 複合型には**制約を付けられない**（制約を付けたいならドメイン）\n- テーブルを作ると、**同じ名前の複合型が自動で作られる**\n- `DROP TYPE mood;`（使っている列があればエラー。`CASCADE` で列ごと削除）。psql の一覧表示は **`\\dT`**"
+  },
+  {
+    "id": "02-SQL①定義・更新-29",
+    "chapter": "02-SQL①定義・更新",
+    "category": "開発/SQL",
     "section": "テーブル定義の変更（ALTER TABLE）",
     "heading": "",
     "answer": "その値",
@@ -1089,7 +1166,7 @@
     "paragraph": "- 追加した列の既存行の値は、DEFAULT 指定があれば**その値**、なければ **NULL**\n- ⚠ NULL を含む列に `SET NOT NULL` すると**エラー**。既存データが制約に違反する `ADD CONSTRAINT` も同様\n- ⚠ 列名変更は `RENAME COLUMN`、型変更は `ALTER COLUMN ... TYPE`。`MODIFY`（Oracle / MySQL の構文）は**使えない**\n- カンマで区切れば1文で複数の変更ができる（`ALTER TABLE t ADD COLUMN a int, ADD COLUMN b int;`）"
   },
   {
-    "id": "02-SQL①定義・更新-23",
+    "id": "02-SQL①定義・更新-30",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブル定義の変更（ALTER TABLE）",
@@ -1100,7 +1177,7 @@
     "paragraph": "- 追加した列の既存行の値は、DEFAULT 指定があれば**その値**、なければ **NULL**\n- ⚠ NULL を含む列に `SET NOT NULL` すると**エラー**。既存データが制約に違反する `ADD CONSTRAINT` も同様\n- ⚠ 列名変更は `RENAME COLUMN`、型変更は `ALTER COLUMN ... TYPE`。`MODIFY`（Oracle / MySQL の構文）は**使えない**\n- カンマで区切れば1文で複数の変更ができる（`ALTER TABLE t ADD COLUMN a int, ADD COLUMN b int;`）"
   },
   {
-    "id": "02-SQL①定義・更新-24",
+    "id": "02-SQL①定義・更新-31",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブル定義の変更（ALTER TABLE）",
@@ -1111,7 +1188,7 @@
     "paragraph": "- 追加した列の既存行の値は、DEFAULT 指定があれば**その値**、なければ **NULL**\n- ⚠ NULL を含む列に `SET NOT NULL` すると**エラー**。既存データが制約に違反する `ADD CONSTRAINT` も同様\n- ⚠ 列名変更は `RENAME COLUMN`、型変更は `ALTER COLUMN ... TYPE`。`MODIFY`（Oracle / MySQL の構文）は**使えない**\n- カンマで区切れば1文で複数の変更ができる（`ALTER TABLE t ADD COLUMN a int, ADD COLUMN b int;`）"
   },
   {
-    "id": "02-SQL①定義・更新-25",
+    "id": "02-SQL①定義・更新-32",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブル定義の変更（ALTER TABLE）",
@@ -1122,7 +1199,7 @@
     "paragraph": "- 追加した列の既存行の値は、DEFAULT 指定があれば**その値**、なければ **NULL**\n- ⚠ NULL を含む列に `SET NOT NULL` すると**エラー**。既存データが制約に違反する `ADD CONSTRAINT` も同様\n- ⚠ 列名変更は `RENAME COLUMN`、型変更は `ALTER COLUMN ... TYPE`。`MODIFY`（Oracle / MySQL の構文）は**使えない**\n- カンマで区切れば1文で複数の変更ができる（`ALTER TABLE t ADD COLUMN a int, ADD COLUMN b int;`）"
   },
   {
-    "id": "02-SQL①定義・更新-26",
+    "id": "02-SQL①定義・更新-33",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1133,7 +1210,7 @@
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
-    "id": "02-SQL①定義・更新-27",
+    "id": "02-SQL①定義・更新-34",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1144,7 +1221,7 @@
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
-    "id": "02-SQL①定義・更新-28",
+    "id": "02-SQL①定義・更新-35",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1155,7 +1232,7 @@
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
-    "id": "02-SQL①定義・更新-29",
+    "id": "02-SQL①定義・更新-36",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1166,7 +1243,7 @@
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
-    "id": "02-SQL①定義・更新-30",
+    "id": "02-SQL①定義・更新-37",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1177,7 +1254,7 @@
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
-    "id": "02-SQL①定義・更新-31",
+    "id": "02-SQL①定義・更新-38",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1188,7 +1265,7 @@
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
-    "id": "02-SQL①定義・更新-32",
+    "id": "02-SQL①定義・更新-39",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1199,7 +1276,7 @@
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
-    "id": "02-SQL①定義・更新-33",
+    "id": "02-SQL①定義・更新-40",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1210,7 +1287,7 @@
     "paragraph": "- `TRUNCATE t;` テーブルの**全行を高速に削除**（定義は残る）\n- `DELETE`（WHERE なし）との違い"
   },
   {
-    "id": "02-SQL①定義・更新-34",
+    "id": "02-SQL①定義・更新-41",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "テーブルの削除（DROP / TRUNCATE）",
@@ -1221,7 +1298,7 @@
     "paragraph": "- `RESTART IDENTITY`: 列に紐づくシーケンスを初期値に戻す（デフォルトは `CONTINUE IDENTITY` で戻さない）\n- ⚠ 外部キーで**参照されているテーブル**は、`CASCADE` を付けるか参照元も同時に指定しないと TRUNCATE できない（参照元が空でもエラー）"
   },
   {
-    "id": "02-SQL①定義・更新-35",
+    "id": "02-SQL①定義・更新-42",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "データの追加（INSERT）",
@@ -1232,7 +1309,7 @@
     "paragraph": "- 列リストで**省略した列にはデフォルト値**（なければ NULL）が入る\n- 列名を省略すると定義順に先頭から当てはめる。値の数が列数より少なければ、残りの列はデフォルト値\n- ⚠ `INSERT ... SELECT` に **VALUES は付けない**"
   },
   {
-    "id": "02-SQL①定義・更新-36",
+    "id": "02-SQL①定義・更新-43",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "データの追加（INSERT）",
@@ -1243,7 +1320,7 @@
     "paragraph": "- 追加・更新・削除した行の値を**その場で返す**（INSERT / UPDATE / DELETE で使える）\n- `INSERT INTO products (name) VALUES ('かき') RETURNING id;` → 自動採番された id を取得"
   },
   {
-    "id": "02-SQL①定義・更新-37",
+    "id": "02-SQL①定義・更新-44",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "データの追加（INSERT）",
@@ -1254,7 +1331,7 @@
     "paragraph": "- **`EXCLUDED`** は「追加しようとして衝突した行」を指す\n- ⚠ `DO UPDATE` では衝突対象（`(id)` や `ON CONSTRAINT 制約名`）の指定が**必須**。`DO NOTHING` は省略できる"
   },
   {
-    "id": "02-SQL①定義・更新-38",
+    "id": "02-SQL①定義・更新-45",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "データの追加（INSERT）",
@@ -1265,7 +1342,7 @@
     "paragraph": "- **`EXCLUDED`** は「追加しようとして衝突した行」を指す\n- ⚠ `DO UPDATE` では衝突対象（`(id)` や `ON CONSTRAINT 制約名`）の指定が**必須**。`DO NOTHING` は省略できる"
   },
   {
-    "id": "02-SQL①定義・更新-39",
+    "id": "02-SQL①定義・更新-46",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "データの更新・削除（UPDATE / DELETE）",
@@ -1276,7 +1353,7 @@
     "paragraph": "- ⚠ **WHERE を省略すると全行が対象**（エラーにも警告にもならない）\n- SET の右辺はすべて**更新前の値**で計算される（`SET a = b, b = a` で値が入れ替わる）\n- 該当行が0件でもエラーにならない（`UPDATE 0` / `DELETE 0` と表示）\n- 制約に違反する更新・削除は**文全体がエラー**になり、1行も変わらない"
   },
   {
-    "id": "02-SQL①定義・更新-40",
+    "id": "02-SQL①定義・更新-47",
     "chapter": "02-SQL①定義・更新",
     "category": "開発/SQL",
     "section": "データの更新・削除（UPDATE / DELETE）",
@@ -1768,7 +1845,7 @@
     "answer": "データは持たず",
     "blank_count": 1,
     "importance": 3,
-    "paragraph": "- SELECT 文に名前を付けたもの。**データは持たず**、参照するたびに元の SELECT を実行する\n- **`CREATE OR REPLACE VIEW`**: 既存のビューを置き換える。⚠ ただし**列の削除・名前変更・型変更はできず、末尾への列追加だけ**できる\n- `DROP VIEW v;`\n- ⚠ ビューが参照しているテーブルは、`DROP TABLE ... CASCADE` でないと削除できない（CASCADE ならビューも消える）"
+    "paragraph": "- SELECT 文に名前を付けたもの。**データは持たず**、参照するたびに元の SELECT を実行する\n- **`CREATE OR REPLACE VIEW`**: 既存のビューを置き換える。⚠ ただし**列の削除・名前変更・型変更はできず、末尾への列追加だけ**できる\n- `ALTER VIEW v RENAME TO v2;`（名前・所有者などの変更）。⚠ **定義（SELECT 文）は ALTER VIEW で変えられない** → `CREATE OR REPLACE VIEW` か作り直し\n- `DROP VIEW v;`\n- ⚠ ビューが参照しているテーブルは、`DROP TABLE ... CASCADE` でないと削除できない（CASCADE ならビューも消える）"
   },
   {
     "id": "03-SQL②検索・オブジェクト-45",
@@ -1812,7 +1889,7 @@
     "answer": "B-tree",
     "blank_count": 1,
     "importance": 3,
-    "paragraph": "- 検索（WHERE・JOIN・ORDER BY）を速くする。代わりに**更新は遅くなり、領域を使う**\n- デフォルトの方式は **B-tree**（等価・範囲検索・ソートに使える）\n- **式インデックス**: `WHERE lower(name) = 'abc'` のように**同じ式**で検索したときに使われる\n- **部分インデックス**: 条件に合う行だけを索引に入れる\n- **`CREATE INDEX CONCURRENTLY`**: テーブルへの書き込みを**止めずに**作成（時間はかかる。トランザクションブロック内では実行できない）\n- `REINDEX INDEX 名前;` / `REINDEX TABLE t;` でインデックスを作り直す\n- ⚠ `LIKE 'abc%'`（前方一致）は B-tree が使える場合があるが、**`LIKE '%abc'`（後方・中間一致）は B-tree を使えない**\n- ⚠ インデックスはテーブルに属し、**DROP TABLE で一緒に削除**される"
+    "paragraph": "- 検索（WHERE・JOIN・ORDER BY）を速くする。代わりに**更新は遅くなり、領域を使う**\n- デフォルトの方式は **B-tree**（等価・範囲検索・ソートに使える）\n- **式インデックス**: `WHERE lower(name) = 'abc'` のように**同じ式**で検索したときに使われる\n- **部分インデックス**: 条件に合う行だけを索引に入れる\n- **`CREATE INDEX CONCURRENTLY`**: テーブルへの書き込みを**止めずに**作成（時間はかかる。トランザクションブロック内では実行できない）\n- `REINDEX INDEX 名前;` / `REINDEX TABLE t;` でインデックスを作り直す\n- `ALTER INDEX 名前 RENAME TO 新名;` / `ALTER INDEX 名前 SET TABLESPACE ts;`。⚠ 対象の列や式は ALTER INDEX で変えられない → 作り直す\n- ⚠ `LIKE 'abc%'`（前方一致）は B-tree が使える場合があるが、**`LIKE '%abc'`（後方・中間一致）は B-tree を使えない**\n- ⚠ インデックスはテーブルに属し、**DROP TABLE で一緒に削除**される"
   },
   {
     "id": "03-SQL②検索・オブジェクト-49",
@@ -1823,7 +1900,7 @@
     "answer": "式インデックス",
     "blank_count": 1,
     "importance": 3,
-    "paragraph": "- 検索（WHERE・JOIN・ORDER BY）を速くする。代わりに**更新は遅くなり、領域を使う**\n- デフォルトの方式は **B-tree**（等価・範囲検索・ソートに使える）\n- **式インデックス**: `WHERE lower(name) = 'abc'` のように**同じ式**で検索したときに使われる\n- **部分インデックス**: 条件に合う行だけを索引に入れる\n- **`CREATE INDEX CONCURRENTLY`**: テーブルへの書き込みを**止めずに**作成（時間はかかる。トランザクションブロック内では実行できない）\n- `REINDEX INDEX 名前;` / `REINDEX TABLE t;` でインデックスを作り直す\n- ⚠ `LIKE 'abc%'`（前方一致）は B-tree が使える場合があるが、**`LIKE '%abc'`（後方・中間一致）は B-tree を使えない**\n- ⚠ インデックスはテーブルに属し、**DROP TABLE で一緒に削除**される"
+    "paragraph": "- 検索（WHERE・JOIN・ORDER BY）を速くする。代わりに**更新は遅くなり、領域を使う**\n- デフォルトの方式は **B-tree**（等価・範囲検索・ソートに使える）\n- **式インデックス**: `WHERE lower(name) = 'abc'` のように**同じ式**で検索したときに使われる\n- **部分インデックス**: 条件に合う行だけを索引に入れる\n- **`CREATE INDEX CONCURRENTLY`**: テーブルへの書き込みを**止めずに**作成（時間はかかる。トランザクションブロック内では実行できない）\n- `REINDEX INDEX 名前;` / `REINDEX TABLE t;` でインデックスを作り直す\n- `ALTER INDEX 名前 RENAME TO 新名;` / `ALTER INDEX 名前 SET TABLESPACE ts;`。⚠ 対象の列や式は ALTER INDEX で変えられない → 作り直す\n- ⚠ `LIKE 'abc%'`（前方一致）は B-tree が使える場合があるが、**`LIKE '%abc'`（後方・中間一致）は B-tree を使えない**\n- ⚠ インデックスはテーブルに属し、**DROP TABLE で一緒に削除**される"
   },
   {
     "id": "03-SQL②検索・オブジェクト-50",
@@ -1834,7 +1911,7 @@
     "answer": "同じ式",
     "blank_count": 1,
     "importance": 3,
-    "paragraph": "- 検索（WHERE・JOIN・ORDER BY）を速くする。代わりに**更新は遅くなり、領域を使う**\n- デフォルトの方式は **B-tree**（等価・範囲検索・ソートに使える）\n- **式インデックス**: `WHERE lower(name) = 'abc'` のように**同じ式**で検索したときに使われる\n- **部分インデックス**: 条件に合う行だけを索引に入れる\n- **`CREATE INDEX CONCURRENTLY`**: テーブルへの書き込みを**止めずに**作成（時間はかかる。トランザクションブロック内では実行できない）\n- `REINDEX INDEX 名前;` / `REINDEX TABLE t;` でインデックスを作り直す\n- ⚠ `LIKE 'abc%'`（前方一致）は B-tree が使える場合があるが、**`LIKE '%abc'`（後方・中間一致）は B-tree を使えない**\n- ⚠ インデックスはテーブルに属し、**DROP TABLE で一緒に削除**される"
+    "paragraph": "- 検索（WHERE・JOIN・ORDER BY）を速くする。代わりに**更新は遅くなり、領域を使う**\n- デフォルトの方式は **B-tree**（等価・範囲検索・ソートに使える）\n- **式インデックス**: `WHERE lower(name) = 'abc'` のように**同じ式**で検索したときに使われる\n- **部分インデックス**: 条件に合う行だけを索引に入れる\n- **`CREATE INDEX CONCURRENTLY`**: テーブルへの書き込みを**止めずに**作成（時間はかかる。トランザクションブロック内では実行できない）\n- `REINDEX INDEX 名前;` / `REINDEX TABLE t;` でインデックスを作り直す\n- `ALTER INDEX 名前 RENAME TO 新名;` / `ALTER INDEX 名前 SET TABLESPACE ts;`。⚠ 対象の列や式は ALTER INDEX で変えられない → 作り直す\n- ⚠ `LIKE 'abc%'`（前方一致）は B-tree が使える場合があるが、**`LIKE '%abc'`（後方・中間一致）は B-tree を使えない**\n- ⚠ インデックスはテーブルに属し、**DROP TABLE で一緒に削除**される"
   },
   {
     "id": "03-SQL②検索・オブジェクト-51",
@@ -1845,7 +1922,7 @@
     "answer": "部分インデックス",
     "blank_count": 1,
     "importance": 3,
-    "paragraph": "- 検索（WHERE・JOIN・ORDER BY）を速くする。代わりに**更新は遅くなり、領域を使う**\n- デフォルトの方式は **B-tree**（等価・範囲検索・ソートに使える）\n- **式インデックス**: `WHERE lower(name) = 'abc'` のように**同じ式**で検索したときに使われる\n- **部分インデックス**: 条件に合う行だけを索引に入れる\n- **`CREATE INDEX CONCURRENTLY`**: テーブルへの書き込みを**止めずに**作成（時間はかかる。トランザクションブロック内では実行できない）\n- `REINDEX INDEX 名前;` / `REINDEX TABLE t;` でインデックスを作り直す\n- ⚠ `LIKE 'abc%'`（前方一致）は B-tree が使える場合があるが、**`LIKE '%abc'`（後方・中間一致）は B-tree を使えない**\n- ⚠ インデックスはテーブルに属し、**DROP TABLE で一緒に削除**される"
+    "paragraph": "- 検索（WHERE・JOIN・ORDER BY）を速くする。代わりに**更新は遅くなり、領域を使う**\n- デフォルトの方式は **B-tree**（等価・範囲検索・ソートに使える）\n- **式インデックス**: `WHERE lower(name) = 'abc'` のように**同じ式**で検索したときに使われる\n- **部分インデックス**: 条件に合う行だけを索引に入れる\n- **`CREATE INDEX CONCURRENTLY`**: テーブルへの書き込みを**止めずに**作成（時間はかかる。トランザクションブロック内では実行できない）\n- `REINDEX INDEX 名前;` / `REINDEX TABLE t;` でインデックスを作り直す\n- `ALTER INDEX 名前 RENAME TO 新名;` / `ALTER INDEX 名前 SET TABLESPACE ts;`。⚠ 対象の列や式は ALTER INDEX で変えられない → 作り直す\n- ⚠ `LIKE 'abc%'`（前方一致）は B-tree が使える場合があるが、**`LIKE '%abc'`（後方・中間一致）は B-tree を使えない**\n- ⚠ インデックスはテーブルに属し、**DROP TABLE で一緒に削除**される"
   },
   {
     "id": "03-SQL②検索・オブジェクト-52",
@@ -1856,7 +1933,7 @@
     "answer": "止めずに",
     "blank_count": 1,
     "importance": 3,
-    "paragraph": "- 検索（WHERE・JOIN・ORDER BY）を速くする。代わりに**更新は遅くなり、領域を使う**\n- デフォルトの方式は **B-tree**（等価・範囲検索・ソートに使える）\n- **式インデックス**: `WHERE lower(name) = 'abc'` のように**同じ式**で検索したときに使われる\n- **部分インデックス**: 条件に合う行だけを索引に入れる\n- **`CREATE INDEX CONCURRENTLY`**: テーブルへの書き込みを**止めずに**作成（時間はかかる。トランザクションブロック内では実行できない）\n- `REINDEX INDEX 名前;` / `REINDEX TABLE t;` でインデックスを作り直す\n- ⚠ `LIKE 'abc%'`（前方一致）は B-tree が使える場合があるが、**`LIKE '%abc'`（後方・中間一致）は B-tree を使えない**\n- ⚠ インデックスはテーブルに属し、**DROP TABLE で一緒に削除**される"
+    "paragraph": "- 検索（WHERE・JOIN・ORDER BY）を速くする。代わりに**更新は遅くなり、領域を使う**\n- デフォルトの方式は **B-tree**（等価・範囲検索・ソートに使える）\n- **式インデックス**: `WHERE lower(name) = 'abc'` のように**同じ式**で検索したときに使われる\n- **部分インデックス**: 条件に合う行だけを索引に入れる\n- **`CREATE INDEX CONCURRENTLY`**: テーブルへの書き込みを**止めずに**作成（時間はかかる。トランザクションブロック内では実行できない）\n- `REINDEX INDEX 名前;` / `REINDEX TABLE t;` でインデックスを作り直す\n- `ALTER INDEX 名前 RENAME TO 新名;` / `ALTER INDEX 名前 SET TABLESPACE ts;`。⚠ 対象の列や式は ALTER INDEX で変えられない → 作り直す\n- ⚠ `LIKE 'abc%'`（前方一致）は B-tree が使える場合があるが、**`LIKE '%abc'`（後方・中間一致）は B-tree を使えない**\n- ⚠ インデックスはテーブルに属し、**DROP TABLE で一緒に削除**される"
   },
   {
     "id": "03-SQL②検索・オブジェクト-53",
@@ -1867,7 +1944,7 @@
     "answer": "欠番",
     "blank_count": 1,
     "importance": 3,
-    "paragraph": "- オプション: `START`（初期値・デフォルト1）、`INCREMENT`（増分・負も可）、`MINVALUE`、`MAXVALUE`、`CYCLE`（最大値に達したら最小値に戻る。デフォルトは NO CYCLE で、達するとエラー）、`CACHE`\n- ⚠ **nextval はロールバックしても戻らない** → 番号に**欠番**が出る\n- 複数のセッションが同時に nextval しても、**同じ値は返らない**"
+    "paragraph": "- オプション: `START`（初期値・デフォルト1）、`INCREMENT`（増分・負も可）、`MINVALUE`、`MAXVALUE`、`CYCLE`（最大値に達したら最小値に戻る。デフォルトは NO CYCLE で、達するとエラー）、`CACHE`\n- 変更は `ALTER SEQUENCE`（`INCREMENT` などのオプションを変える）。**`ALTER SEQUENCE seq RESTART WITH 1;`** で番号を振り直す（WITH 省略なら START の値から）\n- `DROP SEQUENCE seq;`\n- ⚠ **nextval はロールバックしても戻らない** → 番号に**欠番**が出る\n- 複数のセッションが同時に nextval しても、**同じ値は返らない**"
   },
   {
     "id": "03-SQL②検索・オブジェクト-54",
@@ -1878,7 +1955,7 @@
     "answer": "同じ値は返らない",
     "blank_count": 1,
     "importance": 3,
-    "paragraph": "- オプション: `START`（初期値・デフォルト1）、`INCREMENT`（増分・負も可）、`MINVALUE`、`MAXVALUE`、`CYCLE`（最大値に達したら最小値に戻る。デフォルトは NO CYCLE で、達するとエラー）、`CACHE`\n- ⚠ **nextval はロールバックしても戻らない** → 番号に**欠番**が出る\n- 複数のセッションが同時に nextval しても、**同じ値は返らない**"
+    "paragraph": "- オプション: `START`（初期値・デフォルト1）、`INCREMENT`（増分・負も可）、`MINVALUE`、`MAXVALUE`、`CYCLE`（最大値に達したら最小値に戻る。デフォルトは NO CYCLE で、達するとエラー）、`CACHE`\n- 変更は `ALTER SEQUENCE`（`INCREMENT` などのオプションを変える）。**`ALTER SEQUENCE seq RESTART WITH 1;`** で番号を振り直す（WITH 省略なら START の値から）\n- `DROP SEQUENCE seq;`\n- ⚠ **nextval はロールバックしても戻らない** → 番号に**欠番**が出る\n- 複数のセッションが同時に nextval しても、**同じ値は返らない**"
   },
   {
     "id": "03-SQL②検索・オブジェクト-55",
@@ -1961,6 +2038,39 @@
     "id": "03-SQL②検索・オブジェクト-62",
     "chapter": "03-SQL②検索・オブジェクト",
     "category": "開発/SQL",
+    "section": "パーティショニング",
+    "heading": "パーティションの付け外し（ATTACH / DETACH）",
+    "answer": "ATTACH",
+    "blank_count": 1,
+    "importance": 1,
+    "paragraph": "- **ATTACH**: 作ってある普通のテーブルをパーティションとして組み込む。⚠ 範囲に合わない行があると**エラー**（組み込む前に全行を検査する）\n- **DETACH**: パーティションを親から外す。⚠ 外したテーブルは**独立したテーブルとして残る**（データは消えない。消したいなら DROP TABLE）\n- 古いデータの切り離し → 退避・削除が、DELETE より速く済む"
+  },
+  {
+    "id": "03-SQL②検索・オブジェクト-63",
+    "chapter": "03-SQL②検索・オブジェクト",
+    "category": "開発/SQL",
+    "section": "パーティショニング",
+    "heading": "パーティションの付け外し（ATTACH / DETACH）",
+    "answer": "エラー",
+    "blank_count": 1,
+    "importance": 1,
+    "paragraph": "- **ATTACH**: 作ってある普通のテーブルをパーティションとして組み込む。⚠ 範囲に合わない行があると**エラー**（組み込む前に全行を検査する）\n- **DETACH**: パーティションを親から外す。⚠ 外したテーブルは**独立したテーブルとして残る**（データは消えない。消したいなら DROP TABLE）\n- 古いデータの切り離し → 退避・削除が、DELETE より速く済む"
+  },
+  {
+    "id": "03-SQL②検索・オブジェクト-64",
+    "chapter": "03-SQL②検索・オブジェクト",
+    "category": "開発/SQL",
+    "section": "パーティショニング",
+    "heading": "パーティションの付け外し（ATTACH / DETACH）",
+    "answer": "DETACH",
+    "blank_count": 1,
+    "importance": 1,
+    "paragraph": "- **ATTACH**: 作ってある普通のテーブルをパーティションとして組み込む。⚠ 範囲に合わない行があると**エラー**（組み込む前に全行を検査する）\n- **DETACH**: パーティションを親から外す。⚠ 外したテーブルは**独立したテーブルとして残る**（データは消えない。消したいなら DROP TABLE）\n- 古いデータの切り離し → 退避・削除が、DELETE より速く済む"
+  },
+  {
+    "id": "03-SQL②検索・オブジェクト-65",
+    "chapter": "03-SQL②検索・オブジェクト",
+    "category": "開発/SQL",
     "section": "関数・プロシージャ・トリガー",
     "heading": "ユーザー定義関数",
     "answer": "sql",
@@ -1969,7 +2079,7 @@
     "paragraph": "- `CREATE [OR REPLACE] FUNCTION 名前(引数) RETURNS 戻り値の型 AS 本体 LANGUAGE 言語;`\n- 本体は文字列。**ドル引用符 `$$ ... $$`** を使うと中の単一引用符をエスケープしなくてよい\n- 言語: **sql**、**plpgsql**（変数・IF・ループが使える）、C など\n- `RETURNS void`（返り値なし）、`RETURNS SETOF 型` / `RETURNS TABLE (...)`（複数行を返す）\n- 同じ名前でも**引数の型・数が違えば別の関数**として作れる（オーバーロード）。削除時は `DROP FUNCTION tax_in(integer);` のように引数の型で区別する\n- **プロシージャ**: `CREATE PROCEDURE` で作り **`CALL`** で実行。戻り値を持たず、**中で COMMIT / ROLLBACK できる**（関数はできない）"
   },
   {
-    "id": "03-SQL②検索・オブジェクト-63",
+    "id": "03-SQL②検索・オブジェクト-66",
     "chapter": "03-SQL②検索・オブジェクト",
     "category": "開発/SQL",
     "section": "関数・プロシージャ・トリガー",
@@ -1980,7 +2090,7 @@
     "paragraph": "- `CREATE [OR REPLACE] FUNCTION 名前(引数) RETURNS 戻り値の型 AS 本体 LANGUAGE 言語;`\n- 本体は文字列。**ドル引用符 `$$ ... $$`** を使うと中の単一引用符をエスケープしなくてよい\n- 言語: **sql**、**plpgsql**（変数・IF・ループが使える）、C など\n- `RETURNS void`（返り値なし）、`RETURNS SETOF 型` / `RETURNS TABLE (...)`（複数行を返す）\n- 同じ名前でも**引数の型・数が違えば別の関数**として作れる（オーバーロード）。削除時は `DROP FUNCTION tax_in(integer);` のように引数の型で区別する\n- **プロシージャ**: `CREATE PROCEDURE` で作り **`CALL`** で実行。戻り値を持たず、**中で COMMIT / ROLLBACK できる**（関数はできない）"
   },
   {
-    "id": "03-SQL②検索・オブジェクト-64",
+    "id": "03-SQL②検索・オブジェクト-67",
     "chapter": "03-SQL②検索・オブジェクト",
     "category": "開発/SQL",
     "section": "関数・プロシージャ・トリガー",
@@ -1991,7 +2101,7 @@
     "paragraph": "- `CREATE [OR REPLACE] FUNCTION 名前(引数) RETURNS 戻り値の型 AS 本体 LANGUAGE 言語;`\n- 本体は文字列。**ドル引用符 `$$ ... $$`** を使うと中の単一引用符をエスケープしなくてよい\n- 言語: **sql**、**plpgsql**（変数・IF・ループが使える）、C など\n- `RETURNS void`（返り値なし）、`RETURNS SETOF 型` / `RETURNS TABLE (...)`（複数行を返す）\n- 同じ名前でも**引数の型・数が違えば別の関数**として作れる（オーバーロード）。削除時は `DROP FUNCTION tax_in(integer);` のように引数の型で区別する\n- **プロシージャ**: `CREATE PROCEDURE` で作り **`CALL`** で実行。戻り値を持たず、**中で COMMIT / ROLLBACK できる**（関数はできない）"
   },
   {
-    "id": "03-SQL②検索・オブジェクト-65",
+    "id": "03-SQL②検索・オブジェクト-68",
     "chapter": "03-SQL②検索・オブジェクト",
     "category": "開発/SQL",
     "section": "関数・プロシージャ・トリガー",
@@ -2002,7 +2112,7 @@
     "paragraph": "- `CREATE [OR REPLACE] FUNCTION 名前(引数) RETURNS 戻り値の型 AS 本体 LANGUAGE 言語;`\n- 本体は文字列。**ドル引用符 `$$ ... $$`** を使うと中の単一引用符をエスケープしなくてよい\n- 言語: **sql**、**plpgsql**（変数・IF・ループが使える）、C など\n- `RETURNS void`（返り値なし）、`RETURNS SETOF 型` / `RETURNS TABLE (...)`（複数行を返す）\n- 同じ名前でも**引数の型・数が違えば別の関数**として作れる（オーバーロード）。削除時は `DROP FUNCTION tax_in(integer);` のように引数の型で区別する\n- **プロシージャ**: `CREATE PROCEDURE` で作り **`CALL`** で実行。戻り値を持たず、**中で COMMIT / ROLLBACK できる**（関数はできない）"
   },
   {
-    "id": "03-SQL②検索・オブジェクト-66",
+    "id": "03-SQL②検索・オブジェクト-69",
     "chapter": "03-SQL②検索・オブジェクト",
     "category": "開発/SQL",
     "section": "関数・プロシージャ・トリガー",
@@ -2013,7 +2123,7 @@
     "paragraph": "- 手順: ① **戻り値の型が `trigger` の関数**を作る（引数なし）→ ② **CREATE TRIGGER** でテーブルに紐づける\n- タイミング: **BEFORE**（実行前）/ **AFTER**（実行後）/ **INSTEAD OF**（ビューに対してのみ。代わりに実行）\n- 単位: **FOR EACH ROW**（1行ごと）/ **FOR EACH STATEMENT**（1文に1回。**デフォルト**）\n- 行トリガーでは **NEW**（新しい行。INSERT・UPDATE）と **OLD**（古い行。UPDATE・DELETE）を参照できる\n- ⚠ BEFORE の行トリガーが **NULL を返すと、その行の操作は行われない**。NEW を書き換えて返すと、書き換えた値で保存される\n- AFTER トリガーや文単位トリガーの戻り値は無視される\n- `EXECUTE PROCEDURE` は古い書き方（意味は同じ）。`DROP TRIGGER trg_updated ON products;`"
   },
   {
-    "id": "03-SQL②検索・オブジェクト-67",
+    "id": "03-SQL②検索・オブジェクト-70",
     "chapter": "03-SQL②検索・オブジェクト",
     "category": "開発/SQL",
     "section": "関数・プロシージャ・トリガー",
@@ -2024,7 +2134,7 @@
     "paragraph": "- 手順: ① **戻り値の型が `trigger` の関数**を作る（引数なし）→ ② **CREATE TRIGGER** でテーブルに紐づける\n- タイミング: **BEFORE**（実行前）/ **AFTER**（実行後）/ **INSTEAD OF**（ビューに対してのみ。代わりに実行）\n- 単位: **FOR EACH ROW**（1行ごと）/ **FOR EACH STATEMENT**（1文に1回。**デフォルト**）\n- 行トリガーでは **NEW**（新しい行。INSERT・UPDATE）と **OLD**（古い行。UPDATE・DELETE）を参照できる\n- ⚠ BEFORE の行トリガーが **NULL を返すと、その行の操作は行われない**。NEW を書き換えて返すと、書き換えた値で保存される\n- AFTER トリガーや文単位トリガーの戻り値は無視される\n- `EXECUTE PROCEDURE` は古い書き方（意味は同じ）。`DROP TRIGGER trg_updated ON products;`"
   },
   {
-    "id": "03-SQL②検索・オブジェクト-68",
+    "id": "03-SQL②検索・オブジェクト-71",
     "chapter": "03-SQL②検索・オブジェクト",
     "category": "開発/SQL",
     "section": "関数・プロシージャ・トリガー",
@@ -2035,7 +2145,7 @@
     "paragraph": "- 手順: ① **戻り値の型が `trigger` の関数**を作る（引数なし）→ ② **CREATE TRIGGER** でテーブルに紐づける\n- タイミング: **BEFORE**（実行前）/ **AFTER**（実行後）/ **INSTEAD OF**（ビューに対してのみ。代わりに実行）\n- 単位: **FOR EACH ROW**（1行ごと）/ **FOR EACH STATEMENT**（1文に1回。**デフォルト**）\n- 行トリガーでは **NEW**（新しい行。INSERT・UPDATE）と **OLD**（古い行。UPDATE・DELETE）を参照できる\n- ⚠ BEFORE の行トリガーが **NULL を返すと、その行の操作は行われない**。NEW を書き換えて返すと、書き換えた値で保存される\n- AFTER トリガーや文単位トリガーの戻り値は無視される\n- `EXECUTE PROCEDURE` は古い書き方（意味は同じ）。`DROP TRIGGER trg_updated ON products;`"
   },
   {
-    "id": "03-SQL②検索・オブジェクト-69",
+    "id": "03-SQL②検索・オブジェクト-72",
     "chapter": "03-SQL②検索・オブジェクト",
     "category": "開発/SQL",
     "section": "関数・プロシージャ・トリガー",
@@ -2046,7 +2156,7 @@
     "paragraph": "- 手順: ① **戻り値の型が `trigger` の関数**を作る（引数なし）→ ② **CREATE TRIGGER** でテーブルに紐づける\n- タイミング: **BEFORE**（実行前）/ **AFTER**（実行後）/ **INSTEAD OF**（ビューに対してのみ。代わりに実行）\n- 単位: **FOR EACH ROW**（1行ごと）/ **FOR EACH STATEMENT**（1文に1回。**デフォルト**）\n- 行トリガーでは **NEW**（新しい行。INSERT・UPDATE）と **OLD**（古い行。UPDATE・DELETE）を参照できる\n- ⚠ BEFORE の行トリガーが **NULL を返すと、その行の操作は行われない**。NEW を書き換えて返すと、書き換えた値で保存される\n- AFTER トリガーや文単位トリガーの戻り値は無視される\n- `EXECUTE PROCEDURE` は古い書き方（意味は同じ）。`DROP TRIGGER trg_updated ON products;`"
   },
   {
-    "id": "03-SQL②検索・オブジェクト-70",
+    "id": "03-SQL②検索・オブジェクト-73",
     "chapter": "03-SQL②検索・オブジェクト",
     "category": "開発/SQL",
     "section": "関数・プロシージャ・トリガー",
@@ -2057,7 +2167,7 @@
     "paragraph": "- 手順: ① **戻り値の型が `trigger` の関数**を作る（引数なし）→ ② **CREATE TRIGGER** でテーブルに紐づける\n- タイミング: **BEFORE**（実行前）/ **AFTER**（実行後）/ **INSTEAD OF**（ビューに対してのみ。代わりに実行）\n- 単位: **FOR EACH ROW**（1行ごと）/ **FOR EACH STATEMENT**（1文に1回。**デフォルト**）\n- 行トリガーでは **NEW**（新しい行。INSERT・UPDATE）と **OLD**（古い行。UPDATE・DELETE）を参照できる\n- ⚠ BEFORE の行トリガーが **NULL を返すと、その行の操作は行われない**。NEW を書き換えて返すと、書き換えた値で保存される\n- AFTER トリガーや文単位トリガーの戻り値は無視される\n- `EXECUTE PROCEDURE` は古い書き方（意味は同じ）。`DROP TRIGGER trg_updated ON products;`"
   },
   {
-    "id": "03-SQL②検索・オブジェクト-71",
+    "id": "03-SQL②検索・オブジェクト-74",
     "chapter": "03-SQL②検索・オブジェクト",
     "category": "開発/SQL",
     "section": "関数・プロシージャ・トリガー",
@@ -2068,7 +2178,7 @@
     "paragraph": "- 手順: ① **戻り値の型が `trigger` の関数**を作る（引数なし）→ ② **CREATE TRIGGER** でテーブルに紐づける\n- タイミング: **BEFORE**（実行前）/ **AFTER**（実行後）/ **INSTEAD OF**（ビューに対してのみ。代わりに実行）\n- 単位: **FOR EACH ROW**（1行ごと）/ **FOR EACH STATEMENT**（1文に1回。**デフォルト**）\n- 行トリガーでは **NEW**（新しい行。INSERT・UPDATE）と **OLD**（古い行。UPDATE・DELETE）を参照できる\n- ⚠ BEFORE の行トリガーが **NULL を返すと、その行の操作は行われない**。NEW を書き換えて返すと、書き換えた値で保存される\n- AFTER トリガーや文単位トリガーの戻り値は無視される\n- `EXECUTE PROCEDURE` は古い書き方（意味は同じ）。`DROP TRIGGER trg_updated ON products;`"
   },
   {
-    "id": "03-SQL②検索・オブジェクト-72",
+    "id": "03-SQL②検索・オブジェクト-75",
     "chapter": "03-SQL②検索・オブジェクト",
     "category": "開発/SQL",
     "section": "関数・プロシージャ・トリガー",
