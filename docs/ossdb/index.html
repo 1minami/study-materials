@@ -61,6 +61,12 @@
     <li><a href="#08-運用管理作業">運用管理作業</a></li>
   </ul>
 </div>
+<div class="toc-section">
+  <a href="#用語索引" class="toc-section-title">🔍 用語索引</a>
+  <ul>
+    <li><a href="#99-用語索引">用語索引</a></li>
+  </ul>
+</div>
 </nav>
 
 </aside>
@@ -5324,6 +5330,1662 @@ SELECT column_name, data_type FROM information_schema.columns WHERE table_name =
 <ul>
 <li>例: <code>SELECT pg_size_pretty(pg_database_size('sampledb'));</code></li>
 </ul>
+</article>
+</section>
+<section class="part" id="用語索引">
+<h1 class="part-title">🔍 用語索引</h1>
+<article class="chapter" id="99-用語索引">
+<h2 id="99-用語索引-1">用語索引</h2>
+<p>本編（01〜08章）に登場する主要用語の索引です。英字（コマンド・関数・パラメータ）はアルファベット順、日本語は五十音順。章名をクリックすると該当章にジャンプします。</p>
+<h3 id="99-用語索引-2">記号・psql メタコマンド</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>\?</code> / <code>\h</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>\c</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>\copy</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>\d</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>\db</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>\dD</code> / <code>\dT</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>\df</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>\di</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>\dn</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>\dp</code> / <code>\z</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>\ds</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>\dt</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>\du</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>\dv</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>\i</code> / <code>\o</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>\l</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>\timing</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>\x</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>-&gt;</code> / <code>-&gt;&gt;</code></td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>#&gt;</code> / <code>#&gt;&gt;</code></td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>@&gt;</code></td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>@?</code> / <code>@@</code></td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>::</code>（キャスト）</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>文字列連結演算子（パイプ2本）</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>%</code> / <code>_</code>（LIKE）</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>$$</code>（ドル引用符）</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="99-用語索引-3">A〜C</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ACCESS EXCLUSIVE</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a>、<a href="#07-バックアップ">07-バックアップ</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>ACID</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td><code>age</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>ALTER DEFAULT PRIVILEGES</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>ALTER DOMAIN</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>ALTER ROLE</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>ALTER SEQUENCE</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>ALTER SYSTEM</td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>ALTER TABLE</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>ANALYZE</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>ANY / SOME / ALL</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>archive_command</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a>、<a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>archive_mode</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a>、<a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>array_agg</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>ATTACH / DETACH PARTITION</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>autovacuum</td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>autovacuum_naptime</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>autovacuum_vacuum_scale_factor</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>B-tree</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>backup_label</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>base/</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>BEGIN / COMMIT / ROLLBACK</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>BETWEEN</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>bigint</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>boolean</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>BSD ライセンス</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td><code>bytea</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>CALL</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>CASCADE</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>CASE</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>CAST</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>ceil</code> / <code>floor</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>char(n)</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>char_length</code> / <code>length</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>CHECK 制約</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>CHECKPOINT</td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>clock_timestamp</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>CLUSTER</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>COALESCE</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>CommitFest</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td><code>concat</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>configure</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td>CONNECT 権限</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>contrib</td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td>COPY</td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>count</code></td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>CREATE DATABASE</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>CREATE DOMAIN</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>CREATE INDEX CONCURRENTLY</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>CREATE ROLE / CREATE USER</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>CREATE TABLE</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>CREATE TABLESPACE</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>CREATE TRIGGER</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>CREATE TYPE</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>createdb</code> / <code>dropdb</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td>CREATEDB / CREATEROLE</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>createuser</code> / <code>dropuser</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td>CROSS JOIN</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>CTE（WITH 句）</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>current_date</code> / <code>current_timestamp</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>currval</code></td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="99-用語索引-4">D〜I</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>date_part</code> / <code>extract</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>date_trunc</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>DCL / DDL / DML</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td><code>deadlock_timeout</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>default_transaction_isolation</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a>、<a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>dense_rank</code> / <code>rank</code></td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>DISTINCT</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>double precision</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>DROP DATABASE</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>DROP OWNED</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>DROP TABLE</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>E-R 図</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td>ENUM（列挙型）</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>EOL</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td>EXCEPT / INTERSECT</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>EXCLUDED</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>EXISTS</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>FOR UPDATE</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>FOREIGN KEY</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>fsync</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>FULL OUTER JOIN</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>GIN インデックス</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>global/</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>GPL / LGPL</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td>GRANT / REVOKE</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>GREATEST / LEAST</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>GROUP BY / HAVING</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>host</code> / <code>hostssl</code> / <code>hostnossl</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>IDENTITY 列</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>ident</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>ILIKE</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>IN</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>include</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>INHERIT</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>initdb</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td>INNER JOIN</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>INSERT</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>integer</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>interval</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a>、<a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>IS DISTINCT FROM</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>IS NULL</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="99-用語索引-5">J〜O</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JSON / JSONB</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#02-SQL①定義・更新">02-SQL①</a>、<a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>jsonpath</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>jsonb_path_query</code></td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>LEFT / RIGHT OUTER JOIN</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>LIKE</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>LIMIT / OFFSET</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>listen_addresses</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>local</code>（pg_hba.conf）</td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>LOCK TABLE</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>log_destination</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>log_min_duration_statement</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>log_min_messages</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>log_statement</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>logging_collector</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>LOGIN</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>lpad</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>LSN</td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>maintenance_work_mem</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>max_connections</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>max_wal_senders</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>max_wal_size</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>md5</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>MIT ライセンス</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td><code>mod</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>MVCC</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#04-関数・トランザクション">04-関数・トランザクション</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>NATURAL JOIN</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>NEW / OLD</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>nextval</code></td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>NO ACTION / RESTRICT</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>NOT NULL</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>now</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>NOWAIT</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>NULL</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>NULLIF</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>numeric</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>octet_length</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>OID</td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>ON CONFLICT</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>ON_ERROR_STOP</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td>ORDER BY</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>OSD / OSI</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="99-用語索引-6">P（pg_ 系）</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pg_authid</code> / <code>pg_roles</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_backup_start</code> / <code>pg_backup_stop</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>pg_basebackup</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>pg_cancel_backend</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_catalog</code></td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_class</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_create_restore_point</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>pg_ctl</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>pg_ctl promote</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>pg_ctl reload</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>pg_database</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_database_size</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_default</code> / <code>pg_global</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_dump</code></td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>pg_dumpall</code></td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>pg_hba.conf</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>pg_hba_file_rules</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>pg_ident.conf</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>pg_isready</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>pg_locks</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_read_all_data</code> / <code>pg_write_all_data</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_read_server_files</code> / <code>pg_write_server_files</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>pg_relation_size</code> / <code>pg_total_relation_size</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_reload_conf</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>pg_restore</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>pg_settings</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_size_pretty</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_stat_activity</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_stat_archiver</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>pg_stat_user_tables</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_statistic</code> / <code>pg_stats</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_switch_wal</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>pg_tables</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_tablespace</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_tblspc/</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_terminate_backend</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>pg_upgrade</code></td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td><code>pg_wal/</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>pg_wal_replay_resume</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>pg_xact/</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>PG_VERSION</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td>PGDATA</td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td>PGHOST / PGPORT / PGUSER / PGDATABASE</td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>.pgpass</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="99-用語索引-7">P〜Z</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>peer</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>PITR</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>PL/pgSQL</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>position</code> / <code>strpos</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>PostgreSQL Global Development Group</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td>PostgreSQL ライセンス</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td><code>postgresql.auto.conf</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>postgresql.conf</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>postmaster.pid</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td>PRIMARY KEY</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>primary_conninfo</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>PUBLIC</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>random</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>READ COMMITTED</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>real</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>REASSIGN OWNED</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>recovery.signal</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>recovery_target_action</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>recovery_target_time</code> / <code>recovery_target_xid</code> / <code>recovery_target_name</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>REFRESH MATERIALIZED VIEW</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>REINDEX</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>reject</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>RELEASE SAVEPOINT</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>REPEATABLE READ</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>replace</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>replication</code>（pg_hba.conf）</td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a>、<a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>restore_command</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>RETURNING</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>round</code> / <code>trunc</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>row_number</code></td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>samehost</code> / <code>samenet</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>sameuser</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>SAVEPOINT</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>scram-sha-256</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>search_path</code></td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a>、<a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>SERIALIZABLE</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>serial</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a>、<a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>SET / SHOW / RESET</td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>SET LOCAL</td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>SET NULL / SET DEFAULT</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>setval</code></td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>shared_buffers</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>SIMILAR TO</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>SKIP LOCKED</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>smart / fast / immediate（停止モード）</td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td><code>standby.signal</code></td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>string_agg</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>substring</code> / <code>substr</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>SUPERUSER</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>synchronous_commit</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td><code>template0</code> / <code>template1</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>text</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>timestamp</code> / <code>timestamptz</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>to_char</code> / <code>to_date</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>track_counts</code></td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>trim</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td><code>trust</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+<tr>
+<td>TRUNCATE</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>UNION / UNION ALL</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>UNIQUE</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>UPDATE</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>upper</code> / <code>lower</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>USAGE 権限</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>USING（JOIN / DELETE）</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a>、<a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>VACUUM</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#04-関数・トランザクション">04-関数・トランザクション</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>VACUUM FULL</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>vacuumdb</code></td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>VALID UNTIL</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td><code>varchar(n)</code></td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>WAL</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#06-設定ファイル">06-設定ファイル</a>、<a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td><code>wal_level</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a>、<a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>WITH CHECK OPTION</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>WITH GRANT OPTION</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>WITH RECURSIVE</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td><code>work_mem</code></td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="99-用語索引-8">あ行</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>アーカイブ（WAL アーカイブ）</td>
+<td><a href="#06-設定ファイル">06-設定ファイル</a>、<a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>アップグレード（メジャー / マイナー）</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td>一時テーブル</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>インデックス</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>ウィンドウ関数</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>エンコーディング</td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="99-用語索引-9">か行</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>外部キー</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>可視性マップ</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>カスタム形式（-Fc）</td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>型変換（キャスト）</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>関係演算（選択・射影・結合）</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td>関数従属</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td>クラッシュリカバリ</td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td>グローバルオブジェクト</td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>結合（JOIN）</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>権限</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>更新可能ビュー</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>候補キー</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td>コールドバックアップ（オフラインバックアップ）</td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="99-用語索引-10">さ行</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>サブクエリ</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>サブスクリプション</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>参照整合性</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td>システムカタログ</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>自動コミット</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>集合演算</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>集約関数</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a>、<a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>主キー</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>情報スキーマ（information_schema）</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>シーケンス</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>スキーマ</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>ストリーミングレプリケーション</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td>正規化（第1〜第3正規形）</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td>制約（列制約・表制約）</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>セーブポイント</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>相関サブクエリ</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="99-用語索引-11">た行</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ダーティリード</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>タイムライン</td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>データ型</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>データチェックサム</td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td>データディレクトリ</td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td>データベースクラスタ</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td>テーブルスペース</td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a>、<a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>定義済みロール</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>デッドロック</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>凍結（FREEZE）</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>統計情報</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>ドメイン</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>トランザクション</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>トランザクション ID の周回（wraparound）</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>トランザクション分離レベル</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>トリガー</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="99-用語索引-12">な行</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ノンリピータブルリード</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="99-用語索引-13">は行</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>パーティショニング</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>パブリケーション</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>パスワードファイル（.pgpass）</td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+<tr>
+<td>ビュー</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>ファントムリード</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>複合型</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>復元ポイント</td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>部分インデックス / 式インデックス</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>物理バックアップ</td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>不要タプル（dead tuple）</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>プランナ</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>プレーンテキスト形式（-Fp）</td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>プロシージャ</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>ベースバックアップ</td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="99-用語索引-14">ま行</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>マテリアライズドビュー</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+<tr>
+<td>メジャーバージョン / マイナーバージョン</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td>メタコマンド</td>
+<td><a href="#05-インストール・標準付属ツール">05-インストール・ツール</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="99-用語索引-15">や行</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ユーザー定義関数</td>
+<td><a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="99-用語索引-16">ら行</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>登場章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>リカバリ目標</td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>リストア</td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>リリースサイクル</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td>リレーション（表）</td>
+<td><a href="#01-一般知識">01-一般知識</a></td>
+</tr>
+<tr>
+<td>列挙型（ENUM）</td>
+<td><a href="#02-SQL①定義・更新">02-SQL①</a></td>
+</tr>
+<tr>
+<td>ロール</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>ロールのメンバーシップ</td>
+<td><a href="#08-運用管理作業">08-運用管理</a></td>
+</tr>
+<tr>
+<td>ロック</td>
+<td><a href="#04-関数・トランザクション">04-関数・トランザクション</a></td>
+</tr>
+<tr>
+<td>論理バックアップ</td>
+<td><a href="#07-バックアップ">07-バックアップ</a></td>
+</tr>
+<tr>
+<td>論理レプリケーション</td>
+<td><a href="#01-一般知識">01-一般知識</a>、<a href="#03-SQL②検索・オブジェクト">03-SQL②</a></td>
+</tr>
+</tbody>
+</table>
 </article>
 </section>
 

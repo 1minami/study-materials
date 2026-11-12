@@ -7,7 +7,7 @@
     "heading": "OSS（オープンソースソフトウェア）",
     "answer": "OSI",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- ソースコードが公開され、利用・改変・再配布が認められたソフトウェア\n- 定義は **OSI**（Open Source Initiative）の **OSD**（The Open Source Definition）。「再配布の自由」「ソースコードの入手」「派生物の許可」「個人・団体・利用分野で差別しない」など10項目\n- ⚠ 「無償」は OSS の条件ではない。有償で販売・サポートしてもよい"
   },
   {
@@ -18,7 +18,7 @@
     "heading": "OSS（オープンソースソフトウェア）",
     "answer": "OSD",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- ソースコードが公開され、利用・改変・再配布が認められたソフトウェア\n- 定義は **OSI**（Open Source Initiative）の **OSD**（The Open Source Definition）。「再配布の自由」「ソースコードの入手」「派生物の許可」「個人・団体・利用分野で差別しない」など10項目\n- ⚠ 「無償」は OSS の条件ではない。有償で販売・サポートしてもよい"
   },
   {
@@ -73,7 +73,7 @@
     "heading": "開発体制",
     "answer": "CommitFest",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- 特定の企業が所有・開発しているのではなく、**PostgreSQL Global Development Group**（世界中の開発者のコミュニティ）が開発\n- 誰でも参加できる。開発の議論・パッチ投稿は**メーリングリスト**（開発者向けの `pgsql-hackers` など）で行い、パッチは **CommitFest**（定期的なレビュー期間）で審査される\n- 日本には **日本 PostgreSQL ユーザ会（JPUG）** があり、勉強会・ドキュメント翻訳などを行う"
   },
   {
@@ -150,7 +150,7 @@
     "heading": "リリースとサポート",
     "answer": "EOL",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- メジャーバージョン: **年1回**（例年 **9〜10月**）リリース。新機能が入る\n- マイナーバージョン: **少なくとも3か月に1回**リリース。**バグ修正・セキュリティ修正のみ**（新機能は入らない）。重大な脆弱性はスケジュール外でも出る\n- サポート期間: 各メジャーバージョンは初回リリースから **5年間**。期限後に最終マイナーリリースを出して **EOL**（サポート終了）\n- コミュニティは**最新のマイナーバージョンを使う**ことを推奨している"
   },
   {
@@ -194,7 +194,7 @@
     "heading": "アップグレード方法",
     "answer": "pg_upgrade",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **マイナーアップグレード**: サーバを停止 → プログラム（バイナリ）を入れ替え → 再起動。**データベースクラスタはそのまま使える**（ダンプ・リストア**不要**）\n- **メジャーアップグレード**: データディレクトリの形式に互換性がないため、次のどちらかが必要\n  - **`pg_dump` / `pg_dumpall` でダンプ → 新バージョンでリストア**\n  - **`pg_upgrade`** で変換\n- ⚠ メジャーバージョンは途中を飛ばして（例: 12 → 16）アップグレードしてよい"
   },
   {
@@ -205,7 +205,7 @@
     "heading": "",
     "answer": "ACID",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **ACID** 特性を満たすトランザクション\n- **MVCC**（多版型同時実行制御）: 更新時に行の新しい版を作り、古い版を残す → **読み取りと書き込みが互いをブロックしない**。不要になった古い行は **VACUUM** で回収する\n- **WAL**（先行書き込みログ）: 変更をデータファイルより先にログへ書く → クラッシュ時の復旧、**PITR**（ポイントインタイムリカバリ）、レプリケーションの基盤\n- **SQL 標準**への高い準拠\n- **拡張性**: ユーザー定義のデータ型・関数・演算子・インデックス方式を追加できる。`CREATE EXTENSION` で拡張機能を導入\n- **手続き言語**: **PL/pgSQL**（標準）、PL/Perl、PL/Python、PL/Tcl\n- 豊富なデータ型: **JSON / JSONB**、配列、範囲型、幾何データ型、ネットワークアドレス型 など\n- インデックス方式: **B-tree**（デフォルト）、Hash、GiST、SP-GiST、GIN、BRIN\n- レプリケーション: **ストリーミングレプリケーション**（物理）、**論理レプリケーション**（`CREATE PUBLICATION` / `CREATE SUBSCRIPTION`）\n- **宣言的パーティショニング**（`PARTITION BY` / `PARTITION OF`）、パラレルクエリ\n- **マルチプロセス**構成: 接続ごとにサーバプロセス（バックエンド）が1つ起動する（スレッドではない）\n- 対応 OS: Linux・Windows・macOS・各種 UNIX"
   },
   {
@@ -216,7 +216,7 @@
     "heading": "",
     "answer": "MVCC",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **ACID** 特性を満たすトランザクション\n- **MVCC**（多版型同時実行制御）: 更新時に行の新しい版を作り、古い版を残す → **読み取りと書き込みが互いをブロックしない**。不要になった古い行は **VACUUM** で回収する\n- **WAL**（先行書き込みログ）: 変更をデータファイルより先にログへ書く → クラッシュ時の復旧、**PITR**（ポイントインタイムリカバリ）、レプリケーションの基盤\n- **SQL 標準**への高い準拠\n- **拡張性**: ユーザー定義のデータ型・関数・演算子・インデックス方式を追加できる。`CREATE EXTENSION` で拡張機能を導入\n- **手続き言語**: **PL/pgSQL**（標準）、PL/Perl、PL/Python、PL/Tcl\n- 豊富なデータ型: **JSON / JSONB**、配列、範囲型、幾何データ型、ネットワークアドレス型 など\n- インデックス方式: **B-tree**（デフォルト）、Hash、GiST、SP-GiST、GIN、BRIN\n- レプリケーション: **ストリーミングレプリケーション**（物理）、**論理レプリケーション**（`CREATE PUBLICATION` / `CREATE SUBSCRIPTION`）\n- **宣言的パーティショニング**（`PARTITION BY` / `PARTITION OF`）、パラレルクエリ\n- **マルチプロセス**構成: 接続ごとにサーバプロセス（バックエンド）が1つ起動する（スレッドではない）\n- 対応 OS: Linux・Windows・macOS・各種 UNIX"
   },
   {
@@ -227,7 +227,7 @@
     "heading": "",
     "answer": "VACUUM",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **ACID** 特性を満たすトランザクション\n- **MVCC**（多版型同時実行制御）: 更新時に行の新しい版を作り、古い版を残す → **読み取りと書き込みが互いをブロックしない**。不要になった古い行は **VACUUM** で回収する\n- **WAL**（先行書き込みログ）: 変更をデータファイルより先にログへ書く → クラッシュ時の復旧、**PITR**（ポイントインタイムリカバリ）、レプリケーションの基盤\n- **SQL 標準**への高い準拠\n- **拡張性**: ユーザー定義のデータ型・関数・演算子・インデックス方式を追加できる。`CREATE EXTENSION` で拡張機能を導入\n- **手続き言語**: **PL/pgSQL**（標準）、PL/Perl、PL/Python、PL/Tcl\n- 豊富なデータ型: **JSON / JSONB**、配列、範囲型、幾何データ型、ネットワークアドレス型 など\n- インデックス方式: **B-tree**（デフォルト）、Hash、GiST、SP-GiST、GIN、BRIN\n- レプリケーション: **ストリーミングレプリケーション**（物理）、**論理レプリケーション**（`CREATE PUBLICATION` / `CREATE SUBSCRIPTION`）\n- **宣言的パーティショニング**（`PARTITION BY` / `PARTITION OF`）、パラレルクエリ\n- **マルチプロセス**構成: 接続ごとにサーバプロセス（バックエンド）が1つ起動する（スレッドではない）\n- 対応 OS: Linux・Windows・macOS・各種 UNIX"
   },
   {
@@ -238,7 +238,7 @@
     "heading": "",
     "answer": "WAL",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **ACID** 特性を満たすトランザクション\n- **MVCC**（多版型同時実行制御）: 更新時に行の新しい版を作り、古い版を残す → **読み取りと書き込みが互いをブロックしない**。不要になった古い行は **VACUUM** で回収する\n- **WAL**（先行書き込みログ）: 変更をデータファイルより先にログへ書く → クラッシュ時の復旧、**PITR**（ポイントインタイムリカバリ）、レプリケーションの基盤\n- **SQL 標準**への高い準拠\n- **拡張性**: ユーザー定義のデータ型・関数・演算子・インデックス方式を追加できる。`CREATE EXTENSION` で拡張機能を導入\n- **手続き言語**: **PL/pgSQL**（標準）、PL/Perl、PL/Python、PL/Tcl\n- 豊富なデータ型: **JSON / JSONB**、配列、範囲型、幾何データ型、ネットワークアドレス型 など\n- インデックス方式: **B-tree**（デフォルト）、Hash、GiST、SP-GiST、GIN、BRIN\n- レプリケーション: **ストリーミングレプリケーション**（物理）、**論理レプリケーション**（`CREATE PUBLICATION` / `CREATE SUBSCRIPTION`）\n- **宣言的パーティショニング**（`PARTITION BY` / `PARTITION OF`）、パラレルクエリ\n- **マルチプロセス**構成: 接続ごとにサーバプロセス（バックエンド）が1つ起動する（スレッドではない）\n- 対応 OS: Linux・Windows・macOS・各種 UNIX"
   },
   {
@@ -249,7 +249,7 @@
     "heading": "",
     "answer": "PITR",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **ACID** 特性を満たすトランザクション\n- **MVCC**（多版型同時実行制御）: 更新時に行の新しい版を作り、古い版を残す → **読み取りと書き込みが互いをブロックしない**。不要になった古い行は **VACUUM** で回収する\n- **WAL**（先行書き込みログ）: 変更をデータファイルより先にログへ書く → クラッシュ時の復旧、**PITR**（ポイントインタイムリカバリ）、レプリケーションの基盤\n- **SQL 標準**への高い準拠\n- **拡張性**: ユーザー定義のデータ型・関数・演算子・インデックス方式を追加できる。`CREATE EXTENSION` で拡張機能を導入\n- **手続き言語**: **PL/pgSQL**（標準）、PL/Perl、PL/Python、PL/Tcl\n- 豊富なデータ型: **JSON / JSONB**、配列、範囲型、幾何データ型、ネットワークアドレス型 など\n- インデックス方式: **B-tree**（デフォルト）、Hash、GiST、SP-GiST、GIN、BRIN\n- レプリケーション: **ストリーミングレプリケーション**（物理）、**論理レプリケーション**（`CREATE PUBLICATION` / `CREATE SUBSCRIPTION`）\n- **宣言的パーティショニング**（`PARTITION BY` / `PARTITION OF`）、パラレルクエリ\n- **マルチプロセス**構成: 接続ごとにサーバプロセス（バックエンド）が1つ起動する（スレッドではない）\n- 対応 OS: Linux・Windows・macOS・各種 UNIX"
   },
   {
@@ -293,7 +293,7 @@
     "heading": "",
     "answer": "PL/pgSQL",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **ACID** 特性を満たすトランザクション\n- **MVCC**（多版型同時実行制御）: 更新時に行の新しい版を作り、古い版を残す → **読み取りと書き込みが互いをブロックしない**。不要になった古い行は **VACUUM** で回収する\n- **WAL**（先行書き込みログ）: 変更をデータファイルより先にログへ書く → クラッシュ時の復旧、**PITR**（ポイントインタイムリカバリ）、レプリケーションの基盤\n- **SQL 標準**への高い準拠\n- **拡張性**: ユーザー定義のデータ型・関数・演算子・インデックス方式を追加できる。`CREATE EXTENSION` で拡張機能を導入\n- **手続き言語**: **PL/pgSQL**（標準）、PL/Perl、PL/Python、PL/Tcl\n- 豊富なデータ型: **JSON / JSONB**、配列、範囲型、幾何データ型、ネットワークアドレス型 など\n- インデックス方式: **B-tree**（デフォルト）、Hash、GiST、SP-GiST、GIN、BRIN\n- レプリケーション: **ストリーミングレプリケーション**（物理）、**論理レプリケーション**（`CREATE PUBLICATION` / `CREATE SUBSCRIPTION`）\n- **宣言的パーティショニング**（`PARTITION BY` / `PARTITION OF`）、パラレルクエリ\n- **マルチプロセス**構成: 接続ごとにサーバプロセス（バックエンド）が1つ起動する（スレッドではない）\n- 対応 OS: Linux・Windows・macOS・各種 UNIX"
   },
   {
@@ -304,7 +304,7 @@
     "heading": "",
     "answer": "JSON / JSONB",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **ACID** 特性を満たすトランザクション\n- **MVCC**（多版型同時実行制御）: 更新時に行の新しい版を作り、古い版を残す → **読み取りと書き込みが互いをブロックしない**。不要になった古い行は **VACUUM** で回収する\n- **WAL**（先行書き込みログ）: 変更をデータファイルより先にログへ書く → クラッシュ時の復旧、**PITR**（ポイントインタイムリカバリ）、レプリケーションの基盤\n- **SQL 標準**への高い準拠\n- **拡張性**: ユーザー定義のデータ型・関数・演算子・インデックス方式を追加できる。`CREATE EXTENSION` で拡張機能を導入\n- **手続き言語**: **PL/pgSQL**（標準）、PL/Perl、PL/Python、PL/Tcl\n- 豊富なデータ型: **JSON / JSONB**、配列、範囲型、幾何データ型、ネットワークアドレス型 など\n- インデックス方式: **B-tree**（デフォルト）、Hash、GiST、SP-GiST、GIN、BRIN\n- レプリケーション: **ストリーミングレプリケーション**（物理）、**論理レプリケーション**（`CREATE PUBLICATION` / `CREATE SUBSCRIPTION`）\n- **宣言的パーティショニング**（`PARTITION BY` / `PARTITION OF`）、パラレルクエリ\n- **マルチプロセス**構成: 接続ごとにサーバプロセス（バックエンド）が1つ起動する（スレッドではない）\n- 対応 OS: Linux・Windows・macOS・各種 UNIX"
   },
   {
@@ -315,7 +315,7 @@
     "heading": "",
     "answer": "B-tree",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **ACID** 特性を満たすトランザクション\n- **MVCC**（多版型同時実行制御）: 更新時に行の新しい版を作り、古い版を残す → **読み取りと書き込みが互いをブロックしない**。不要になった古い行は **VACUUM** で回収する\n- **WAL**（先行書き込みログ）: 変更をデータファイルより先にログへ書く → クラッシュ時の復旧、**PITR**（ポイントインタイムリカバリ）、レプリケーションの基盤\n- **SQL 標準**への高い準拠\n- **拡張性**: ユーザー定義のデータ型・関数・演算子・インデックス方式を追加できる。`CREATE EXTENSION` で拡張機能を導入\n- **手続き言語**: **PL/pgSQL**（標準）、PL/Perl、PL/Python、PL/Tcl\n- 豊富なデータ型: **JSON / JSONB**、配列、範囲型、幾何データ型、ネットワークアドレス型 など\n- インデックス方式: **B-tree**（デフォルト）、Hash、GiST、SP-GiST、GIN、BRIN\n- レプリケーション: **ストリーミングレプリケーション**（物理）、**論理レプリケーション**（`CREATE PUBLICATION` / `CREATE SUBSCRIPTION`）\n- **宣言的パーティショニング**（`PARTITION BY` / `PARTITION OF`）、パラレルクエリ\n- **マルチプロセス**構成: 接続ごとにサーバプロセス（バックエンド）が1つ起動する（スレッドではない）\n- 対応 OS: Linux・Windows・macOS・各種 UNIX"
   },
   {
@@ -326,7 +326,7 @@
     "heading": "",
     "answer": "論理レプリケーション",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **ACID** 特性を満たすトランザクション\n- **MVCC**（多版型同時実行制御）: 更新時に行の新しい版を作り、古い版を残す → **読み取りと書き込みが互いをブロックしない**。不要になった古い行は **VACUUM** で回収する\n- **WAL**（先行書き込みログ）: 変更をデータファイルより先にログへ書く → クラッシュ時の復旧、**PITR**（ポイントインタイムリカバリ）、レプリケーションの基盤\n- **SQL 標準**への高い準拠\n- **拡張性**: ユーザー定義のデータ型・関数・演算子・インデックス方式を追加できる。`CREATE EXTENSION` で拡張機能を導入\n- **手続き言語**: **PL/pgSQL**（標準）、PL/Perl、PL/Python、PL/Tcl\n- 豊富なデータ型: **JSON / JSONB**、配列、範囲型、幾何データ型、ネットワークアドレス型 など\n- インデックス方式: **B-tree**（デフォルト）、Hash、GiST、SP-GiST、GIN、BRIN\n- レプリケーション: **ストリーミングレプリケーション**（物理）、**論理レプリケーション**（`CREATE PUBLICATION` / `CREATE SUBSCRIPTION`）\n- **宣言的パーティショニング**（`PARTITION BY` / `PARTITION OF`）、パラレルクエリ\n- **マルチプロセス**構成: 接続ごとにサーバプロセス（バックエンド）が1つ起動する（スレッドではない）\n- 対応 OS: Linux・Windows・macOS・各種 UNIX"
   },
   {
@@ -403,7 +403,7 @@
     "heading": "キー",
     "answer": "候補キー",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **スーパーキー**: 行を一意に識別できる属性の組（余分な属性を含んでもよい）\n- **候補キー**: 行を一意に識別できる**最小**の属性の組\n- **主キー（PRIMARY KEY）**: 候補キーから1つ選んだもの。**一意（UNIQUE）かつ NOT NULL**。1テーブルに**1つだけ**\n- **代替キー**: 主キーに選ばれなかった候補キー\n- **複合キー**: 複数の列からなるキー\n- **外部キー（FOREIGN KEY）**: 他のテーブルの主キー（または UNIQUE 列）を参照する列。**参照整合性**（存在しない値を参照させない）を保証する\n- ⚠ 外部キーの列には NULL を入れてよい（参照先が無い状態を表す）"
   },
   {
@@ -458,7 +458,7 @@
     "heading": "キー",
     "answer": "参照整合性",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **スーパーキー**: 行を一意に識別できる属性の組（余分な属性を含んでもよい）\n- **候補キー**: 行を一意に識別できる**最小**の属性の組\n- **主キー（PRIMARY KEY）**: 候補キーから1つ選んだもの。**一意（UNIQUE）かつ NOT NULL**。1テーブルに**1つだけ**\n- **代替キー**: 主キーに選ばれなかった候補キー\n- **複合キー**: 複数の列からなるキー\n- **外部キー（FOREIGN KEY）**: 他のテーブルの主キー（または UNIQUE 列）を参照する列。**参照整合性**（存在しない値を参照させない）を保証する\n- ⚠ 外部キーの列には NULL を入れてよい（参照先が無い状態を表す）"
   },
   {
@@ -612,7 +612,7 @@
     "heading": "SQL の分類",
     "answer": "DCL",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- ⚠ `GRANT` / `REVOKE` は **DCL**（DDL ではない）\n- ⚠ `SELECT` は **DML**（「データを変更しないから DML ではない」は誤り）"
   },
   {
@@ -623,7 +623,7 @@
     "heading": "SQL の分類",
     "answer": "DML",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- ⚠ `GRANT` / `REVOKE` は **DCL**（DDL ではない）\n- ⚠ `SELECT` は **DML**（「データを変更しないから DML ではない」は誤り）"
   },
   {
@@ -645,7 +645,7 @@
     "heading": "設計の流れ",
     "answer": "E-R 図",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "1. **概念設計**: 業務の対象を **E-R 図**で表す（DBMS に依存しない）\n2. **論理設計**: テーブル・列・キーを決め、**正規化**する\n3. **物理設計**: インデックス・格納場所など、特定の DBMS に合わせて決める"
   },
   {
@@ -667,7 +667,7 @@
     "heading": "設計の流れ",
     "answer": "正規化",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "1. **概念設計**: 業務の対象を **E-R 図**で表す（DBMS に依存しない）\n2. **論理設計**: テーブル・列・キーを決め、**正規化**する\n3. **物理設計**: インデックス・格納場所など、特定の DBMS に合わせて決める"
   },
   {
@@ -755,7 +755,7 @@
     "heading": "関数従属",
     "answer": "関数従属",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **関数従属**: 列 A の値が決まると列 B の値が1つに決まる（A → B）\n- **部分関数従属**: 複合キーの**一部**だけで、非キー列が決まる\n- **推移関数従属**: キー → 非キー列 X → 非キー列 Y のように、**非キー列を経由して**決まる"
   },
   {
@@ -1041,7 +1041,7 @@
     "heading": "ドメイン（CREATE DOMAIN）",
     "answer": "ALTER DOMAIN",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- 付けられるのは **NOT NULL / NULL・CHECK・DEFAULT** だけ\n- ⚠ **UNIQUE・PRIMARY KEY・FOREIGN KEY はドメインに付けられない**（列・表の制約として書く）\n- CHECK の中では、検査する値を **VALUE** で表す（列名は書かない）\n- 列に DEFAULT を書くと、**列の DEFAULT がドメインの DEFAULT より優先**される\n- ⚠ ドメインの制約は列側で**外せない**（列側で制約を追加するのはできる）\n- 変更は **ALTER DOMAIN**（`SET DEFAULT` / `DROP DEFAULT`・`SET NOT NULL` / `DROP NOT NULL`・`ADD CONSTRAINT` / `DROP CONSTRAINT`・`RENAME TO`）。制約を追加すると**既存データも検査**され、違反があればエラー\n- `DROP DOMAIN d;` ⚠ 使っている列があると**エラー**。**`CASCADE` ならその列も削除**される\n- psql の一覧表示は **`\\dD`**"
   },
   {
@@ -1074,7 +1074,7 @@
     "heading": "ドメイン（CREATE DOMAIN）",
     "answer": "\\dD",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- 付けられるのは **NOT NULL / NULL・CHECK・DEFAULT** だけ\n- ⚠ **UNIQUE・PRIMARY KEY・FOREIGN KEY はドメインに付けられない**（列・表の制約として書く）\n- CHECK の中では、検査する値を **VALUE** で表す（列名は書かない）\n- 列に DEFAULT を書くと、**列の DEFAULT がドメインの DEFAULT より優先**される\n- ⚠ ドメインの制約は列側で**外せない**（列側で制約を追加するのはできる）\n- 変更は **ALTER DOMAIN**（`SET DEFAULT` / `DROP DEFAULT`・`SET NOT NULL` / `DROP NOT NULL`・`ADD CONSTRAINT` / `DROP CONSTRAINT`・`RENAME TO`）。制約を追加すると**既存データも検査**され、違反があればエラー\n- `DROP DOMAIN d;` ⚠ 使っている列があると**エラー**。**`CASCADE` ならその列も削除**される\n- psql の一覧表示は **`\\dD`**"
   },
   {
@@ -1085,7 +1085,7 @@
     "heading": "列挙型・複合型（CREATE TYPE）",
     "answer": "列挙型（ENUM）",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **列挙型（ENUM）**: 決められた値だけを入れられる型。⚠ 大小比較は**定義した順**（文字コード順ではない。上の例では `'sad' < 'happy'`）\n- 値の追加は `ALTER TYPE mood ADD VALUE 'angry';`（`BEFORE` / `AFTER` で位置指定可）。⚠ **値の削除はできない**\n- **複合型**: 複数の項目をまとめた型。値は `ROW(...)` で作る。⚠ 要素の参照は **`(列名).要素`**（括弧がないとテーブル名と解釈されエラー）\n- ⚠ 複合型には**制約を付けられない**（制約を付けたいならドメイン）\n- テーブルを作ると、**同じ名前の複合型が自動で作られる**\n- `DROP TYPE mood;`（使っている列があればエラー。`CASCADE` で列ごと削除）。psql の一覧表示は **`\\dT`**"
   },
   {
@@ -1118,7 +1118,7 @@
     "heading": "列挙型・複合型（CREATE TYPE）",
     "answer": "複合型",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **列挙型（ENUM）**: 決められた値だけを入れられる型。⚠ 大小比較は**定義した順**（文字コード順ではない。上の例では `'sad' < 'happy'`）\n- 値の追加は `ALTER TYPE mood ADD VALUE 'angry';`（`BEFORE` / `AFTER` で位置指定可）。⚠ **値の削除はできない**\n- **複合型**: 複数の項目をまとめた型。値は `ROW(...)` で作る。⚠ 要素の参照は **`(列名).要素`**（括弧がないとテーブル名と解釈されエラー）\n- ⚠ 複合型には**制約を付けられない**（制約を付けたいならドメイン）\n- テーブルを作ると、**同じ名前の複合型が自動で作られる**\n- `DROP TYPE mood;`（使っている列があればエラー。`CASCADE` で列ごと削除）。psql の一覧表示は **`\\dT`**"
   },
   {
@@ -1151,7 +1151,7 @@
     "heading": "列挙型・複合型（CREATE TYPE）",
     "answer": "\\dT",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **列挙型（ENUM）**: 決められた値だけを入れられる型。⚠ 大小比較は**定義した順**（文字コード順ではない。上の例では `'sad' < 'happy'`）\n- 値の追加は `ALTER TYPE mood ADD VALUE 'angry';`（`BEFORE` / `AFTER` で位置指定可）。⚠ **値の削除はできない**\n- **複合型**: 複数の項目をまとめた型。値は `ROW(...)` で作る。⚠ 要素の参照は **`(列名).要素`**（括弧がないとテーブル名と解釈されエラー）\n- ⚠ 複合型には**制約を付けられない**（制約を付けたいならドメイン）\n- テーブルを作ると、**同じ名前の複合型が自動で作られる**\n- `DROP TYPE mood;`（使っている列があればエラー。`CASCADE` で列ごと削除）。psql の一覧表示は **`\\dT`**"
   },
   {
@@ -1173,7 +1173,7 @@
     "heading": "",
     "answer": "NULL",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- 追加した列の既存行の値は、DEFAULT 指定があれば**その値**、なければ **NULL**\n- ⚠ NULL を含む列に `SET NOT NULL` すると**エラー**。既存データが制約に違反する `ADD CONSTRAINT` も同様\n- ⚠ 列名変更は `RENAME COLUMN`、型変更は `ALTER COLUMN ... TYPE`。`MODIFY`（Oracle / MySQL の構文）は**使えない**\n- カンマで区切れば1文で複数の変更ができる（`ALTER TABLE t ADD COLUMN a int, ADD COLUMN b int;`）"
   },
   {
@@ -1217,7 +1217,7 @@
     "heading": "DROP TABLE",
     "answer": "RESTRICT",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
@@ -1239,7 +1239,7 @@
     "heading": "DROP TABLE",
     "answer": "CASCADE",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
@@ -1250,7 +1250,7 @@
     "heading": "DROP TABLE",
     "answer": "ビュー",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- `DROP TABLE t;` テーブルの**定義ごと**削除。複数をカンマで並べられる\n- `DROP TABLE IF EXISTS t;` 存在しなくてもエラーにしない\n- **RESTRICT**（デフォルト）: 依存するオブジェクト（ビュー・外部キー）があれば**エラー**\n- **CASCADE**: 依存するオブジェクトも削除\n- ⚠ CASCADE で消えるのは**ビュー**や、参照元テーブルの**外部キー制約**。参照元の**テーブル自体は消えない**"
   },
   {
@@ -1327,7 +1327,7 @@
     "heading": "ON CONFLICT（UPSERT）",
     "answer": "EXCLUDED",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **`EXCLUDED`** は「追加しようとして衝突した行」を指す\n- ⚠ `DO UPDATE` では衝突対象（`(id)` や `ON CONSTRAINT 制約名`）の指定が**必須**。`DO NOTHING` は省略できる"
   },
   {
@@ -1503,7 +1503,7 @@
     "heading": "GROUP BY / HAVING",
     "answer": "HAVING",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- GROUP BY の列の値が同じ行を1グループにまとめ、グループごとに集約する\n- ⚠ GROUP BY を使うと、SELECT に書けるのは **GROUP BY の列・集約関数・定数**だけ（それ以外の列はエラー。ただし GROUP BY に主キーを書いた場合、そのテーブルの他の列は書ける）\n- ⚠ **集約関数は WHERE に書けない** → グループに対する条件は **HAVING** に書く\n- WHERE は**グループ化の前**に行を絞り、HAVING は**グループ化の後**にグループを絞る\n- GROUP BY がなくても集約関数を使えば、全体が1グループになる\n- GROUP BY では NULL も1つのグループにまとまる"
   },
   {
@@ -1580,7 +1580,7 @@
     "heading": "結合条件の書き方",
     "answer": "NATURAL JOIN",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **`ON 条件`**: 任意の条件\n- **`USING (列名)`**: 両表の**同名の列**で等価結合。結果にその列は**1つだけ**現れる\n- **`NATURAL JOIN`**: **同名の列すべて**で自動的に等価結合（意図しない列で結合しやすい）\n- 古い書き方: `FROM a, b WHERE a.id = b.a_id`（カンマは CROSS JOIN と同じ。WHERE で絞ると内部結合と同じ結果）\n- **自己結合**: 同じテーブルに別名を付けて結合（`FROM emp e JOIN emp m ON e.boss_id = m.id`）\n- ⚠ 外部結合で右表の条件を **WHERE** に書くと、NULL の行が除外されて**内部結合と同じ結果**になる。残したいときは **ON** に書く"
   },
   {
@@ -1646,7 +1646,7 @@
     "heading": "",
     "answer": "相関サブクエリ",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **相関サブクエリ**: 外側のクエリの列を参照するサブクエリ。外側の**1行ごとに**評価される（EXISTS の例）"
   },
   {
@@ -1822,7 +1822,7 @@
     "heading": "search_path",
     "answer": "pg_catalog",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- スキーマ名を省略したときに**探すスキーマの順番**\n- デフォルトは **`\"$user\", public`**（ユーザー名と同じ名前のスキーマ → public）\n- オブジェクトを作るときは、search_path の中で**最初に存在するスキーマ**に作られる\n- 確認: `SHOW search_path;` 変更: `SET search_path TO s, public;`\n- システムカタログの **pg_catalog** スキーマは、search_path に書かなくても**常に最初に**検索される\n- ⚠ PostgreSQL 14 までは、public スキーマに**誰でもオブジェクトを作れる**（15 から作成権限が既定で外された）"
   },
   {
@@ -1888,7 +1888,7 @@
     "heading": "",
     "answer": "B-tree",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- 検索（WHERE・JOIN・ORDER BY）を速くする。代わりに**更新は遅くなり、領域を使う**\n- デフォルトの方式は **B-tree**（等価・範囲検索・ソートに使える）\n- **式インデックス**: `WHERE lower(name) = 'abc'` のように**同じ式**で検索したときに使われる\n- **部分インデックス**: 条件に合う行だけを索引に入れる\n- **`CREATE INDEX CONCURRENTLY`**: テーブルへの書き込みを**止めずに**作成（時間はかかる。トランザクションブロック内では実行できない）\n- `REINDEX INDEX 名前;` / `REINDEX TABLE t;` でインデックスを作り直す\n- `ALTER INDEX 名前 RENAME TO 新名;` / `ALTER INDEX 名前 SET TABLESPACE ts;`。⚠ 対象の列や式は ALTER INDEX で変えられない → 作り直す\n- ⚠ `LIKE 'abc%'`（前方一致）は B-tree が使える場合があるが、**`LIKE '%abc'`（後方・中間一致）は B-tree を使えない**\n- ⚠ インデックスはテーブルに属し、**DROP TABLE で一緒に削除**される"
   },
   {
@@ -1899,7 +1899,7 @@
     "heading": "",
     "answer": "式インデックス",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- 検索（WHERE・JOIN・ORDER BY）を速くする。代わりに**更新は遅くなり、領域を使う**\n- デフォルトの方式は **B-tree**（等価・範囲検索・ソートに使える）\n- **式インデックス**: `WHERE lower(name) = 'abc'` のように**同じ式**で検索したときに使われる\n- **部分インデックス**: 条件に合う行だけを索引に入れる\n- **`CREATE INDEX CONCURRENTLY`**: テーブルへの書き込みを**止めずに**作成（時間はかかる。トランザクションブロック内では実行できない）\n- `REINDEX INDEX 名前;` / `REINDEX TABLE t;` でインデックスを作り直す\n- `ALTER INDEX 名前 RENAME TO 新名;` / `ALTER INDEX 名前 SET TABLESPACE ts;`。⚠ 対象の列や式は ALTER INDEX で変えられない → 作り直す\n- ⚠ `LIKE 'abc%'`（前方一致）は B-tree が使える場合があるが、**`LIKE '%abc'`（後方・中間一致）は B-tree を使えない**\n- ⚠ インデックスはテーブルに属し、**DROP TABLE で一緒に削除**される"
   },
   {
@@ -1921,7 +1921,7 @@
     "heading": "",
     "answer": "部分インデックス",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- 検索（WHERE・JOIN・ORDER BY）を速くする。代わりに**更新は遅くなり、領域を使う**\n- デフォルトの方式は **B-tree**（等価・範囲検索・ソートに使える）\n- **式インデックス**: `WHERE lower(name) = 'abc'` のように**同じ式**で検索したときに使われる\n- **部分インデックス**: 条件に合う行だけを索引に入れる\n- **`CREATE INDEX CONCURRENTLY`**: テーブルへの書き込みを**止めずに**作成（時間はかかる。トランザクションブロック内では実行できない）\n- `REINDEX INDEX 名前;` / `REINDEX TABLE t;` でインデックスを作り直す\n- `ALTER INDEX 名前 RENAME TO 新名;` / `ALTER INDEX 名前 SET TABLESPACE ts;`。⚠ 対象の列や式は ALTER INDEX で変えられない → 作り直す\n- ⚠ `LIKE 'abc%'`（前方一致）は B-tree が使える場合があるが、**`LIKE '%abc'`（後方・中間一致）は B-tree を使えない**\n- ⚠ インデックスはテーブルに属し、**DROP TABLE で一緒に削除**される"
   },
   {
@@ -1965,7 +1965,7 @@
     "heading": "serial 型",
     "answer": "NOT NULL",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- 次の3つをまとめて行う略記: ① integer 列を作る ② シーケンス `orders_id_seq` を作る ③ 列の DEFAULT を `nextval('orders_id_seq')` にし、**NOT NULL** を付ける\n- ⚠ serial だけでは **UNIQUE / PRIMARY KEY は付かない**（重複を防ぐには別途指定）\n- ⚠ 値を**明示的に指定して INSERT できる**（シーケンスは進まない → 後で重複エラーの原因になる）\n- 列（テーブル）を削除すると、シーケンスも削除される"
   },
   {
@@ -2042,7 +2042,7 @@
     "heading": "パーティションの付け外し（ATTACH / DETACH）",
     "answer": "ATTACH",
     "blank_count": 1,
-    "importance": 1,
+    "importance": 3,
     "paragraph": "- **ATTACH**: 作ってある普通のテーブルをパーティションとして組み込む。⚠ 範囲に合わない行があると**エラー**（組み込む前に全行を検査する）\n- **DETACH**: パーティションを親から外す。⚠ 外したテーブルは**独立したテーブルとして残る**（データは消えない。消したいなら DROP TABLE）\n- 古いデータの切り離し → 退避・削除が、DELETE より速く済む"
   },
   {
@@ -2097,7 +2097,7 @@
     "heading": "ユーザー定義関数",
     "answer": "プロシージャ",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- `CREATE [OR REPLACE] FUNCTION 名前(引数) RETURNS 戻り値の型 AS 本体 LANGUAGE 言語;`\n- 本体は文字列。**ドル引用符 `$$ ... $$`** を使うと中の単一引用符をエスケープしなくてよい\n- 言語: **sql**、**plpgsql**（変数・IF・ループが使える）、C など\n- `RETURNS void`（返り値なし）、`RETURNS SETOF 型` / `RETURNS TABLE (...)`（複数行を返す）\n- 同じ名前でも**引数の型・数が違えば別の関数**として作れる（オーバーロード）。削除時は `DROP FUNCTION tax_in(integer);` のように引数の型で区別する\n- **プロシージャ**: `CREATE PROCEDURE` で作り **`CALL`** で実行。戻り値を持たず、**中で COMMIT / ROLLBACK できる**（関数はできない）"
   },
   {
@@ -2108,7 +2108,7 @@
     "heading": "ユーザー定義関数",
     "answer": "CALL",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- `CREATE [OR REPLACE] FUNCTION 名前(引数) RETURNS 戻り値の型 AS 本体 LANGUAGE 言語;`\n- 本体は文字列。**ドル引用符 `$$ ... $$`** を使うと中の単一引用符をエスケープしなくてよい\n- 言語: **sql**、**plpgsql**（変数・IF・ループが使える）、C など\n- `RETURNS void`（返り値なし）、`RETURNS SETOF 型` / `RETURNS TABLE (...)`（複数行を返す）\n- 同じ名前でも**引数の型・数が違えば別の関数**として作れる（オーバーロード）。削除時は `DROP FUNCTION tax_in(integer);` のように引数の型で区別する\n- **プロシージャ**: `CREATE PROCEDURE` で作り **`CALL`** で実行。戻り値を持たず、**中で COMMIT / ROLLBACK できる**（関数はできない）"
   },
   {
@@ -2174,7 +2174,7 @@
     "heading": "トリガー",
     "answer": "NEW",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- 手順: ① **戻り値の型が `trigger` の関数**を作る（引数なし）→ ② **CREATE TRIGGER** でテーブルに紐づける\n- タイミング: **BEFORE**（実行前）/ **AFTER**（実行後）/ **INSTEAD OF**（ビューに対してのみ。代わりに実行）\n- 単位: **FOR EACH ROW**（1行ごと）/ **FOR EACH STATEMENT**（1文に1回。**デフォルト**）\n- 行トリガーでは **NEW**（新しい行。INSERT・UPDATE）と **OLD**（古い行。UPDATE・DELETE）を参照できる\n- ⚠ BEFORE の行トリガーが **NULL を返すと、その行の操作は行われない**。NEW を書き換えて返すと、書き換えた値で保存される\n- AFTER トリガーや文単位トリガーの戻り値は無視される\n- `EXECUTE PROCEDURE` は古い書き方（意味は同じ）。`DROP TRIGGER trg_updated ON products;`"
   },
   {
@@ -2185,7 +2185,7 @@
     "heading": "トリガー",
     "answer": "OLD",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- 手順: ① **戻り値の型が `trigger` の関数**を作る（引数なし）→ ② **CREATE TRIGGER** でテーブルに紐づける\n- タイミング: **BEFORE**（実行前）/ **AFTER**（実行後）/ **INSTEAD OF**（ビューに対してのみ。代わりに実行）\n- 単位: **FOR EACH ROW**（1行ごと）/ **FOR EACH STATEMENT**（1文に1回。**デフォルト**）\n- 行トリガーでは **NEW**（新しい行。INSERT・UPDATE）と **OLD**（古い行。UPDATE・DELETE）を参照できる\n- ⚠ BEFORE の行トリガーが **NULL を返すと、その行の操作は行われない**。NEW を書き換えて返すと、書き換えた値で保存される\n- AFTER トリガーや文単位トリガーの戻り値は無視される\n- `EXECUTE PROCEDURE` は古い書き方（意味は同じ）。`DROP TRIGGER trg_updated ON products;`"
   },
   {
@@ -2240,7 +2240,7 @@
     "heading": "演算子",
     "answer": "GIN インデックス",
     "blank_count": 1,
-    "importance": 1,
+    "importance": 3,
     "paragraph": "- 複数キーの存在は `?|`（どれか1つ）/ `?&`（全部）。`'{a,b}'` のような配列で渡す\n- ⚠ `->` の結果は JSON のまま → 文字列と比較・連結するなら **`->>`** を使う\n- ⚠ 配列の添字は **0 始まり**（PostgreSQL の配列型は 1 始まりなので混同注意）\n- json と jsonb の違い: **json** は入力をそのまま保存（空白・キーの順序・重複キーも残る）。**jsonb** は分解して保存（空白を除き、キーの順序は保たれず、**重複キーは最後の値だけ**残る）\n- jsonb には **GIN インデックス**を作れる（`@>` や `?` の検索が速くなる）"
   },
   {
@@ -2273,7 +2273,7 @@
     "heading": "",
     "answer": "パブリケーション",
     "blank_count": 1,
-    "importance": 1,
+    "importance": 3,
     "paragraph": "- テーブル単位で、行の変更（**INSERT / UPDATE / DELETE / TRUNCATE**）を別のサーバへ送る仕組み\n- パブリッシャー: **パブリケーション**（何を送るか）を作る。サブスクライバー: **サブスクリプション**（どこから受けるか）を作る\n- ⚠ パブリッシャーは **`wal_level = logical`** が必要（デフォルトの replica では不可。変更には再起動が必要）\n- ⚠ **DDL（テーブル定義の変更）とシーケンスは送られない** → サブスクライバー側に**テーブルを先に作っておく**（`pg_dump -s` で定義だけ移すなど）\n- 作成時に既存データも**最初にコピー**される（`WITH (copy_data = false)` で止められる）\n- UPDATE / DELETE を送るには、テーブルに**主キー**（レプリカアイデンティティ）が必要\n- 変更: `ALTER PUBLICATION pub1 ADD TABLE t;` → 受ける側で `ALTER SUBSCRIPTION sub1 REFRESH PUBLICATION;`。`ALTER SUBSCRIPTION sub1 DISABLE;` / `ENABLE;` で一時停止・再開"
   },
   {
@@ -2284,7 +2284,7 @@
     "heading": "",
     "answer": "サブスクリプション",
     "blank_count": 1,
-    "importance": 1,
+    "importance": 3,
     "paragraph": "- テーブル単位で、行の変更（**INSERT / UPDATE / DELETE / TRUNCATE**）を別のサーバへ送る仕組み\n- パブリッシャー: **パブリケーション**（何を送るか）を作る。サブスクライバー: **サブスクリプション**（どこから受けるか）を作る\n- ⚠ パブリッシャーは **`wal_level = logical`** が必要（デフォルトの replica では不可。変更には再起動が必要）\n- ⚠ **DDL（テーブル定義の変更）とシーケンスは送られない** → サブスクライバー側に**テーブルを先に作っておく**（`pg_dump -s` で定義だけ移すなど）\n- 作成時に既存データも**最初にコピー**される（`WITH (copy_data = false)` で止められる）\n- UPDATE / DELETE を送るには、テーブルに**主キー**（レプリカアイデンティティ）が必要\n- 変更: `ALTER PUBLICATION pub1 ADD TABLE t;` → 受ける側で `ALTER SUBSCRIPTION sub1 REFRESH PUBLICATION;`。`ALTER SUBSCRIPTION sub1 DISABLE;` / `ENABLE;` で一時停止・再開"
   },
   {
@@ -2317,7 +2317,7 @@
     "heading": "",
     "answer": "主キー",
     "blank_count": 1,
-    "importance": 1,
+    "importance": 3,
     "paragraph": "- テーブル単位で、行の変更（**INSERT / UPDATE / DELETE / TRUNCATE**）を別のサーバへ送る仕組み\n- パブリッシャー: **パブリケーション**（何を送るか）を作る。サブスクライバー: **サブスクリプション**（どこから受けるか）を作る\n- ⚠ パブリッシャーは **`wal_level = logical`** が必要（デフォルトの replica では不可。変更には再起動が必要）\n- ⚠ **DDL（テーブル定義の変更）とシーケンスは送られない** → サブスクライバー側に**テーブルを先に作っておく**（`pg_dump -s` で定義だけ移すなど）\n- 作成時に既存データも**最初にコピー**される（`WITH (copy_data = false)` で止められる）\n- UPDATE / DELETE を送るには、テーブルに**主キー**（レプリカアイデンティティ）が必要\n- 変更: `ALTER PUBLICATION pub1 ADD TABLE t;` → 受ける側で `ALTER SUBSCRIPTION sub1 REFRESH PUBLICATION;`。`ALTER SUBSCRIPTION sub1 DISABLE;` / `ENABLE;` で一時停止・再開"
   },
   {
@@ -2548,7 +2548,7 @@
     "heading": "",
     "answer": "numeric",
     "blank_count": 1,
-    "importance": 1,
+    "importance": 3,
     "paragraph": "- 基本（count・sum・avg・max・min）と NULL の扱いは → 03章「集約関数と GROUP BY」\n- **string_agg(列, 区切り文字)**: 文字列を連結 → `string_agg(name, ',' ORDER BY name)` で 'みかん,りんご'\n- **array_agg(列)**: 配列にまとめる\n- bool_and / bool_or（every）: 真偽値の AND / OR\n- ⚠ avg を整数列に使うと結果は **numeric**（小数になる）。sum を integer 列に使うと **bigint**"
   },
   {
@@ -2559,7 +2559,7 @@
     "heading": "",
     "answer": "bigint",
     "blank_count": 1,
-    "importance": 1,
+    "importance": 3,
     "paragraph": "- 基本（count・sum・avg・max・min）と NULL の扱いは → 03章「集約関数と GROUP BY」\n- **string_agg(列, 区切り文字)**: 文字列を連結 → `string_agg(name, ',' ORDER BY name)` で 'みかん,りんご'\n- **array_agg(列)**: 配列にまとめる\n- bool_and / bool_or（every）: 真偽値の AND / OR\n- ⚠ avg を整数列に使うと結果は **numeric**（小数になる）。sum を integer 列に使うと **bigint**"
   },
   {
@@ -2636,7 +2636,7 @@
     "heading": "トランザクションと DDL",
     "answer": "VACUUM",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- PostgreSQL では **CREATE TABLE・DROP TABLE・TRUNCATE などの DDL もロールバックできる**\n- ⚠ 例外: **CREATE DATABASE / DROP DATABASE**、CREATE TABLESPACE / DROP TABLESPACE、**VACUUM**、ALTER SYSTEM、CREATE INDEX CONCURRENTLY は**トランザクションブロック内で実行できない**（エラー）\n- ⚠ シーケンスの nextval は**ロールバックしても戻らない**（→ 03章）"
   },
   {
@@ -2724,7 +2724,7 @@
     "heading": "明示的なロック",
     "answer": "NOWAIT",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **`LOCK TABLE t IN 〜 MODE;`**: テーブルロックを取る。モードを省略すると **ACCESS EXCLUSIVE**\n  - ⚠ **トランザクションブロックの中でしか使えない**。ロックは**トランザクション終了時に解放**される（個別に解放する UNLOCK コマンドはない）\n- **`SELECT ... FOR UPDATE`**: 読んだ行に更新用の行ロックをかける（他は更新・削除・FOR UPDATE できず待つ）\n  - `FOR SHARE`: 共有ロック（他の FOR SHARE は可、更新は不可）\n  - **`NOWAIT`**: ロックが取れなければ**待たずにエラー**\n  - **`SKIP LOCKED`**: ロックされている行を**飛ばして**返す"
   },
   {
@@ -2746,7 +2746,7 @@
     "heading": "明示的なロック",
     "answer": "SKIP LOCKED",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **`LOCK TABLE t IN 〜 MODE;`**: テーブルロックを取る。モードを省略すると **ACCESS EXCLUSIVE**\n  - ⚠ **トランザクションブロックの中でしか使えない**。ロックは**トランザクション終了時に解放**される（個別に解放する UNLOCK コマンドはない）\n- **`SELECT ... FOR UPDATE`**: 読んだ行に更新用の行ロックをかける（他は更新・削除・FOR UPDATE できず待つ）\n  - `FOR SHARE`: 共有ロック（他の FOR SHARE は可、更新は不可）\n  - **`NOWAIT`**: ロックが取れなければ**待たずにエラー**\n  - **`SKIP LOCKED`**: ロックされている行を**飛ばして**返す"
   },
   {
@@ -2801,7 +2801,7 @@
     "heading": "デッドロック",
     "answer": "pg_locks",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- 2つのトランザクションが**互いに相手のロック解放を待つ**状態\n- PostgreSQL は**自動で検出**し、**片方のトランザクションをエラーにしてロールバック**させる（もう片方は続行できる）\n- 検出のチェックを始めるまでの待ち時間はパラメータ **deadlock_timeout**（デフォルト **1秒**）\n- 防ぐには、複数の行・テーブルを**同じ順番で**ロックするようにする\n- 現在のロックの状況はシステムビュー **pg_locks** で確認できる"
   },
   {
@@ -2812,7 +2812,7 @@
     "heading": "ソースコードからのインストール",
     "answer": "configure",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **configure** の主なオプション: **`--prefix=ディレクトリ`**（インストール先。デフォルト **`/usr/local/pgsql`**）、`--with-openssl`（SSL 対応）、`--without-readline`、`--without-zlib`、`--with-perl` / `--with-python`（PL/Perl・PL/Python）\n- ⚠ **readline**（psql の行編集・履歴）と **zlib**（pg_dump の圧縮）は**デフォルトで必須**。無ければ configure がエラーになる（`--without-〜` で外せる）\n- `make world` / `make install-world`: ドキュメントと **contrib**（追加モジュール）も含めてビルド・インストール\n- contrib だけ追加するなら、`contrib/` ディレクトリで `make` → `make install`"
   },
   {
@@ -2856,7 +2856,7 @@
     "heading": "ソースコードからのインストール",
     "answer": "contrib",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- **configure** の主なオプション: **`--prefix=ディレクトリ`**（インストール先。デフォルト **`/usr/local/pgsql`**）、`--with-openssl`（SSL 対応）、`--without-readline`、`--without-zlib`、`--with-perl` / `--with-python`（PL/Perl・PL/Python）\n- ⚠ **readline**（psql の行編集・履歴）と **zlib**（pg_dump の圧縮）は**デフォルトで必須**。無ければ configure がエラーになる（`--without-〜` で外せる）\n- `make world` / `make install-world`: ドキュメントと **contrib**（追加モジュール）も含めてビルド・インストール\n- contrib だけ追加するなら、`contrib/` ディレクトリで `make` → `make install`"
   },
   {
@@ -2878,7 +2878,7 @@
     "heading": "インストール後の作業",
     "answer": "initdb",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "1. PostgreSQL 管理用の OS ユーザー（通常 **`postgres`**）を作る\n2. データベースクラスタ用のディレクトリを作り、所有者を postgres にする\n3. postgres ユーザーで **initdb** を実行してデータベースクラスタを作る\n4. **pg_ctl start** でサーバを起動する\n5. 必要に応じて環境変数（PATH、**PGDATA** など）を設定する"
   },
   {
@@ -2900,7 +2900,7 @@
     "heading": "インストール後の作業",
     "answer": "PGDATA",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "1. PostgreSQL 管理用の OS ユーザー（通常 **`postgres`**）を作る\n2. データベースクラスタ用のディレクトリを作り、所有者を postgres にする\n3. postgres ユーザーで **initdb** を実行してデータベースクラスタを作る\n4. **pg_ctl start** でサーバを起動する\n5. 必要に応じて環境変数（PATH、**PGDATA** など）を設定する"
   },
   {
@@ -2911,7 +2911,7 @@
     "heading": "データベースクラスタ",
     "answer": "データディレクトリ",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **1つのサーバ（postgres プロセス群）が管理するデータベースの集まり**。ディスク上では1つのディレクトリ（**データディレクトリ**）\n- ⚠ 「クラスタ」は複数サーバの集合のことではない。**1インスタンスが管理するデータベース群**\n- initdb 直後に作られるデータベース: **template0**、**template1**、**postgres** の3つ\n  - **template1**: CREATE DATABASE のデフォルトの**複製元**（→ 08章）\n  - **template0**: 変更してはいけない素のテンプレート\n  - **postgres**: 接続先がないときに使うデフォルトのデータベース"
   },
   {
@@ -2922,7 +2922,7 @@
     "heading": "データベースクラスタ",
     "answer": "template0",
     "blank_count": 2,
-    "importance": 4,
+    "importance": 6,
     "paragraph": "- **1つのサーバ（postgres プロセス群）が管理するデータベースの集まり**。ディスク上では1つのディレクトリ（**データディレクトリ**）\n- ⚠ 「クラスタ」は複数サーバの集合のことではない。**1インスタンスが管理するデータベース群**\n- initdb 直後に作られるデータベース: **template0**、**template1**、**postgres** の3つ\n  - **template1**: CREATE DATABASE のデフォルトの**複製元**（→ 08章）\n  - **template0**: 変更してはいけない素のテンプレート\n  - **postgres**: 接続先がないときに使うデフォルトのデータベース"
   },
   {
@@ -2933,7 +2933,7 @@
     "heading": "データベースクラスタ",
     "answer": "template1",
     "blank_count": 2,
-    "importance": 4,
+    "importance": 6,
     "paragraph": "- **1つのサーバ（postgres プロセス群）が管理するデータベースの集まり**。ディスク上では1つのディレクトリ（**データディレクトリ**）\n- ⚠ 「クラスタ」は複数サーバの集合のことではない。**1インスタンスが管理するデータベース群**\n- initdb 直後に作られるデータベース: **template0**、**template1**、**postgres** の3つ\n  - **template1**: CREATE DATABASE のデフォルトの**複製元**（→ 08章）\n  - **template0**: 変更してはいけない素のテンプレート\n  - **postgres**: 接続先がないときに使うデフォルトのデータベース"
   },
   {
@@ -3131,7 +3131,7 @@
     "heading": "セッション単位: SET / SHOW / RESET",
     "answer": "SET LOCAL",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- ⚠ SET の効果は**そのセッションだけ**。切断すると消え、他のセッションには影響しない\n- ⚠ **SET LOCAL** はトランザクションの終了で元に戻る。トランザクション外で使うと警告が出て効果なし\n- トランザクション内で SET した後に **ROLLBACK すると SET も取り消される**"
   },
   {
@@ -3197,7 +3197,7 @@
     "heading": "WAL・チェックポイント",
     "answer": "CHECKPOINT",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **チェックポイント**: 共有バッファ上の変更済みページ（ダーティページ）を**データファイルへ書き出す**処理。それ以前の WAL はクラッシュリカバリに不要になる。**`CHECKPOINT`** コマンドで手動実行もできる\n- ⚠ fsync = off と synchronous_commit = off の違い: **fsync off はデータ破損のおそれ**、synchronous_commit off は**直近のコミットを失うおそれ（整合性は保たれる）**"
   },
   {
@@ -3274,7 +3274,7 @@
     "heading": "ログ",
     "answer": "mod",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- メッセージのレベル（低 → 高）: DEBUG5〜DEBUG1 → INFO → **NOTICE** → **WARNING** → **ERROR** → LOG → **FATAL** → **PANIC**\n  - log_min_messages で指定したレベル**以上**が出力される（サーバログでは LOG は ERROR より上の扱い）\n- ⚠ log_statement の **mod** は ddl に加えて **INSERT・UPDATE・DELETE・TRUNCATE** なども出す（「ddl ⊂ mod ⊂ all」）"
   },
   {
@@ -3318,7 +3318,7 @@
     "heading": "アドレス（ADDRESS）",
     "answer": "samehost",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **CIDR 形式**: `192.168.1.0/24`（ネットワーク）、`192.168.1.10/32`（1台）、`0.0.0.0/0`（IPv4 すべて）、`::1/128`（IPv6 のループバック）\n- IP アドレスとネットマスクを2列に分けて書いてもよい（`192.168.1.0 255.255.255.0`）\n- **samehost**（サーバ自身のアドレス）、**samenet**（サーバと同じサブネット）、ホスト名も書ける"
   },
   {
@@ -3329,7 +3329,7 @@
     "heading": "アドレス（ADDRESS）",
     "answer": "samenet",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **CIDR 形式**: `192.168.1.0/24`（ネットワーク）、`192.168.1.10/32`（1台）、`0.0.0.0/0`（IPv4 すべて）、`::1/128`（IPv6 のループバック）\n- IP アドレスとネットマスクを2列に分けて書いてもよい（`192.168.1.0 255.255.255.0`）\n- **samehost**（サーバ自身のアドレス）、**samenet**（サーバと同じサブネット）、ホスト名も書ける"
   },
   {
@@ -3340,7 +3340,7 @@
     "heading": "",
     "answer": "PITR",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- ⚠ **論理バックアップは別のメジャーバージョン・別の OS / CPU アーキテクチャへ移せる**。物理バックアップは**同じメジャーバージョン・同じアーキテクチャ**でしか使えない\n- ⚠ **論理バックアップは取得した時点にしか戻せない**。任意の時点に戻せるのは **PITR**\n- 物理バックアップは**テーブル単位では戻せない**（クラスタ全体を戻す）"
   },
   {
@@ -3439,7 +3439,7 @@
     "heading": "pg_dump が出力しないもの",
     "answer": "pg_dumpall",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- ⚠ **ロール（ユーザー）とテーブルスペース**は**クラスタ全体のオブジェクト（グローバルオブジェクト）**なので、**pg_dump では出力されない** → **pg_dumpall** を使う\n- データベース自体の作成文（CREATE DATABASE）も、**-C を付けない限り出力しない**"
   },
   {
@@ -3681,7 +3681,7 @@
     "heading": "低レベル API（PostgreSQL 14）",
     "answer": "backup_label",
     "blank_count": 1,
-    "importance": 2,
+    "importance": 4,
     "paragraph": "- 開始すると、データディレクトリに **backup_label** ファイル（開始位置などの情報）ができる（排他モードの場合）\n- ⚠ **15 で pg_backup_start() / pg_backup_stop() に改名**され、排他モードは廃止。試験（14 基準）は**旧名**で答える"
   },
   {
@@ -3725,7 +3725,7 @@
     "heading": "WAL の基本",
     "answer": "pg_wal/",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **WAL（Write Ahead Log、先行書き込みログ）**: データを変更する前に、**変更内容をログに書く**仕組み\n- コミット時は WAL をディスクに書けばよく、データファイルへの反映は**チェックポイント**でまとめて行う\n- WAL ファイルは **pg_wal/** に置かれ、1ファイル（**WAL セグメント**）は **16MB**（initdb の `--wal-segsize` で変更可）\n- ファイル名は **24桁の16進数**（タイムライン ID 8桁 + 論理位置 16桁）。例: `000000010000000000000003`\n- WAL 内の位置は **LSN**（Log Sequence Number）。`SELECT pg_current_wal_lsn();` で確認\n- 使い終わった WAL は、チェックポイント後に**削除または再利用**される → PITR には**アーカイブ**して残しておく必要がある\n- **`SELECT pg_switch_wal();`**: 現在の WAL ファイルを閉じて**次のファイルへ切り替える**（すぐにアーカイブさせたいとき。10 より前は pg_switch_xlog）"
   },
   {
@@ -3769,7 +3769,7 @@
     "heading": "WAL の基本",
     "answer": "LSN",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **WAL（Write Ahead Log、先行書き込みログ）**: データを変更する前に、**変更内容をログに書く**仕組み\n- コミット時は WAL をディスクに書けばよく、データファイルへの反映は**チェックポイント**でまとめて行う\n- WAL ファイルは **pg_wal/** に置かれ、1ファイル（**WAL セグメント**）は **16MB**（initdb の `--wal-segsize` で変更可）\n- ファイル名は **24桁の16進数**（タイムライン ID 8桁 + 論理位置 16桁）。例: `000000010000000000000003`\n- WAL 内の位置は **LSN**（Log Sequence Number）。`SELECT pg_current_wal_lsn();` で確認\n- 使い終わった WAL は、チェックポイント後に**削除または再利用**される → PITR には**アーカイブ**して残しておく必要がある\n- **`SELECT pg_switch_wal();`**: 現在の WAL ファイルを閉じて**次のファイルへ切り替える**（すぐにアーカイブさせたいとき。10 より前は pg_switch_xlog）"
   },
   {
@@ -3791,7 +3791,7 @@
     "heading": "WAL の基本",
     "answer": "アーカイブ",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **WAL（Write Ahead Log、先行書き込みログ）**: データを変更する前に、**変更内容をログに書く**仕組み\n- コミット時は WAL をディスクに書けばよく、データファイルへの反映は**チェックポイント**でまとめて行う\n- WAL ファイルは **pg_wal/** に置かれ、1ファイル（**WAL セグメント**）は **16MB**（initdb の `--wal-segsize` で変更可）\n- ファイル名は **24桁の16進数**（タイムライン ID 8桁 + 論理位置 16桁）。例: `000000010000000000000003`\n- WAL 内の位置は **LSN**（Log Sequence Number）。`SELECT pg_current_wal_lsn();` で確認\n- 使い終わった WAL は、チェックポイント後に**削除または再利用**される → PITR には**アーカイブ**して残しておく必要がある\n- **`SELECT pg_switch_wal();`**: 現在の WAL ファイルを閉じて**次のファイルへ切り替える**（すぐにアーカイブさせたいとき。10 より前は pg_switch_xlog）"
   },
   {
@@ -3835,7 +3835,7 @@
     "heading": "仕組み",
     "answer": "ベースバックアップ",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **ベースバックアップ**（オンライン物理バックアップ）を戻し、その後の **アーカイブ WAL を再生（ロールフォワード）** して、**任意の時点**まで復旧する\n- 例: 誤って DROP TABLE した**直前の時刻**まで戻せる"
   },
   {
@@ -3879,7 +3879,7 @@
     "heading": "事前準備",
     "answer": "ベースバックアップ",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "1. **WAL アーカイブを有効**にする（wal_level・archive_mode・archive_command）\n2. 定期的に **ベースバックアップ**（pg_basebackup など）を取る"
   },
   {
@@ -3912,7 +3912,7 @@
     "heading": "リカバリの手順（PostgreSQL 12 以降）",
     "answer": "リカバリ目標",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "1. **サーバを停止**する\n2. 現在のデータディレクトリを退避し、**ベースバックアップを戻す**\n3. 退避した **pg_wal/ のうち、まだアーカイブされていない WAL** を新しい pg_wal/ にコピーする（最新まで戻すため）\n4. **postgresql.conf**（または postgresql.auto.conf）に **restore_command** と、必要なら**リカバリ目標**を書く\n5. データディレクトリに **recovery.signal** ファイル（空でよい）を作る\n6. **サーバを起動**する → WAL を再生してリカバリ → 完了すると通常運転になる（**recovery.signal は自動で削除**される）"
   },
   {
@@ -3967,7 +3967,7 @@
     "heading": "なぜ必要か",
     "answer": "MVCC",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- PostgreSQL は **MVCC**: UPDATE は「古い行を無効にして新しい行を追加」、DELETE は「行を無効にする」だけで、**古い行（不要タプル / dead tuple）が物理的に残る**\n- 放っておくとテーブルが膨れ（肥大化）、検索が遅くなる → **VACUUM** で不要な行の領域を回収する\n- VACUUM の役割\n  1. 不要タプルの領域を**再利用できるようにする**\n  2. **可視性マップ**を更新する（Index Only Scan を速くする）\n  3. **トランザクション ID の周回（wraparound）を防ぐ**（古い行を凍結 = FREEZE する）\n  4. ANALYZE を付ければ統計情報も更新"
   },
   {
@@ -3978,7 +3978,7 @@
     "heading": "なぜ必要か",
     "answer": "VACUUM",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- PostgreSQL は **MVCC**: UPDATE は「古い行を無効にして新しい行を追加」、DELETE は「行を無効にする」だけで、**古い行（不要タプル / dead tuple）が物理的に残る**\n- 放っておくとテーブルが膨れ（肥大化）、検索が遅くなる → **VACUUM** で不要な行の領域を回収する\n- VACUUM の役割\n  1. 不要タプルの領域を**再利用できるようにする**\n  2. **可視性マップ**を更新する（Index Only Scan を速くする）\n  3. **トランザクション ID の周回（wraparound）を防ぐ**（古い行を凍結 = FREEZE する）\n  4. ANALYZE を付ければ統計情報も更新"
   },
   {
@@ -4000,7 +4000,7 @@
     "heading": "なぜ必要か",
     "answer": "可視性マップ",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- PostgreSQL は **MVCC**: UPDATE は「古い行を無効にして新しい行を追加」、DELETE は「行を無効にする」だけで、**古い行（不要タプル / dead tuple）が物理的に残る**\n- 放っておくとテーブルが膨れ（肥大化）、検索が遅くなる → **VACUUM** で不要な行の領域を回収する\n- VACUUM の役割\n  1. 不要タプルの領域を**再利用できるようにする**\n  2. **可視性マップ**を更新する（Index Only Scan を速くする）\n  3. **トランザクション ID の周回（wraparound）を防ぐ**（古い行を凍結 = FREEZE する）\n  4. ANALYZE を付ければ統計情報も更新"
   },
   {
@@ -4011,7 +4011,7 @@
     "heading": "書き方",
     "answer": "vacuumdb",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- ⚠ **VACUUM はトランザクションブロック内で実行できない**（→ 04章）\n- テーブルの所有者・DB の所有者・スーパーユーザーが実行できる（権限のないテーブルは警告を出して飛ばす）\n- OS のコマンドからは **vacuumdb**（→ 05章）"
   },
   {
@@ -4044,7 +4044,7 @@
     "heading": "トランザクション ID の周回",
     "answer": "凍結（FREEZE）",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- トランザクション ID（XID）は **32ビット**（約42億）で、使い切ると一周する。行の新旧を比べられるのは前後約 **20億**まで\n- 古い行を **凍結（FREEZE）** して「どのトランザクションから見ても過去」の印を付けないと、**古いデータが見えなくなる**（データ消失に見える）\n- そのため、autovacuum を off にしていても、周回が近づくと**周回防止のための autovacuum が強制的に実行**される（autovacuum_freeze_max_age、デフォルト **2億**トランザクション）"
   },
   {
@@ -4077,7 +4077,7 @@
     "heading": "",
     "answer": "統計情報",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- テーブルの**統計情報**（行数、列の値の分布、NULL の割合など）を集め、システムカタログ **pg_statistic** に保存する（見やすい形のビューは **pg_stats**）\n- 統計情報は**プランナ（実行計画を立てる部分）**が使う。古いと**遅い実行計画**が選ばれる\n- テーブル全体ではなく**サンプリング**した行を読む（大きいテーブルでも速い）\n- ロックは SHARE UPDATE EXCLUSIVE（読み書きと並行できる）\n- ⚠ ANALYZE は**トランザクションブロック内でも実行できる**（VACUUM はできない）\n- 大量のデータを入れた後（COPY、大きな INSERT）は ANALYZE を実行すると良い"
   },
   {
@@ -4088,7 +4088,7 @@
     "heading": "",
     "answer": "pg_statistic",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- テーブルの**統計情報**（行数、列の値の分布、NULL の割合など）を集め、システムカタログ **pg_statistic** に保存する（見やすい形のビューは **pg_stats**）\n- 統計情報は**プランナ（実行計画を立てる部分）**が使う。古いと**遅い実行計画**が選ばれる\n- テーブル全体ではなく**サンプリング**した行を読む（大きいテーブルでも速い）\n- ロックは SHARE UPDATE EXCLUSIVE（読み書きと並行できる）\n- ⚠ ANALYZE は**トランザクションブロック内でも実行できる**（VACUUM はできない）\n- 大量のデータを入れた後（COPY、大きな INSERT）は ANALYZE を実行すると良い"
   },
   {
@@ -4099,7 +4099,7 @@
     "heading": "",
     "answer": "pg_stats",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- テーブルの**統計情報**（行数、列の値の分布、NULL の割合など）を集め、システムカタログ **pg_statistic** に保存する（見やすい形のビューは **pg_stats**）\n- 統計情報は**プランナ（実行計画を立てる部分）**が使う。古いと**遅い実行計画**が選ばれる\n- テーブル全体ではなく**サンプリング**した行を読む（大きいテーブルでも速い）\n- ロックは SHARE UPDATE EXCLUSIVE（読み書きと並行できる）\n- ⚠ ANALYZE は**トランザクションブロック内でも実行できる**（VACUUM はできない）\n- 大量のデータを入れた後（COPY、大きな INSERT）は ANALYZE を実行すると良い"
   },
   {
@@ -4253,7 +4253,7 @@
     "heading": "基本",
     "answer": "PUBLIC",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **PUBLIC**: **すべてのロール**（今後作られるロールも含む）を表す特別な名前\n- ⚠ **WITH GRANT OPTION** で受け取った権限を他人に与えていた場合、元の権限を REVOKE するには **CASCADE** が必要（付けないとエラー）\n- ⚠ PUBLIC から REVOKE しても、**個別に GRANT された権限は残る**\n- ⚠ `ON ALL TABLES IN SCHEMA` は**今あるテーブルだけ**。今後作るテーブルにも与えるには **`ALTER DEFAULT PRIVILEGES`**\n- 確認: psql の **`\\dp`** / **`\\z`**（例: `alice=arw/postgres` = postgres が alice に a・r・w を与えた）"
   },
   {
@@ -4275,7 +4275,7 @@
     "heading": "基本",
     "answer": "CASCADE",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **PUBLIC**: **すべてのロール**（今後作られるロールも含む）を表す特別な名前\n- ⚠ **WITH GRANT OPTION** で受け取った権限を他人に与えていた場合、元の権限を REVOKE するには **CASCADE** が必要（付けないとエラー）\n- ⚠ PUBLIC から REVOKE しても、**個別に GRANT された権限は残る**\n- ⚠ `ON ALL TABLES IN SCHEMA` は**今あるテーブルだけ**。今後作るテーブルにも与えるには **`ALTER DEFAULT PRIVILEGES`**\n- 確認: psql の **`\\dp`** / **`\\z`**（例: `alice=arw/postgres` = postgres が alice に a・r・w を与えた）"
   },
   {
@@ -4297,7 +4297,7 @@
     "heading": "基本",
     "answer": "\\dp",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **PUBLIC**: **すべてのロール**（今後作られるロールも含む）を表す特別な名前\n- ⚠ **WITH GRANT OPTION** で受け取った権限を他人に与えていた場合、元の権限を REVOKE するには **CASCADE** が必要（付けないとエラー）\n- ⚠ PUBLIC から REVOKE しても、**個別に GRANT された権限は残る**\n- ⚠ `ON ALL TABLES IN SCHEMA` は**今あるテーブルだけ**。今後作るテーブルにも与えるには **`ALTER DEFAULT PRIVILEGES`**\n- 確認: psql の **`\\dp`** / **`\\z`**（例: `alice=arw/postgres` = postgres が alice に a・r・w を与えた）"
   },
   {
@@ -4308,7 +4308,7 @@
     "heading": "基本",
     "answer": "\\z",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **PUBLIC**: **すべてのロール**（今後作られるロールも含む）を表す特別な名前\n- ⚠ **WITH GRANT OPTION** で受け取った権限を他人に与えていた場合、元の権限を REVOKE するには **CASCADE** が必要（付けないとエラー）\n- ⚠ PUBLIC から REVOKE しても、**個別に GRANT された権限は残る**\n- ⚠ `ON ALL TABLES IN SCHEMA` は**今あるテーブルだけ**。今後作るテーブルにも与えるには **`ALTER DEFAULT PRIVILEGES`**\n- 確認: psql の **`\\dp`** / **`\\z`**（例: `alice=arw/postgres` = postgres が alice に a・r・w を与えた）"
   },
   {
@@ -4374,7 +4374,7 @@
     "heading": "",
     "answer": "template1",
     "blank_count": 1,
-    "importance": 4,
+    "importance": 6,
     "paragraph": "- **CREATE DATABASE は既存のデータベースを複製**して作る。デフォルトの複製元は **template1**\n  - template1 に入れたテーブルや拡張機能は、**以後作るデータベースにも入る**\n  - **template0** は initdb 直後の素の状態。**template1 と違うエンコーディング・ロケールで作るときは template0 を指定**する（template1 のままだとエラー）\n- 実行できるのは **CREATEDB 属性**を持つロールかスーパーユーザー\n- ⚠ **複製元のデータベースに他のセッションが接続していると CREATE DATABASE は失敗**する\n- ⚠ **DROP DATABASE は、そのデータベースに誰か接続していると失敗**する（自分が接続中のデータベースも削除できない）。13 以降は WITH (FORCE) で切断して削除できる\n- ⚠ CREATE DATABASE / DROP DATABASE は**トランザクションブロック内で実行できない**\n- DROP DATABASE できるのは**所有者**とスーパーユーザー"
   },
   {
@@ -4385,7 +4385,7 @@
     "heading": "",
     "answer": "template0",
     "blank_count": 1,
-    "importance": 4,
+    "importance": 6,
     "paragraph": "- **CREATE DATABASE は既存のデータベースを複製**して作る。デフォルトの複製元は **template1**\n  - template1 に入れたテーブルや拡張機能は、**以後作るデータベースにも入る**\n  - **template0** は initdb 直後の素の状態。**template1 と違うエンコーディング・ロケールで作るときは template0 を指定**する（template1 のままだとエラー）\n- 実行できるのは **CREATEDB 属性**を持つロールかスーパーユーザー\n- ⚠ **複製元のデータベースに他のセッションが接続していると CREATE DATABASE は失敗**する\n- ⚠ **DROP DATABASE は、そのデータベースに誰か接続していると失敗**する（自分が接続中のデータベースも削除できない）。13 以降は WITH (FORCE) で切断して削除できる\n- ⚠ CREATE DATABASE / DROP DATABASE は**トランザクションブロック内で実行できない**\n- DROP DATABASE できるのは**所有者**とスーパーユーザー"
   },
   {
@@ -4440,7 +4440,7 @@
     "heading": "",
     "answer": "pg_tblspc/",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- ⚠ LOCATION は**絶対パス**。ディレクトリは**あらかじめ存在し、空で、OS の postgres ユーザーが所有**していること（作ってはくれない）\n- ⚠ CREATE TABLESPACE は**スーパーユーザー**だけが実行できる。トランザクションブロック内では実行できない\n- ⚠ **中にオブジェクトが残っているテーブルスペースは DROP できない**（全データベースで空にする必要がある）\n- データディレクトリの **pg_tblspc/** に、テーブルスペースの OID の名前で**シンボリックリンク**ができる\n- 初めからある2つ"
   },
   {
@@ -4473,7 +4473,7 @@
     "heading": "",
     "answer": "\\db",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- テーブルスペースは**クラスタ全体**で共通（pg_dump では出力されない → pg_dumpall）\n- 確認: psql の **`\\db`**、システムカタログ **pg_tablespace**"
   },
   {
@@ -4495,7 +4495,7 @@
     "heading": "システムカタログ",
     "answer": "OID",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **pg_class の relkind**: **`r`** = テーブル、**`i`** = インデックス、**`S`** = シーケンス、**`v`** = ビュー、`m` = マテリアライズドビュー、`t` = TOAST テーブル、`f` = 外部テーブル、`p` = パーティションテーブル、`c` = 複合型\n- 多くのオブジェクトは **OID**（オブジェクト識別子）で識別される。`SELECT oid, datname FROM pg_database;`"
   },
   {
@@ -4550,7 +4550,7 @@
     "heading": "情報スキーマ（information_schema）",
     "answer": "システムカタログ",
     "blank_count": 1,
-    "importance": 3,
+    "importance": 5,
     "paragraph": "- **SQL 標準**で定められたビューの集まり。**他の DBMS でも同じ問い合わせ**が使える（移植性が高い）\n- 例: `information_schema.tables`、`information_schema.columns`、`information_schema.views`、`information_schema.table_privileges`\n- ⚠ PostgreSQL 独自の情報（インデックスなど）は含まない。それらは**システムカタログ**で見る"
   }
 ]

@@ -10,10 +10,13 @@ MD → HTML の変換処理・穴埋め抽出は build_takken_textbook.py の関
 """
 
 import json
+import re
 import shutil
 from pathlib import Path
 
-from build_takken_textbook import TEMPLATES_DIR, DOCS_DIR, build_toc, build_body, parse_fillin_from_md
+from build_takken_textbook import (
+    TEMPLATES_DIR, DOCS_DIR, INDEX_TERM_RE, READING_PAREN_RE, build_toc, build_body, parse_fillin_from_md,
+)
 
 PROJECT_DIR = Path(__file__).parent.parent
 MATERIALS_DIR = PROJECT_DIR / "materials" / "ossdb"
@@ -46,7 +49,15 @@ SECTIONS = {
         ],
         "icon": "🛠️",
     },
+    "用語索引": {
+        "files": ["99-用語索引.md"],
+        "icon": "🔍",
+    },
 }
+
+INDEX_FILE_NAME = "99-用語索引.md"
+# 穴埋め対象外のセクション（試験概要・用語索引）
+FILLIN_EXCLUDE = {"試験概要", "用語索引"}
 
 # script.js へ渡す設定。localStorage は github.io 上で宅建版と同一オリジンになるため接頭辞を分ける
 TEXTBOOK_CONFIG = '{storagePrefix: "ossdb", ttsChapters: [0, 98]}'
@@ -111,18 +122,41 @@ HTML_TEMPLATE = """\
 """
 
 
-def build_fillin_json(sections: dict) -> list:
-    """教材本文の太字から穴埋め問題を抽出（試験概要は除外。カテゴリ = セクション名）。
+def load_index_terms() -> set:
+    """99-用語索引.md の表1列目から用語集合を作る（穴埋めの重要度 +2 判定用）。
 
-    宅建の用語索引に相当するものは無いため、重要度は見出しの★と数字の有無だけで付く。
+    セルは `pg_dump` / `pg_dumpall` のように複数語を「 / 」で並べることがあるため分割し、
+    バッククォートと読み・補足の `（…）` を外した形も登録する（穴埋めの答えは ` を外した語）。
     """
+    fpath = MATERIALS_DIR / INDEX_FILE_NAME
+    if not fpath.exists():
+        return set()
+    terms = set()
+    for m in INDEX_TERM_RE.finditer(fpath.read_text(encoding="utf-8")):
+        cell = m.group(1).strip()
+        if not cell or cell == "用語" or re.fullmatch(r"[-:]+", cell):
+            continue
+        for t in [cell, *cell.split(" / ")]:
+            t = t.replace("`", "").strip()
+            terms.add(t)
+            terms.add(READING_PAREN_RE.sub("", t).strip())
+    terms.discard("")
+    return terms
+
+
+def build_fillin_json(sections: dict) -> list:
+    """教材本文の太字から穴埋め問題を抽出（試験概要・用語索引は除外。カテゴリ = セクション名）。
+
+    重要度は見出しの★数 + 用語索引との一致(+2) + 数字の有無(+1)。
+    """
+    index_terms = load_index_terms()
     questions = []
     for sec_name, sec in sections.items():
-        if sec_name == "試験概要":
+        if sec_name in FILLIN_EXCLUDE:
             continue
         for fname in sec["files"]:
             md = (MATERIALS_DIR / fname).read_text(encoding="utf-8")
-            qs = parse_fillin_from_md(md, fname.replace(".md", ""), sec_name, set())
+            qs = parse_fillin_from_md(md, fname.replace(".md", ""), sec_name, index_terms)
             print(f"  parsed {len(qs)} fillin from {fname}")
             questions.extend(qs)
     return questions
