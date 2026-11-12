@@ -3339,8 +3339,16 @@ make install         # インストール（書き込み権限のあるユーザ
 <td>CREATEROLE</td>
 </tr>
 <tr>
+<td><code>-S</code> / <code>-D</code> / <code>-R</code></td>
+<td>NOSUPERUSER / NOCREATEDB / NOCREATEROLE（<strong>いずれもデフォルト</strong>）</td>
+</tr>
+<tr>
 <td><code>-l</code> / <code>-L</code></td>
 <td>LOGIN（<strong>デフォルト</strong>）/ NOLOGIN</td>
+</tr>
+<tr>
+<td><code>-i</code> / <code>-I</code></td>
+<td>INHERIT（<strong>デフォルト</strong>）/ NOINHERIT</td>
 </tr>
 <tr>
 <td><strong><code>-P</code></strong> / <code>--pwprompt</code></td>
@@ -3349,6 +3357,18 @@ make install         # インストール（書き込み権限のあるユーザ
 <tr>
 <td><code>--replication</code></td>
 <td>REPLICATION</td>
+</tr>
+<tr>
+<td><code>-g ロール</code> / <code>--role</code></td>
+<td>指定ロールのメンバーにする（複数指定可）</td>
+</tr>
+<tr>
+<td><code>-c 数</code> / <code>--connection-limit</code></td>
+<td>同時接続数の上限（デフォルトは無制限）</td>
+</tr>
+<tr>
+<td><code>-e</code> / <code>--echo</code></td>
+<td>サーバへ送る SQL を表示</td>
 </tr>
 <tr>
 <td><code>--interactive</code></td>
